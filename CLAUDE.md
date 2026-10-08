@@ -81,8 +81,7 @@ Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**
 - **Prévia do overlay da PoC:** `Assets/Dev/PreviewOverlay/Preview_Overlay.unity`, fora do build. Tem a folha A4 do marcador deitada numa mesa e um objeto "Imagem rastreada (simulada)" com o `Overlay_PoC` como filho, igual ao `ARContentManager`. Serve para ajustar offsets e overlays no Editor, já que o XR Simulation não roda aqui. A câmera "Camera do celular (prévia)" pode ser renderizada por script para gerar imagens.
 - **Celular:** o Galaxy A06 do Yuri não serve para testar (relatado em 05/10). O APK foi copiado para ele via MTP, mas a depuração USB não chegou a conectar. **Falta um aparelho com ARCore** para a PoC; conferir em https://developers.google.com/ar/devices.
 - O ARCore grava o banco de imagens dentro de `MontAR_ReferenceImages.asset` (`m_DataStore`) a cada build: é normal esse asset aparecer modificado no git depois de buildar.
-- Git: branch `main` **sem nenhum commit**. Remoto: `origin = https://github.com/yuri-pro07/Upx8---Projeto-MONTAR.git`. **Não commitar até o Yuri liberar** (pedido explícito em 05/10).
-  - `Assets/Editor/HubForceResolve.cs` está staged mas já foi apagado do disco. Rodar `git add -A` antes do 1º commit para não versioná-lo.
+- Git: primeiros commits enviados para `origin/main` em 08/10 (pedido do Yuri): configuração, código, cena e conteúdo, docs. Remoto: `origin = https://github.com/yuri-pro07/Upx8---Projeto-MONTAR.git`. Identidade local do repositório: `Yuri Peruzzo`. Continua valendo: só commitar e dar push quando pedirem.
   - `.gitattributes` usa **Git LFS** (fbx, blend, obj, áudio, vídeo…). Todo integrante precisa rodar `git lfs install` (já feito na máquina do Yuri, LFS 3.7.1).
   - Artigo e pitch em `docs/documents/artigo-v1-montar.docx` e `docs/documents/pitch-montar.pptx`.
 - `.gitkeep` só nas pastas ainda vazias (`Assets/Models`, `docs/diagrams`). A Unity ignora arquivos que começam com ponto.
@@ -350,14 +349,14 @@ Foi assim que o app foi montado e testado em 07/10. A Unity trava o projeto, ent
 ## 15. Backlog por fase
 
 ### Fase 0: repositório (agora)
-- [ ] `git add -A` (registrar a remoção do `HubForceResolve.cs`) e revisar o que vai no 1º commit.
+- [x] Revisar o que vai no 1º commit (08/10).
 - [x] Mover o artigo e o pitch para `docs/documents/`.
 - [x] Criar as pastas do modelo (`Materials`, `Models`, `Prefabs`, `Scripts`, `Textures`) e `docs/{diagrams,documents,images}`.
 - [x] Copiar `README-PREENCHIMENTO.md` do modelo. Criar `CHANGELOG.md` (`0.1.0`).
 - [x] Criar o `README.md` com as 33 seções do modelo e preencher já o que o artigo e o pitch respondem. Pendentes no README: curso, professor e RAs (marcados como _a preencher_ / _a confirmar_).
 - [x] Ajustar o `.gitignore` (§10). `git lfs install`: feito na máquina do Yuri; falta Enzo e Pedro.
 - [x] Via MCP: remover `TutorialInfo/` e `Readme.asset`, renomear Company/Product no Player Settings e confirmar os `.meta` das pastas novas.
-- [ ] 1º commit e push para `origin/main`. **Aguardando o Yuri liberar o git.** Sugestão para não virar um commitão: (1) `chore: estrutura inicial do projeto Unity` (template, .gitignore, docs, README, CHANGELOG, CLAUDE.md); (2) `chore: configura AR Foundation e ARCore para Android` (Packages, ProjectSettings, Assets/XR, Settings); (3) `feat: adiciona fluxo de etapas, métricas e progresso` (Scripts menos AR + Tests); (4) `feat: adiciona cena da prova de conceito com marcador A` (AR scripts, cena, marcador, prefab, tools/).
+- [x] 1º commit e push para `origin/main` (08/10), em 4 commits: configuração do projeto; código e testes; cena, marcador e conteúdo da bancada; documentação.
 - [x] Conectar o MCP for Unity ao Claude Code (§13): `UnityMCP √ Connected` em 05/10.
 
 ### Fase 1: prova de conceito (05/10 – ~19/10)

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_eps_8p
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: eps_8p
+  title: Ligue o cabo EPS 12V da CPU
+  componentName: "Fonte \xB7 cabo EPS 8 pinos (4+4)"
+  requiredPartId: fonte
+  requiredModelId: 
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Pegue o cabo marcado CPU (EPS 4+4); se vier dividido, junte as duas metades. Encaixe no conector de 8 pinos do canto superior esquerdo da placa, perto do painel traseiro, at\xE9 a trava prender."
+  commonErrorAlert: "N\xE3o use o cabo PCIe 6+2 (marcado PCI-E ou VGA): ele parece o EPS, mas a pinagem \xE9 outra. For\xE7ar o cabo errado pode danificar a placa ou a fonte."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 161668523982233553, guid: bf695c3e03710534daecc55c383d9367, type: 3}
+  overlayPositionOffset: {x: -0.09, y: 0.0132, z: -0.1025}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Cabo marcado CPU/EPS (n\xE3o PCI-E)"
+  - As 8 vias encaixadas e a trava presa
+  validationReferenceName: 

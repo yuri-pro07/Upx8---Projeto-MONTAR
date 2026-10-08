@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_cooler_cpu
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: cooler_cpu
+  title: Instale o cooler e ligue no CPU_FAN
+  componentName: Cooler do processador
+  requiredPartId: cooler
+  requiredModelId: 
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Confira a pasta t\xE9rmica. Apoie o cooler sobre a CPU com os 4 pontos de fixa\xE7\xE3o alinhados aos furos em volta do soquete e prenda em diagonal (pinos ou parafusos em X). Depois ligue o cabo do cooler no conector CPU_FAN, acima do soquete."
+  commonErrorAlert: Sem o cabo no CPU_FAN (ou com ele em outro conector), a placa acusa erro ou o processador esquenta demais.
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 7167357341185340534, guid: 07502371c12eed340b6b2d05a608f6c8, type: 3}
+  overlayPositionOffset: {x: -0.022, y: 0.0087, z: -0.17300001}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Pasta t\xE9rmica no lugar (j\xE1 vem no cooler ou uma gota no centro da CPU)"
+  - "Cooler firme, sem balan\xE7ar, com os 4 pontos presos"
+  - Cabo do cooler ligado no conector CPU_FAN
+  validationReferenceName: 

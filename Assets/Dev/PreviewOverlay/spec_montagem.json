@@ -1,0 +1,351 @@
+{
+  "convention": "v0 (rascunho manual, sem pesquisa de fontes). Quadro da placa: placa deitada, borda traseira (I/O) à esquerda, borda superior para cima; origem no canto superior esquerdo, x para a direita, y para baixo, z para cima a partir da PCB; mm. Quadro do tapete: mesma orientação, origem no canto superior esquerdo do tapete. Offsets do overlay relativos ao alvo da etapa (target_*), no quadro da placa. Etapas: part_id/model_id/part_min_qty/part_max_qty decidem se a etapa entra no roteiro do kit; no_tracking = etapa sem marcador (só checklist).",
+  "platform": "Intel LGA1700 (suposição para a demo)",
+  "ram_generation": "DDR5 (suposição para a demo)",
+  "board_elements": [
+    { "id": "pcb", "label_pt": "Placa (PCB)", "kind": "pcb", "x_mm": 122, "y_mm": 152.5, "w_mm": 244, "h_mm": 305, "height_mm": 1.6, "color_rgb": [0.09, 0.1, 0.11], "metallic": false },
+    { "id": "io_traseiro", "label_pt": "Cobertura do I/O traseiro", "kind": "io", "x_mm": 14, "y_mm": 95, "w_mm": 26, "h_mm": 160, "height_mm": 32, "color_rgb": [0.22, 0.23, 0.25], "metallic": true },
+    { "id": "vrm_superior", "label_pt": "Dissipador do VRM (superior)", "kind": "dissipador", "x_mm": 86.5, "y_mm": 19, "w_mm": 63, "h_mm": 22, "height_mm": 25, "color_rgb": [0.3, 0.31, 0.33], "metallic": true },
+    { "id": "vrm_esquerdo", "label_pt": "Dissipador do VRM (esquerdo)", "kind": "dissipador", "x_mm": 41, "y_mm": 77, "w_mm": 22, "h_mm": 95, "height_mm": 25, "color_rgb": [0.3, 0.31, 0.33], "metallic": true },
+    { "id": "eps_8p", "label_pt": "Conector EPS 12V 8 pinos (CPU)", "kind": "conector", "x_mm": 40, "y_mm": 7.5, "w_mm": 19, "h_mm": 9, "height_mm": 12, "color_rgb": [0.08, 0.08, 0.08], "metallic": false },
+    { "id": "cpu_fan", "label_pt": "Header CPU_FAN", "kind": "header", "x_mm": 147, "y_mm": 12, "w_mm": 10, "h_mm": 5, "height_mm": 7, "color_rgb": [0.92, 0.92, 0.92], "metallic": false },
+    { "id": "soquete_moldura", "label_pt": "Soquete LGA1700: moldura (load plate)", "kind": "soquete", "x_mm": 108, "y_mm": 78, "w_mm": 60, "h_mm": 72, "height_mm": 2, "color_rgb": [0.62, 0.63, 0.66], "metallic": true },
+    { "id": "soquete_corpo", "label_pt": "Soquete LGA1700: corpo", "kind": "soquete", "x_mm": 108, "y_mm": 78, "w_mm": 44, "h_mm": 52, "height_mm": 3, "color_rgb": [0.12, 0.12, 0.13], "metallic": false },
+    { "id": "soquete_alavanca", "label_pt": "Alavanca do soquete", "kind": "soquete", "x_mm": 141, "y_mm": 78, "w_mm": 3, "h_mm": 70, "height_mm": 4, "color_rgb": [0.7, 0.7, 0.72], "metallic": true },
+    { "id": "dimm_a1", "label_pt": "Slot DIMM_A1", "kind": "dimm", "x_mm": 158, "y_mm": 82, "w_mm": 6.5, "h_mm": 140, "height_mm": 8, "color_rgb": [0.15, 0.15, 0.16], "metallic": false },
+    { "id": "dimm_a2", "label_pt": "Slot DIMM_A2", "kind": "dimm", "x_mm": 167.6, "y_mm": 82, "w_mm": 6.5, "h_mm": 140, "height_mm": 8, "color_rgb": [0.15, 0.15, 0.16], "metallic": false },
+    { "id": "dimm_b1", "label_pt": "Slot DIMM_B1", "kind": "dimm", "x_mm": 177.2, "y_mm": 82, "w_mm": 6.5, "h_mm": 140, "height_mm": 8, "color_rgb": [0.15, 0.15, 0.16], "metallic": false },
+    { "id": "dimm_b2", "label_pt": "Slot DIMM_B2", "kind": "dimm", "x_mm": 186.8, "y_mm": 82, "w_mm": 6.5, "h_mm": 140, "height_mm": 8, "color_rgb": [0.15, 0.15, 0.16], "metallic": false },
+    { "id": "atx_24p", "label_pt": "Conector ATX 24 pinos", "kind": "conector", "x_mm": 236, "y_mm": 120, "w_mm": 10, "h_mm": 52, "height_mm": 13, "color_rgb": [0.1, 0.1, 0.1], "metallic": false },
+    { "id": "m2_conector", "label_pt": "Conector M.2 (M key)", "silk": "M2_1", "kind": "conector", "x_mm": 122, "y_mm": 140, "w_mm": 5, "h_mm": 22, "height_mm": 4.5, "color_rgb": [0.08, 0.08, 0.08], "metallic": false },
+    { "id": "m2_suporte", "label_pt": "Suporte do parafuso M.2 (posição 2280)", "silk": "2280", "kind": "suporte", "x_mm": 41, "y_mm": 140, "w_mm": 5, "h_mm": 5, "height_mm": 2.5, "color_rgb": [0.78, 0.66, 0.32], "metallic": true },
+    { "id": "pciex16_1", "label_pt": "Slot PCIe x16 principal", "kind": "pcie", "x_mm": 88, "y_mm": 172, "w_mm": 89, "h_mm": 7, "height_mm": 11, "color_rgb": [0.58, 0.59, 0.62], "metallic": true },
+    { "id": "pciex1_1", "label_pt": "Slot PCIe x1", "kind": "pcie", "x_mm": 54.5, "y_mm": 192.3, "w_mm": 25, "h_mm": 7, "height_mm": 11, "color_rgb": [0.15, 0.15, 0.16], "metallic": false },
+    { "id": "pciex16_2", "label_pt": "Slot PCIe x16 (x4 elétrico)", "kind": "pcie", "x_mm": 88, "y_mm": 253, "w_mm": 89, "h_mm": 7, "height_mm": 11, "color_rgb": [0.15, 0.15, 0.16], "metallic": false },
+    { "id": "chipset", "label_pt": "Dissipador do chipset", "kind": "dissipador", "x_mm": 190, "y_mm": 215, "w_mm": 45, "h_mm": 45, "height_mm": 10, "color_rgb": [0.3, 0.31, 0.33], "metallic": true },
+    { "id": "sata", "label_pt": "Portas SATA", "kind": "conector", "x_mm": 236, "y_mm": 230, "w_mm": 10, "h_mm": 30, "height_mm": 14, "color_rgb": [0.1, 0.1, 0.1], "metallic": false },
+    { "id": "f_panel", "label_pt": "Header do painel frontal (F_PANEL)", "kind": "header", "x_mm": 200, "y_mm": 296, "w_mm": 25, "h_mm": 6, "height_mm": 8, "color_rgb": [0.1, 0.1, 0.1], "metallic": false },
+    { "id": "cmos", "label_pt": "Bateria CMOS (CR2032)", "kind": "bateria", "x_mm": 150, "y_mm": 200, "w_mm": 20, "h_mm": 20, "height_mm": 3.2, "color_rgb": [0.8, 0.8, 0.82], "metallic": true }
+  ],
+  "mounting_holes": [
+    { "x_mm": 6.4, "y_mm": 10.2 },
+    { "x_mm": 125, "y_mm": 10.2 },
+    { "x_mm": 237.6, "y_mm": 10.2 },
+    { "x_mm": 6.4, "y_mm": 200 },
+    { "x_mm": 125, "y_mm": 160 },
+    { "x_mm": 237.6, "y_mm": 160 },
+    { "x_mm": 6.4, "y_mm": 294.6 },
+    { "x_mm": 125, "y_mm": 294.6 },
+    { "x_mm": 237.6, "y_mm": 294.6 }
+  ],
+  "mat": {
+    "width_mm": 420,
+    "height_mm": 594,
+    "board_left_mm": 88,
+    "board_top_mm": 215,
+    "marker_center_x_mm": 218,
+    "marker_center_y_mm": 120,
+    "marker_size_mm": 150,
+    "printed_labels_pt": ["MontAR · tapete de montagem v0 (demo, A2)", "Marcador A: não cobrir", "Placa-mãe ATX aqui (I/O para a esquerda)", "Placa genérica: posições aproximadas"],
+    "rationale_pt": "Tapete A2 (420 x 594 mm). Marcador logo acima da borda superior da placa, alinhado com a região do soquete e dos slots, para reduzir a distância marcador-alvo (cerca de 17 cm até o soquete)."
+  },
+  "steps": [
+    {
+      "step_id": "placa_tapete",
+      "roteiro_index": 1,
+      "title_pt": "Coloque a placa-mãe no tapete",
+      "component_pt": "Placa-mãe ATX",
+      "instruction_pt": "Descarregue a estática (pulseira antiestática ou toque numa parte metálica aterrada). Tire a placa-mãe do saco, segurando pelas bordas, e deite-a sobre o tapete, dentro do contorno tracejado, com o painel traseiro (I/O) para a esquerda.",
+      "common_error_alert_pt": "Nunca monte sobre superfície metálica. E a placa precisa ficar dentro do contorno: o app usa essa posição para mostrar cada encaixe.",
+      "checklist_pt": [
+        "Placa dentro do contorno tracejado do tapete",
+        "Painel traseiro (I/O) virado para a esquerda",
+        "Marcador A à vista, sem nada por cima"
+      ],
+      "target_x_mm": 122,
+      "target_y_mm": 152.5,
+      "target_z_mm": -1.6,
+      "overlay": [
+        { "id": "contorno_placa", "purpose_pt": "Onde a placa fica no tapete", "shape": "contorno_retangular", "size_x_mm": 250, "size_y_mm": 311, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.6, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "placa_fantasma", "purpose_pt": "Placa fantasma descendo até o tapete", "shape": "caixa", "size_x_mm": 244, "size_y_mm": 305, "size_z_mm": 1.6, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.8, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.18], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 40, "period_s": 2.8, "hold_fraction": 0.4 },
+        { "id": "seta_io", "purpose_pt": "I/O para a esquerda", "shape": "seta_horizontal", "size_x_mm": 40, "size_y_mm": 10, "size_z_mm": 10, "offset_x_mm": -150, "offset_y_mm": 0, "offset_z_mm": 12, "rotation_deg_about_up": 180, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 0, "period_s": 1.2, "hold_fraction": 0, "travel_x_mm": -8 }
+      ],
+      "part_id": "placa_mae",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "cpu_soquete",
+      "roteiro_index": 2,
+      "title_pt": "Encaixe a CPU no soquete",
+      "component_pt": "Processador (LGA1700)",
+      "instruction_pt": "Levante a alavanca e abra a moldura. Alinhe o triângulo dourado da CPU com a marca do soquete e apoie a CPU sem empurrar. Feche a moldura e trave a alavanca.",
+      "common_error_alert_pt": "Não encoste nos contatos do soquete nem force a CPU: um pino LGA torto inutiliza a placa.",
+      "checklist_pt": [
+        "Triângulo da CPU alinhado com o do soquete",
+        "CPU apoiada sem forçar",
+        "Moldura fechada e alavanca travada"
+      ],
+      "target_x_mm": 108,
+      "target_y_mm": 78,
+      "target_z_mm": 3,
+      "overlay": [
+        { "id": "contorno_alvo", "purpose_pt": "Onde a CPU assenta", "shape": "contorno_retangular", "size_x_mm": 40, "size_y_mm": 47.5, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "cpu_fantasma", "purpose_pt": "CPU fantasma descendo até o soquete", "shape": "caixa", "size_x_mm": 37.5, "size_y_mm": 45, "size_z_mm": 4.5, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 2.25, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 30 mm até assentar", "motion": "insert", "travel_z_mm": 30, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "triangulo_cpu", "purpose_pt": "Triângulo dourado da CPU", "shape": "triangulo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 0.6, "offset_x_mm": -14.25, "offset_y_mm": 18, "offset_z_mm": 4.8, "rotation_deg_about_up": 0, "color_rgba": [1, 0.8, 0.1, 1], "animate": true, "animation_note": "acompanha a CPU fantasma", "motion": "insert", "travel_z_mm": 30, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "triangulo_soquete", "purpose_pt": "Marca do soquete no mesmo canto", "shape": "triangulo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 0.6, "offset_x_mm": -26, "offset_y_mm": 32, "offset_z_mm": -0.7, "rotation_deg_about_up": 0, "color_rgba": [1, 0.8, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_descer", "purpose_pt": "Gesto: apoiar na vertical, sem empurrar", "shape": "seta_para_baixo", "size_x_mm": 12, "size_y_mm": 12, "size_z_mm": 24, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 52, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 6 mm", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "cpu",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "cooler_cpu",
+      "roteiro_index": 3,
+      "title_pt": "Instale o cooler e ligue no CPU_FAN",
+      "component_pt": "Cooler do processador",
+      "instruction_pt": "Confira a pasta térmica. Apoie o cooler sobre a CPU com os 4 pontos de fixação alinhados aos furos em volta do soquete e prenda em diagonal (pinos ou parafusos em X). Depois ligue o cabo do cooler no conector CPU_FAN, acima do soquete.",
+      "common_error_alert_pt": "Sem o cabo no CPU_FAN (ou com ele em outro conector), a placa acusa erro ou o processador esquenta demais.",
+      "checklist_pt": [
+        "Pasta térmica no lugar (já vem no cooler ou uma gota no centro da CPU)",
+        "Cooler firme, sem balançar, com os 4 pontos presos",
+        "Cabo do cooler ligado no conector CPU_FAN"
+      ],
+      "target_x_mm": 108,
+      "target_y_mm": 78,
+      "target_z_mm": 7.5,
+      "overlay": [
+        { "id": "cooler_fantasma", "purpose_pt": "Cooler fantasma descendo sobre a CPU", "shape": "cilindro", "size_x_mm": 95, "size_y_mm": 95, "size_z_mm": 45, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 22.5, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.3], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 40, "period_s": 2.6, "hold_fraction": 0.35 },
+        { "id": "fixacao_1", "purpose_pt": "Ponto de fixação", "shape": "cilindro", "size_x_mm": 7, "size_y_mm": 7, "size_z_mm": 1.5, "offset_x_mm": -39, "offset_y_mm": -39, "offset_z_mm": -6.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "fixacao_2", "purpose_pt": "Ponto de fixação", "shape": "cilindro", "size_x_mm": 7, "size_y_mm": 7, "size_z_mm": 1.5, "offset_x_mm": 39, "offset_y_mm": -39, "offset_z_mm": -6.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "fixacao_3", "purpose_pt": "Ponto de fixação", "shape": "cilindro", "size_x_mm": 7, "size_y_mm": 7, "size_z_mm": 1.5, "offset_x_mm": -39, "offset_y_mm": 39, "offset_z_mm": -6.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "fixacao_4", "purpose_pt": "Ponto de fixação", "shape": "cilindro", "size_x_mm": 7, "size_y_mm": 7, "size_z_mm": 1.5, "offset_x_mm": 39, "offset_y_mm": 39, "offset_z_mm": -6.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "contorno_cpu_fan", "purpose_pt": "Conector CPU_FAN", "shape": "contorno_retangular", "size_x_mm": 15, "size_y_mm": 10, "size_z_mm": 1, "offset_x_mm": 39, "offset_y_mm": -66, "offset_z_mm": 0.2, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_cpu_fan", "purpose_pt": "Ligar o cabo aqui", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 39, "offset_y_mm": -66, "offset_z_mm": 16, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "cooler",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "ram_slot_a2",
+      "roteiro_index": 4,
+      "title_pt": "Instale a RAM no slot A2",
+      "component_pt": "Memória DDR5 (1 pente)",
+      "instruction_pt": "Com um pente só, use o slot A2 (2º a partir da CPU; confira no manual da placa). Abra as travas, alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.",
+      "common_error_alert_pt": "O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force.",
+      "checklist_pt": [
+        "Pente no slot A2",
+        "Chanfro alinhado com a chave do slot",
+        "Travas fechadas"
+      ],
+      "target_x_mm": 167.6,
+      "target_y_mm": 82,
+      "target_z_mm": 8,
+      "overlay": [
+        { "id": "contorno", "purpose_pt": "Slot A2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": 0.0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma", "purpose_pt": "Pente fantasma no A2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": 0.0, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro", "purpose_pt": "Chanfro do pente A2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": 0.0, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot", "purpose_pt": "Chave do slot A2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": 0.0, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta", "purpose_pt": "Empurrar na vertical (A2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 0.0, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "ram",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 1
+    },
+    {
+      "step_id": "ram_slots",
+      "roteiro_index": 4,
+      "title_pt": "Instale a RAM nos slots A2 e B2",
+      "component_pt": "Memória DDR5 (2 módulos)",
+      "instruction_pt": "Abra as travas dos slots A2 e B2 (2º e 4º a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.",
+      "common_error_alert_pt": "O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force.",
+      "checklist_pt": [
+        "Pentes nos slots A2 e B2",
+        "Chanfro alinhado com a chave do slot",
+        "Travas fechadas nos dois slots"
+      ],
+      "target_x_mm": 177.2,
+      "target_y_mm": 82,
+      "target_z_mm": 8,
+      "overlay": [
+        { "id": "contorno_a2", "purpose_pt": "Slot A2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": -9.6, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "contorno_b2", "purpose_pt": "Slot B2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": 9.6, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_a2", "purpose_pt": "Pente fantasma no A2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": -9.6, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "ram_fantasma_b2", "purpose_pt": "Pente fantasma no B2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": 9.6, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_a2", "purpose_pt": "Chanfro do pente A2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": -9.6, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_b2", "purpose_pt": "Chanfro do pente B2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": 9.6, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_a2", "purpose_pt": "Chave do slot A2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": -9.6, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "chave_slot_b2", "purpose_pt": "Chave do slot B2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": 9.6, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_a2", "purpose_pt": "Empurrar na vertical (A2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": -9.6, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "seta_b2", "purpose_pt": "Empurrar na vertical (B2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 9.6, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "ram",
+      "model_id": "",
+      "part_min_qty": 2,
+      "part_max_qty": 2
+    },
+    {
+      "step_id": "ssd_m2",
+      "roteiro_index": 5,
+      "title_pt": "Instale o SSD M.2",
+      "component_pt": "SSD M.2 2280 (NVMe)",
+      "instruction_pt": "Tire o parafuso do suporte do M.2. Encaixe o SSD inclinado no conector M.2 (entre a CPU e o slot da placa de vídeo), com o chanfro dos contatos alinhado à chave. Abaixe a outra ponta até o suporte e prenda com o parafuso.",
+      "common_error_alert_pt": "SSD sem parafuso fica levantado e pode soltar. Aperte só até firmar: forçar entorta o SSD.",
+      "checklist_pt": [
+        "SSD todo dentro do conector, sem contatos dourados aparecendo",
+        "Ponta do SSD presa pelo parafuso",
+        "SSD paralelo à placa"
+      ],
+      "target_x_mm": 79.5,
+      "target_y_mm": 140,
+      "target_z_mm": 2.5,
+      "overlay": [
+        { "id": "contorno_m2", "purpose_pt": "Área do SSD M.2", "shape": "contorno_retangular", "size_x_mm": 86, "size_y_mm": 26, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": -2, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ssd_fantasma", "purpose_pt": "SSD fantasma deslizando até o conector", "shape": "caixa", "size_x_mm": 80, "size_y_mm": 22, "size_z_mm": 2.4, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.45], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 6, "period_s": 2.4, "hold_fraction": 0.35, "travel_x_mm": -22 },
+        { "id": "conector_m2", "purpose_pt": "Conector M.2", "shape": "contorno_retangular", "size_x_mm": 8, "size_y_mm": 25, "size_z_mm": 1, "offset_x_mm": 42.5, "offset_y_mm": 0, "offset_z_mm": 2.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "parafuso_m2", "purpose_pt": "Parafuso do suporte", "shape": "cilindro", "size_x_mm": 5, "size_y_mm": 5, "size_z_mm": 3, "offset_x_mm": -38.5, "offset_y_mm": 0, "offset_z_mm": 1.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_parafuso", "purpose_pt": "Prender aqui", "shape": "seta_para_baixo", "size_x_mm": 7, "size_y_mm": 7, "size_z_mm": 16, "offset_x_mm": -38.5, "offset_y_mm": 0, "offset_z_mm": 16, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "ssd",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "atx_24p",
+      "roteiro_index": 6,
+      "title_pt": "Ligue o cabo de 24 pinos",
+      "component_pt": "Fonte · cabo ATX 24 pinos",
+      "instruction_pt": "Com a fonte desligada da tomada, pegue o cabo de 24 pinos (o maior). Alinhe a trava do cabo com a lingueta do conector ATX, na borda direita da placa, e empurre até ouvir o clique.",
+      "common_error_alert_pt": "Cabo meio encaixado é a causa mais comum de PC que não liga: empurre até a trava prender.",
+      "checklist_pt": [
+        "Cabo de 24 pinos todo dentro do conector",
+        "Trava do cabo presa na lingueta (clique)"
+      ],
+      "target_x_mm": 236,
+      "target_y_mm": 120,
+      "target_z_mm": 13,
+      "overlay": [
+        { "id": "contorno_24p", "purpose_pt": "Conector ATX 24 pinos", "shape": "contorno_retangular", "size_x_mm": 15, "size_y_mm": 57, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "plugue_24p", "purpose_pt": "Plugue fantasma descendo", "shape": "caixa", "size_x_mm": 10, "size_y_mm": 52, "size_z_mm": 16, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 8, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.4], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 30, "period_s": 2.2, "hold_fraction": 0.35 },
+        { "id": "trava_24p", "purpose_pt": "Trava do cabo", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 6, "size_z_mm": 6, "offset_x_mm": 6.5, "offset_y_mm": 0, "offset_z_mm": 8, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 30, "period_s": 2.2, "hold_fraction": 0.35 },
+        { "id": "seta_24p", "purpose_pt": "Empurrar na vertical", "shape": "seta_para_baixo", "size_x_mm": 9, "size_y_mm": 9, "size_z_mm": 20, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 44, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "fonte",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "eps_8p",
+      "roteiro_index": 7,
+      "title_pt": "Ligue o cabo EPS 12V da CPU",
+      "component_pt": "Fonte · cabo EPS 8 pinos (4+4)",
+      "instruction_pt": "Pegue o cabo marcado CPU (EPS 4+4); se vier dividido, junte as duas metades. Encaixe no conector de 8 pinos do canto superior esquerdo da placa, perto do painel traseiro, até a trava prender.",
+      "common_error_alert_pt": "Não use o cabo PCIe 6+2 (marcado PCI-E ou VGA): ele parece o EPS, mas a pinagem é outra. Forçar o cabo errado pode danificar a placa ou a fonte.",
+      "checklist_pt": [
+        "Cabo marcado CPU/EPS (não PCI-E)",
+        "As 8 vias encaixadas e a trava presa"
+      ],
+      "target_x_mm": 40,
+      "target_y_mm": 7.5,
+      "target_z_mm": 12,
+      "overlay": [
+        { "id": "contorno_eps", "purpose_pt": "Conector EPS 8 pinos", "shape": "contorno_retangular", "size_x_mm": 24, "size_y_mm": 14, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "plugue_eps", "purpose_pt": "Plugue fantasma descendo", "shape": "caixa", "size_x_mm": 19, "size_y_mm": 9, "size_z_mm": 14, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 7, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.4], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 30, "period_s": 2.2, "hold_fraction": 0.35 },
+        { "id": "seta_eps", "purpose_pt": "Empurrar na vertical", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 40, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "fonte",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "gpu_pcie",
+      "roteiro_index": 8,
+      "title_pt": "Encaixe a placa de vídeo no PCIe x16",
+      "component_pt": "Placa de vídeo (PCIe x16)",
+      "instruction_pt": "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Se a placa tiver conector de energia, ligue o cabo PCIe 6+2 da fonte.",
+      "common_error_alert_pt": "O slot de baixo (em vermelho) tem o mesmo tamanho, mas é x4. E a placa de vídeo usa o cabo PCIe 6+2, nunca o EPS da CPU.",
+      "checklist_pt": [
+        "Placa no slot PCIe x16 de cima",
+        "Trava do slot fechada",
+        "Cabo PCIe ligado (se a placa tiver conector de energia)"
+      ],
+      "target_x_mm": 88,
+      "target_y_mm": 172,
+      "target_z_mm": 11,
+      "overlay": [
+        { "id": "contorno_x16", "purpose_pt": "Slot PCIe x16 certo", "shape": "contorno_retangular", "size_x_mm": 94, "size_y_mm": 12, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "contorno_x16_errado", "purpose_pt": "Slot x16 de baixo (x4 elétrico): não usar", "shape": "contorno_retangular", "size_x_mm": 94, "size_y_mm": 12, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 81, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "gpu_fantasma", "purpose_pt": "Placa de vídeo fantasma descendo", "shape": "caixa", "size_x_mm": 230, "size_y_mm": 38, "size_z_mm": 105, "offset_x_mm": 19, "offset_y_mm": 15, "offset_z_mm": 52.5, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.22], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 40, "period_s": 2.6, "hold_fraction": 0.35 },
+        { "id": "trava_x16", "purpose_pt": "Trava do slot", "shape": "caixa", "size_x_mm": 4, "size_y_mm": 9, "size_z_mm": 6, "offset_x_mm": 47.5, "offset_y_mm": 0, "offset_z_mm": 1, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_gpu", "purpose_pt": "Empurrar por igual", "shape": "seta_para_baixo", "size_x_mm": 12, "size_y_mm": 12, "size_z_mm": 24, "offset_x_mm": 19, "offset_y_mm": 0, "offset_z_mm": 128, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "gpu",
+      "model_id": "",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "verificacao_final",
+      "roteiro_index": 9,
+      "title_pt": "Verificação final",
+      "component_pt": "Montagem completa",
+      "instruction_pt": "Antes de ligar, revise tudo com calma. Se algo estiver solto ou fora do lugar, corrija agora.",
+      "common_error_alert_pt": "Só ligue a fonte na tomada depois desta verificação.",
+      "checklist_pt": [
+        "Peças instaladas firmes e com as travas fechadas",
+        "Cabos de energia encaixados até a trava",
+        "Nenhum parafuso ou ferramenta solto sobre a placa"
+      ],
+      "no_tracking": true,
+      "target_x_mm": 122,
+      "target_y_mm": 152.5,
+      "target_z_mm": 0,
+      "overlay": []
+    }
+  ],
+  "shots": [
+    { "name": "1_visao_geral", "step_id": "cpu_soquete", "description_pt": "Visão geral: tapete, marcador A e a placa; o overlay da CPU aparece preso ao marcador.", "cam_x_mm": 210, "cam_y_mm": 760, "cam_z_mm": 520, "look_x_mm": 210, "look_y_mm": 300, "look_z_mm": 0 },
+    { "name": "2_marcador_e_cpu", "step_id": "cpu_soquete", "description_pt": "Marcador e soquete no mesmo quadro: é o marcador que diz ao app onde está o soquete.", "cam_x_mm": 210, "cam_y_mm": 470, "cam_z_mm": 400, "look_x_mm": 205, "look_y_mm": 215, "look_z_mm": 0 },
+    { "name": "3_cpu_close", "step_id": "cpu_soquete", "description_pt": "Close da CPU fantasma descendo no soquete, com o triângulo de alinhamento.", "cam_x_mm": 196, "cam_y_mm": 520, "cam_z_mm": 300, "look_x_mm": 196, "look_y_mm": 293, "look_z_mm": 5 },
+    { "name": "4_cpu_baixo", "step_id": "cpu_soquete", "description_pt": "Ângulo baixo: a CPU fantasma acima do soquete e a seta do gesto.", "cam_x_mm": 420, "cam_y_mm": 330, "cam_z_mm": 110, "look_x_mm": 196, "look_y_mm": 293, "look_z_mm": 20 },
+    { "name": "5_ram_close", "step_id": "ram_slots", "description_pt": "Close da RAM: pentes fantasmas nos slots A2 e B2, com o chanfro em vermelho.", "cam_x_mm": 265, "cam_y_mm": 560, "cam_z_mm": 300, "look_x_mm": 265, "look_y_mm": 297, "look_z_mm": 10 },
+    { "name": "6_ram_lado", "step_id": "ram_slots", "description_pt": "Vista em 3/4: os pentes descem na vertical até as travas fecharem; o chanfro (vermelho) tem que bater com a chave do slot.", "cam_x_mm": 370, "cam_y_mm": 500, "cam_z_mm": 150, "look_x_mm": 262, "look_y_mm": 297, "look_z_mm": 18 },
+    { "name": "7_placa_tapete", "step_id": "placa_tapete", "description_pt": "Placa fantasma descendo no contorno do tapete; seta indicando o I/O para a esquerda.", "cam_x_mm": 210, "cam_y_mm": 820, "cam_z_mm": 560, "look_x_mm": 210, "look_y_mm": 360, "look_z_mm": 0 },
+    { "name": "8_cooler", "step_id": "cooler_cpu", "description_pt": "Cooler fantasma sobre a CPU, pontos de fixação e o conector CPU_FAN.", "cam_x_mm": 196, "cam_y_mm": 540, "cam_z_mm": 330, "look_x_mm": 196, "look_y_mm": 285, "look_z_mm": 20 },
+    { "name": "9_ssd", "step_id": "ssd_m2", "description_pt": "SSD fantasma deslizando até o conector M.2 e o parafuso do suporte.", "cam_x_mm": 170, "cam_y_mm": 560, "cam_z_mm": 260, "look_x_mm": 168, "look_y_mm": 355, "look_z_mm": 2 },
+    { "name": "10_24p", "step_id": "atx_24p", "description_pt": "Plugue de 24 pinos descendo no conector ATX, com a trava em vermelho.", "cam_x_mm": 330, "cam_y_mm": 520, "cam_z_mm": 260, "look_x_mm": 324, "look_y_mm": 335, "look_z_mm": 10 },
+    { "name": "11_eps", "step_id": "eps_8p", "description_pt": "Plugue EPS 8 pinos descendo no canto superior esquerdo.", "cam_x_mm": 140, "cam_y_mm": 420, "cam_z_mm": 230, "look_x_mm": 128, "look_y_mm": 222, "look_z_mm": 10 },
+    { "name": "12_gpu", "step_id": "gpu_pcie", "description_pt": "Placa de vídeo fantasma no PCIe x16 de cima; o x16 de baixo em vermelho.", "cam_x_mm": 330, "cam_y_mm": 760, "cam_z_mm": 360, "look_x_mm": 200, "look_y_mm": 400, "look_z_mm": 40 }
+  ],
+  "precision_note_pt": "Precisão (v0, estimativa): o marcador fica a cerca de 17 cm do soquete. Cada 1° de erro na rotação estimada do marcador desloca o overlay cerca de 3 mm no soquete (2° ≈ 6 mm). Serve para mostrar onde e em que sentido encaixar, mas não para validar a etapa automaticamente: a validação continua pelo checklist.",
+  "assumptions": [
+    "Plataforma Intel LGA1700 e memória DDR5 escolhidas só para a demo.",
+    "Triângulo da CPU no canto inferior esquerdo e alavanca à direita do soquete: a confirmar com o kit real.",
+    "Posição do chanfro do DDR5 aproximada (3 mm do centro).",
+    "Furos do cooler em quadrado de 78 mm em volta do soquete (padrão LGA1700).",
+    "M.2 sem dissipador, conector à direita e suporte 2280 à esquerda; conector ATX 24 pinos vertical, com a trava para fora da placa.",
+    "Placa de vídeo genérica de 230 x 105 mm, ocupando 2 slots, com o cooler para baixo (lado do x16 de baixo).",
+    "Com um pente só, slot A2 (o mais comum nos manuais)."
+  ],
+  "open_questions": [
+    "Qual placa-mãe, CPU e RAM o laboratório vai usar (D5)? As posições da prévia dependem disso.",
+    "Tapete em A2: imprimir em gráfica ou montar com folhas menores?",
+    "Um marcador basta ou vale pôr marcadores mais perto do soquete e dos slots?",
+    "Montagem em bancada (sem gabinete) basta para o experimento, ou entram as etapas do gabinete (D4)? Elas precisam de um marcador no gabinete (D1)."
+  ],
+  "disclaimers_pt": [
+    "Prévia renderizada no PC: não há câmera nem rastreamento reais.",
+    "Placa ATX genérica com posições aproximadas; o kit do laboratório ainda não foi definido (D5).",
+    "Rascunho v0 feito à mão; a versão com pesquisa de fontes substitui esta.",
+    "A interface mostrada é uma maquete, ainda não implementada."
+  ]
+}

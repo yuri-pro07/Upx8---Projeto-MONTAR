@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_ram_slots
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: ram_slots
+  title: Instale a RAM nos slots A2 e B2
+  componentName: "Mem\xF3ria DDR5 (2 m\xF3dulos)"
+  requiredPartId: ram
+  requiredModelId: 
+  minPartQuantity: 2
+  maxPartQuantity: 2
+  instruction: "Abra as travas dos slots A2 e B2 (2\xBA e 4\xBA a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical at\xE9 as travas fecharem."
+  commonErrorAlert: "O pente s\xF3 entra num sentido: se o chanfro n\xE3o bater, gire 180\xB0. Nunca force."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 8332214140385242610, guid: 0186c235fa1bcf149961d7881d86cf08, type: 3}
+  overlayPositionOffset: {x: 0.04720001, y: 0.0092, z: -0.177}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - Pentes nos slots A2 e B2
+  - Chanfro alinhado com a chave do slot
+  - Travas fechadas nos dois slots
+  validationReferenceName: 

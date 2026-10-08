@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_verificacao_final
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: verificacao_final
+  title: "Verifica\xE7\xE3o final"
+  componentName: Montagem completa
+  requiredPartId: 
+  requiredModelId: 
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: Antes de ligar, revise tudo com calma. Se algo estiver solto ou fora do lugar, corrija agora.
+  commonErrorAlert: "S\xF3 ligue a fonte na tomada depois desta verifica\xE7\xE3o."
+  referenceImageName: 
+  overlayPrefab: {fileID: 0}
+  overlayPositionOffset: {x: 0, y: 0, z: 0}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Pe\xE7as instaladas firmes e com as travas fechadas"
+  - "Cabos de energia encaixados at\xE9 a trava"
+  - Nenhum parafuso ou ferramenta solto sobre a placa
+  validationReferenceName: 

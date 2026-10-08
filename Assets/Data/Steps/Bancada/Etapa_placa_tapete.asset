@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_placa_tapete
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: placa_tapete
+  title: "Coloque a placa-m\xE3e no tapete"
+  componentName: "Placa-m\xE3e ATX"
+  requiredPartId: placa_mae
+  requiredModelId: 
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Descarregue a est\xE1tica (pulseira antiest\xE1tica ou toque numa parte met\xE1lica aterrada). Tire a placa-m\xE3e do saco, segurando pelas bordas, e deite-a sobre o tapete, dentro do contorno tracejado, com o painel traseiro (I/O) para a esquerda."
+  commonErrorAlert: "Nunca monte sobre superf\xEDcie met\xE1lica. E a placa precisa ficar dentro do contorno: o app usa essa posi\xE7\xE3o para mostrar cada encaixe."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 2290345136744800391, guid: e4b5dbb2c1712d242ac6b1bba45b5f9f, type: 3}
+  overlayPositionOffset: {x: -0.008, y: -0.00040000002, z: -0.2475}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - Placa dentro do contorno tracejado do tapete
+  - Painel traseiro (I/O) virado para a esquerda
+  - "Marcador A \xE0 vista, sem nada por cima"
+  validationReferenceName: 

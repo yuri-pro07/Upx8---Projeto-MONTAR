@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c298874fd4aa3d04890d4f3eff36207b, type: 3}
+  m_Name: Catalogo_pecas_v0
+  m_EditorClassIdentifier: MontAR::MontAR.PartCatalog
+  parts:
+  - partId: placa_mae
+    displayName: "Placa-m\xE3e"
+    description: "Base da montagem: as outras pe\xE7as encaixam nela. Fica deitada no tapete."
+    icon: {fileID: 21300000, guid: b1858665d96d131428ab0bacde0ee48b, type: 3}
+    unitSingular: placa
+    unitPlural: placas
+    minQuantity: 1
+    maxQuantity: 1
+    defaultQuantity: 1
+    models:
+    - modelId: atx_generica_lga1700
+      displayName: "ATX gen\xE9rica \xB7 LGA1700 \xB7 DDR5"
+      detail: "Modelo de demonstra\xE7\xE3o, com posi\xE7\xF5es aproximadas, at\xE9 o kit do laborat\xF3rio ser definido (D5)."
+  - partId: cpu
+    displayName: Processador (CPU)
+    description: "Vai no soquete; o tri\xE2ngulo dourado mostra o sentido."
+    icon: {fileID: 21300000, guid: a8faa18371b56534d9bcaeb2ebcfaccb, type: 3}
+    unitSingular: unidade
+    unitPlural: unidades
+    minQuantity: 1
+    maxQuantity: 1
+    defaultQuantity: 1
+    models:
+    - modelId: intel_lga1700
+      displayName: "Intel \xB7 soquete LGA1700"
+      detail: 
+  - partId: cooler
+    displayName: Cooler do processador
+    description: Tira o calor da CPU; o cabo vai no conector CPU_FAN.
+    icon: {fileID: 21300000, guid: ac41a508b3ebd0d4ab281e4530ab51df, type: 3}
+    unitSingular: unidade
+    unitPlural: unidades
+    minQuantity: 1
+    maxQuantity: 1
+    defaultQuantity: 1
+    models:
+    - modelId: cooler_ar_4pinos
+      displayName: "Cooler a ar \xB7 cabo de 4 pinos"
+      detail: 
+  - partId: ram
+    displayName: "Mem\xF3ria RAM"
+    description: '1 ou 2 pentes: o roteiro indica os slots certos para cada caso.'
+    icon: {fileID: 21300000, guid: 4b103703f3e65014caebb7e4dfd3c720, type: 3}
+    unitSingular: pente
+    unitPlural: pentes
+    minQuantity: 1
+    maxQuantity: 2
+    defaultQuantity: 2
+    models:
+    - modelId: ddr5_dimm
+      displayName: "DDR5 \xB7 pente DIMM"
+      detail: 
+  - partId: ssd
+    displayName: SSD M.2
+    description: 'Armazenamento: entra inclinado no conector e prende com parafuso.'
+    icon: {fileID: 21300000, guid: 7074859d22a9d884c9c450bb2a260e7a, type: 3}
+    unitSingular: unidade
+    unitPlural: unidades
+    minQuantity: 0
+    maxQuantity: 1
+    defaultQuantity: 1
+    models:
+    - modelId: ssd_m2_2280_nvme
+      displayName: "M.2 2280 \xB7 NVMe"
+      detail: 
+  - partId: gpu
+    displayName: "Placa de v\xEDdeo"
+    description: 'Opcional: vai no slot PCIe x16 de cima.'
+    icon: {fileID: 21300000, guid: ae991b5174a1c014ebb72ac6949e83fb, type: 3}
+    unitSingular: unidade
+    unitPlural: unidades
+    minQuantity: 0
+    maxQuantity: 1
+    defaultQuantity: 1
+    models:
+    - modelId: gpu_pcie_x16
+      displayName: "PCIe x16 \xB7 1 cabo de energia PCIe"
+      detail: 
+  - partId: fonte
+    displayName: "Fonte de alimenta\xE7\xE3o"
+    description: Liga a placa pelos cabos de 24 pinos e EPS 8 pinos.
+    icon: {fileID: 21300000, guid: ae48b38f7e4a63f42bc7b47133eb28bc, type: 3}
+    unitSingular: unidade
+    unitPlural: unidades
+    minQuantity: 1
+    maxQuantity: 1
+    defaultQuantity: 1
+    models:
+    - modelId: fonte_atx
+      displayName: "ATX \xB7 cabos 24 pinos, EPS 4+4 e PCIe 6+2"
+      detail: 

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_atx_24p
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: atx_24p
+  title: Ligue o cabo de 24 pinos
+  componentName: "Fonte \xB7 cabo ATX 24 pinos"
+  requiredPartId: fonte
+  requiredModelId: 
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Com a fonte desligada da tomada, pegue o cabo de 24 pinos (o maior). Alinhe a trava do cabo com a lingueta do conector ATX, na borda direita da placa, e empurre at\xE9 ouvir o clique."
+  commonErrorAlert: "Cabo meio encaixado \xE9 a causa mais comum de PC que n\xE3o liga: empurre at\xE9 a trava prender."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 5666264333565898346, guid: e095104a8da305a4ca7af9fc39a3deb2, type: 3}
+  overlayPositionOffset: {x: 0.106, y: 0.0142, z: -0.215}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - Cabo de 24 pinos todo dentro do conector
+  - Trava do cabo presa na lingueta (clique)
+  validationReferenceName: 

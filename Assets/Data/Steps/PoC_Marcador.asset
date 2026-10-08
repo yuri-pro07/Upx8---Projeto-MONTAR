@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: PoC_Marcador
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: poc_marcador
+  title: 'Prova de conceito: marcador A'
+  componentName: Marcador A (15 cm)
+  instruction: "Aponte a c\xE2mera para o marcador A impresso (15 cm). Confira se o contorno amarelo coincide com a borda preta e anote para que lado a seta laranja aponta em rela\xE7\xE3o ao tri\xE2ngulo preto do canto: isso confirma a conven\xE7\xE3o de eixos usada nos offsets do tapete."
+  commonErrorAlert: "Se o contorno ficar maior ou menor que a borda, o marcador foi impresso fora da escala: imprima em 100%, sem ajustar \xE0 p\xE1gina."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 651900949411242265, guid: adc0abca7719f294ba6e2a21f7ec2258, type: 3}
+  overlayPositionOffset: {x: 0, y: 0, z: 0}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - O contorno amarelo coincide com a borda preta impressa
+  - O overlay continua no lugar ao mover o celular
+  - "A dire\xE7\xE3o da seta foi anotada"
+  validationReferenceName: 

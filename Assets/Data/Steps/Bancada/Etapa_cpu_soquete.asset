@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_cpu_soquete
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: cpu_soquete
+  title: Encaixe a CPU no soquete
+  componentName: Processador (LGA1700)
+  requiredPartId: cpu
+  requiredModelId: 
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Levante a alavanca e abra a moldura. Alinhe o tri\xE2ngulo dourado da CPU com a marca do soquete e apoie a CPU sem empurrar. Feche a moldura e trave a alavanca."
+  commonErrorAlert: "N\xE3o encoste nos contatos do soquete nem force a CPU: um pino LGA torto inutiliza a placa."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 6432339756113537538, guid: 3d9c00ca25002f54fbca0de38427cf9c, type: 3}
+  overlayPositionOffset: {x: -0.022, y: 0.0042, z: -0.17300001}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Tri\xE2ngulo da CPU alinhado com o do soquete"
+  - "CPU apoiada sem for\xE7ar"
+  - Moldura fechada e alavanca travada
+  validationReferenceName: 

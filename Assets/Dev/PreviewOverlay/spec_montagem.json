@@ -220,7 +220,7 @@
       "step_id": "ram_slots",
       "roteiro_index": 4,
       "title_pt": "Instale a RAM nos slots A2 e B2",
-      "component_pt": "Memória DDR5 (2 módulos)",
+      "component_pt": "Memória DDR5 (2 pentes, recomendado)",
       "instruction_pt": "Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Abra as travas dos slots A2 e B2 (2º e 4º a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.",
       "common_error_alert_pt": "O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force.",
       "checklist_pt": [
@@ -253,6 +253,99 @@
       "part_max_qty": 2
     },
     {
+      "step_id": "ram_3_slots",
+      "roteiro_index": 4,
+      "title_pt": "Instale a RAM nos slots A2, B2 e A1",
+      "component_pt": "Memória DDR5 (3 pentes)",
+      "instruction_pt": "Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Coloque primeiro dois pentes em A2 e B2 (2º e 4º a partir da CPU), como na montagem recomendada, e o terceiro em A1. Abra as travas, alinhe o chanfro com a chave do slot e empurre na vertical até as travas fecharem. Confira no manual da placa a ordem para 3 pentes.",
+      "common_error_alert_pt": "Com 3 pentes os dois canais ficam desiguais e a memória pode render menos: o recomendado é 2 ou 4 pentes iguais. O pente só entra num sentido; nunca force.",
+      "checklist_pt": [
+        "Pentes nos slots A2, B2 e A1",
+        "Chanfro alinhado com a chave de cada slot",
+        "Travas fechadas nos três slots"
+      ],
+      "target_x_mm": 172.4,
+      "target_y_mm": 82,
+      "target_z_mm": 8,
+      "overlay": [
+        { "id": "contorno_a2", "purpose_pt": "Slot A2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": -4.8, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_a2", "purpose_pt": "Pente fantasma no A2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": -4.8, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_a2", "purpose_pt": "Chanfro do pente A2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": -4.8, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_a2", "purpose_pt": "Chave do slot A2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": -4.8, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_a2", "purpose_pt": "Empurrar na vertical (A2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": -4.8, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_a2", "purpose_pt": "Segure aqui: ponta do pente (A2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -4.8, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_a2", "purpose_pt": "Segure aqui: ponta do pente (A2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -4.8, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "contorno_b2", "purpose_pt": "Slot B2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": 14.4, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_b2", "purpose_pt": "Pente fantasma no B2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": 14.4, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_b2", "purpose_pt": "Chanfro do pente B2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": 14.4, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_b2", "purpose_pt": "Chave do slot B2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": 14.4, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_b2", "purpose_pt": "Empurrar na vertical (B2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 14.4, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_b2", "purpose_pt": "Segure aqui: ponta do pente (B2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": 14.4, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_b2", "purpose_pt": "Segure aqui: ponta do pente (B2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": 14.4, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "contorno_a1", "purpose_pt": "Slot A1", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": -14.4, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_a1", "purpose_pt": "Pente fantasma no A1", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": -14.4, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_a1", "purpose_pt": "Chanfro do pente A1", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": -14.4, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_a1", "purpose_pt": "Chave do slot A1", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": -14.4, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_a1", "purpose_pt": "Empurrar na vertical (A1)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": -14.4, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_a1", "purpose_pt": "Segure aqui: ponta do pente (A1)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -14.4, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_a1", "purpose_pt": "Segure aqui: ponta do pente (A1)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -14.4, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 }
+      ],
+      "part_id": "ram",
+      "model_id": "",
+      "part_min_qty": 3,
+      "part_max_qty": 3
+    },
+    {
+      "step_id": "ram_4_slots",
+      "roteiro_index": 4,
+      "title_pt": "Instale a RAM nos quatro slots",
+      "component_pt": "Memória DDR5 (4 pentes)",
+      "instruction_pt": "Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Com 4 pentes, todos os slots ficam ocupados. Encaixe primeiro A2 e B2 (2º e 4º a partir da CPU), depois A1 e B1. Abra as travas, alinhe o chanfro com a chave do slot e empurre na vertical até as travas fecharem.",
+      "common_error_alert_pt": "O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force. Com 4 pentes o primeiro boot demora mais (a placa testa a memória): é normal.",
+      "checklist_pt": [
+        "Pentes nos 4 slots (A1, A2, B1 e B2)",
+        "Chanfro alinhado com a chave de cada slot",
+        "Travas fechadas nos quatro slots"
+      ],
+      "target_x_mm": 172.4,
+      "target_y_mm": 82,
+      "target_z_mm": 8,
+      "overlay": [
+        { "id": "contorno_a2", "purpose_pt": "Slot A2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": -4.8, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_a2", "purpose_pt": "Pente fantasma no A2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": -4.8, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_a2", "purpose_pt": "Chanfro do pente A2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": -4.8, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_a2", "purpose_pt": "Chave do slot A2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": -4.8, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_a2", "purpose_pt": "Empurrar na vertical (A2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": -4.8, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_a2", "purpose_pt": "Segure aqui: ponta do pente (A2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -4.8, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_a2", "purpose_pt": "Segure aqui: ponta do pente (A2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -4.8, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "contorno_b2", "purpose_pt": "Slot B2", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": 14.4, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_b2", "purpose_pt": "Pente fantasma no B2", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": 14.4, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_b2", "purpose_pt": "Chanfro do pente B2", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": 14.4, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_b2", "purpose_pt": "Chave do slot B2", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": 14.4, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_b2", "purpose_pt": "Empurrar na vertical (B2)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 14.4, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_b2", "purpose_pt": "Segure aqui: ponta do pente (B2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": 14.4, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_b2", "purpose_pt": "Segure aqui: ponta do pente (B2)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": 14.4, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "contorno_a1", "purpose_pt": "Slot A1", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": -14.4, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_a1", "purpose_pt": "Pente fantasma no A1", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": -14.4, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_a1", "purpose_pt": "Chanfro do pente A1", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": -14.4, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_a1", "purpose_pt": "Chave do slot A1", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": -14.4, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_a1", "purpose_pt": "Empurrar na vertical (A1)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": -14.4, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_a1", "purpose_pt": "Segure aqui: ponta do pente (A1)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -14.4, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_a1", "purpose_pt": "Segure aqui: ponta do pente (A1)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": -14.4, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "contorno_b1", "purpose_pt": "Slot B1", "shape": "contorno_retangular", "size_x_mm": 9, "size_y_mm": 143, "size_z_mm": 1, "offset_x_mm": 4.8, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "ram_fantasma_b1", "purpose_pt": "Pente fantasma no B1", "shape": "caixa", "size_x_mm": 3, "size_y_mm": 133.35, "size_z_mm": 31.25, "offset_x_mm": 4.8, "offset_y_mm": 0, "offset_z_mm": 11.6, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "desce 25 mm até encaixar", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chanfro_b1", "purpose_pt": "Chanfro do pente B1", "shape": "caixa", "size_x_mm": 3.6, "size_y_mm": 3, "size_z_mm": 3, "offset_x_mm": 4.8, "offset_y_mm": 3, "offset_z_mm": -2.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "chave_slot_b1", "purpose_pt": "Chave do slot B1", "shape": "caixa", "size_x_mm": 7, "size_y_mm": 3, "size_z_mm": 0.8, "offset_x_mm": 4.8, "offset_y_mm": 3, "offset_z_mm": 0.4, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_b1", "purpose_pt": "Empurrar na vertical (B1)", "shape": "seta_para_baixo", "size_x_mm": 8, "size_y_mm": 8, "size_z_mm": 18, "offset_x_mm": 4.8, "offset_y_mm": 0, "offset_z_mm": 67, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "oscila 5 mm", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 },
+        { "id": "pegada_cima_b1", "purpose_pt": "Segure aqui: ponta do pente (B1)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": 4.8, "offset_y_mm": -68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 },
+        { "id": "pegada_baixo_b1", "purpose_pt": "Segure aqui: ponta do pente (B1)", "shape": "caixa", "size_x_mm": 5, "size_y_mm": 3, "size_z_mm": 10, "offset_x_mm": 4.8, "offset_y_mm": 68.2, "offset_z_mm": 20, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "acompanha o pente", "motion": "insert", "travel_z_mm": 25, "period_s": 2.4, "hold_fraction": 0.35 }
+      ],
+      "part_id": "ram",
+      "model_id": "",
+      "part_min_qty": 4,
+      "part_max_qty": 4
+    },
+    {
       "step_id": "ssd_m2",
       "roteiro_index": 5,
       "title_pt": "Instale o SSD M.2",
@@ -275,7 +368,7 @@
         { "id": "seta_parafuso", "purpose_pt": "Prender aqui", "shape": "seta_para_baixo", "size_x_mm": 7, "size_y_mm": 7, "size_z_mm": 16, "offset_x_mm": -38.5, "offset_y_mm": 0, "offset_z_mm": 16, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 5, "period_s": 1.2, "hold_fraction": 0 }
       ],
       "part_id": "ssd",
-      "model_id": "",
+      "model_id": "ssd_m2_2280_nvme",
       "part_min_qty": 1,
       "part_max_qty": 0
     },
@@ -329,16 +422,74 @@
       "part_max_qty": 0
     },
     {
+      "step_id": "ssd_sata",
+      "roteiro_index": 8.5,
+      "title_pt": "Ligue o SSD SATA",
+      "component_pt": "SSD SATA 2,5\"",
+      "instruction_pt": "Na bancada, o SSD fica deitado no tapete, à direita da placa (marcadores azuis: segure pelas laterais). Ligue o cabo de dados SATA (o fino, com conector em L) numa porta SATA da borda direita da placa e a outra ponta no SSD. Depois ligue no SSD o cabo de energia SATA da fonte (o mais largo, também em L).",
+      "common_error_alert_pt": "Os conectores SATA têm formato em L e só entram num sentido: virado ao contrário, a lingueta de plástico quebra. Não force.",
+      "checklist_pt": [
+        "Cabo de dados SATA no SSD e numa porta SATA da placa",
+        "Cabo de energia SATA da fonte ligado no SSD",
+        "Os dois conectores encaixados até o fim"
+      ],
+      "target_x_mm": 236,
+      "target_y_mm": 230,
+      "target_z_mm": 7,
+      "overlay": [
+        { "id": "contorno_portas", "purpose_pt": "Portas SATA da placa", "shape": "contorno_retangular", "size_x_mm": 14, "size_y_mm": 34, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 7.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "plugue_dados", "purpose_pt": "Cabo de dados SATA entrando na porta", "shape": "caixa", "size_x_mm": 8, "size_y_mm": 10, "size_z_mm": 6, "offset_x_mm": 9, "offset_y_mm": -8, "offset_z_mm": 0, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 0, "period_s": 2.2, "hold_fraction": 0.35, "travel_x_mm": 22 },
+        { "id": "seta_porta", "purpose_pt": "Empurrar até o fim", "shape": "seta_horizontal", "size_x_mm": 24, "size_y_mm": 8, "size_z_mm": 8, "offset_x_mm": 34, "offset_y_mm": -8, "offset_z_mm": 10, "rotation_deg_about_up": 180, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 0, "period_s": 1.2, "hold_fraction": 0, "travel_x_mm": -6 },
+        { "id": "drive_fantasma", "purpose_pt": "SSD deitado no tapete", "shape": "caixa", "size_x_mm": 70, "size_y_mm": 100, "size_z_mm": 7, "offset_x_mm": 55.0, "offset_y_mm": 0, "offset_z_mm": -5.1, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.25], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 20, "period_s": 2.6, "hold_fraction": 0.4 },
+        { "id": "conectores_drive", "purpose_pt": "Conectores do drive: dados (menor) e energia (maior)", "shape": "caixa", "size_x_mm": 4, "size_y_mm": 26, "size_z_mm": 5, "offset_x_mm": 22.0, "offset_y_mm": -28.0, "offset_z_mm": 0.9000000000000004, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "pegada_drive_1", "purpose_pt": "Segure aqui: lateral do drive", "shape": "caixa", "size_x_mm": 35.0, "size_y_mm": 3, "size_z_mm": 6, "offset_x_mm": 55.0, "offset_y_mm": -51.5, "offset_z_mm": 14.9, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 20, "period_s": 2.6, "hold_fraction": 0.4 },
+        { "id": "pegada_drive_2", "purpose_pt": "Segure aqui: lateral do drive", "shape": "caixa", "size_x_mm": 35.0, "size_y_mm": 3, "size_z_mm": 6, "offset_x_mm": 55.0, "offset_y_mm": 51.5, "offset_z_mm": 14.9, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 20, "period_s": 2.6, "hold_fraction": 0.4 }
+      ],
+      "part_id": "ssd",
+      "model_id": "ssd_sata_25",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "hd_sata",
+      "roteiro_index": 8.5,
+      "title_pt": "Ligue o HD SATA",
+      "component_pt": "HD SATA 3,5\"",
+      "instruction_pt": "O HD tem peças móveis por dentro: segure pelas laterais (marcadores azuis), sem tocar na placa de circuito de baixo, e apoie devagar no tapete, à direita da placa. Ligue o cabo de dados SATA (o fino, em L) numa porta SATA da borda direita da placa e no HD. Depois ligue no HD o cabo de energia SATA da fonte (o mais largo).",
+      "common_error_alert_pt": "Batida ou queda estraga o HD, mesmo desligado. E os conectores em L só entram num sentido: não force.",
+      "checklist_pt": [
+        "HD apoiado no tapete, sem bater",
+        "Cabo de dados SATA no HD e numa porta SATA da placa",
+        "Cabo de energia SATA da fonte ligado no HD"
+      ],
+      "target_x_mm": 236,
+      "target_y_mm": 230,
+      "target_z_mm": 7,
+      "overlay": [
+        { "id": "contorno_portas", "purpose_pt": "Portas SATA da placa", "shape": "contorno_retangular", "size_x_mm": 14, "size_y_mm": 34, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 7.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "plugue_dados", "purpose_pt": "Cabo de dados SATA entrando na porta", "shape": "caixa", "size_x_mm": 8, "size_y_mm": 10, "size_z_mm": 6, "offset_x_mm": 9, "offset_y_mm": -8, "offset_z_mm": 0, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.35], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 0, "period_s": 2.2, "hold_fraction": 0.35, "travel_x_mm": 22 },
+        { "id": "seta_porta", "purpose_pt": "Empurrar até o fim", "shape": "seta_horizontal", "size_x_mm": 24, "size_y_mm": 8, "size_z_mm": 8, "offset_x_mm": 34, "offset_y_mm": -8, "offset_z_mm": 10, "rotation_deg_about_up": 180, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 0, "period_s": 1.2, "hold_fraction": 0, "travel_x_mm": -6 },
+        { "id": "drive_fantasma", "purpose_pt": "HD deitado no tapete", "shape": "caixa", "size_x_mm": 101.6, "size_y_mm": 147, "size_z_mm": 26, "offset_x_mm": 70.8, "offset_y_mm": 0, "offset_z_mm": 4.4, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.25], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 20, "period_s": 2.6, "hold_fraction": 0.4 },
+        { "id": "conectores_drive", "purpose_pt": "Conectores do drive: dados (menor) e energia (maior)", "shape": "caixa", "size_x_mm": 4, "size_y_mm": 26, "size_z_mm": 5, "offset_x_mm": 22.0, "offset_y_mm": -51.5, "offset_z_mm": 19.9, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "pegada_drive_1", "purpose_pt": "Segure aqui: lateral do drive", "shape": "caixa", "size_x_mm": 50.8, "size_y_mm": 3, "size_z_mm": 6, "offset_x_mm": 70.8, "offset_y_mm": -75.0, "offset_z_mm": 24.4, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 20, "period_s": 2.6, "hold_fraction": 0.4 },
+        { "id": "pegada_drive_2", "purpose_pt": "Segure aqui: lateral do drive", "shape": "caixa", "size_x_mm": 50.8, "size_y_mm": 3, "size_z_mm": 6, "offset_x_mm": 70.8, "offset_y_mm": 75.0, "offset_z_mm": 24.4, "rotation_deg_about_up": 0, "color_rgba": [0.15, 0.55, 1, 0.9], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 20, "period_s": 2.6, "hold_fraction": 0.4 }
+      ],
+      "part_id": "ssd",
+      "model_id": "hd_sata_35",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
       "step_id": "gpu_pcie",
       "roteiro_index": 8,
       "title_pt": "Encaixe a placa de vídeo no PCIe x16",
-      "component_pt": "Placa de vídeo (PCIe x16)",
-      "instruction_pt": "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Se a placa tiver conector de energia, ligue o cabo PCIe 6+2 da fonte.",
+      "component_pt": "Placa de vídeo com cabo PCIe 6+2",
+      "instruction_pt": "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Depois ligue o cabo PCIe 6+2 (8 pinos) da fonte no conector da placa de vídeo.",
       "common_error_alert_pt": "O slot de baixo (em vermelho) tem o mesmo tamanho, mas é x4. E a placa de vídeo usa o cabo PCIe 6+2, nunca o EPS da CPU.",
       "checklist_pt": [
         "Placa no slot PCIe x16 de cima",
         "Trava do slot fechada",
-        "Cabo PCIe ligado (se a placa tiver conector de energia)"
+        "Cabo PCIe 6+2 ligado na placa de vídeo"
       ],
       "target_x_mm": 88,
       "target_y_mm": 172,
@@ -351,7 +502,62 @@
         { "id": "seta_gpu", "purpose_pt": "Empurrar por igual", "shape": "seta_para_baixo", "size_x_mm": 12, "size_y_mm": 12, "size_z_mm": 24, "offset_x_mm": 19, "offset_y_mm": 0, "offset_z_mm": 128, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
       ],
       "part_id": "gpu",
-      "model_id": "",
+      "model_id": "gpu_pcie_x16",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "gpu_pcie_sem_cabo",
+      "roteiro_index": 8,
+      "title_pt": "Encaixe a placa de vídeo no PCIe x16",
+      "component_pt": "Placa de vídeo sem cabo de energia",
+      "instruction_pt": "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Esta placa recebe toda a energia pelo slot: não tem cabo para ligar.",
+      "common_error_alert_pt": "O slot de baixo (em vermelho) tem o mesmo tamanho, mas é x4. Segure a placa pelas bordas, sem tocar nos contatos dourados.",
+      "checklist_pt": [
+        "Placa no slot PCIe x16 de cima",
+        "Trava do slot fechada",
+        "Placa reta, sem um lado mais alto"
+      ],
+      "target_x_mm": 88,
+      "target_y_mm": 172,
+      "target_z_mm": 11,
+      "overlay": [
+        { "id": "contorno_x16", "purpose_pt": "Slot PCIe x16 certo", "shape": "contorno_retangular", "size_x_mm": 94, "size_y_mm": 12, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "contorno_x16_errado", "purpose_pt": "Slot x16 de baixo (x4 elétrico): não usar", "shape": "contorno_retangular", "size_x_mm": 94, "size_y_mm": 12, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 81, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "gpu_fantasma", "purpose_pt": "Placa de vídeo fantasma descendo", "shape": "caixa", "size_x_mm": 230, "size_y_mm": 38, "size_z_mm": 105, "offset_x_mm": 19, "offset_y_mm": 15, "offset_z_mm": 52.5, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.22], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 40, "period_s": 2.6, "hold_fraction": 0.35 },
+        { "id": "trava_x16", "purpose_pt": "Trava do slot", "shape": "caixa", "size_x_mm": 4, "size_y_mm": 9, "size_z_mm": 6, "offset_x_mm": 47.5, "offset_y_mm": 0, "offset_z_mm": 1, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_gpu", "purpose_pt": "Empurrar por igual", "shape": "seta_para_baixo", "size_x_mm": 12, "size_y_mm": 12, "size_z_mm": 24, "offset_x_mm": 19, "offset_y_mm": 0, "offset_z_mm": 128, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "gpu",
+      "model_id": "gpu_sem_cabo",
+      "part_min_qty": 1,
+      "part_max_qty": 0
+    },
+    {
+      "step_id": "gpu_pcie_12v2x6",
+      "roteiro_index": 8,
+      "title_pt": "Encaixe a placa de vídeo e o cabo 12V-2x6",
+      "component_pt": "Placa de vídeo com conector 12V-2x6",
+      "instruction_pt": "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos e empurre por igual até a trava fechar. Depois ligue o cabo de 16 pinos 12V-2x6 (ou o adaptador que veio com a placa) e empurre até não sobrar fresta.",
+      "common_error_alert_pt": "Cabo 12V-2x6 meio encaixado esquenta e pode derreter: empurre até o fim e não dobre o cabo logo na saída do conector. O slot de baixo (em vermelho) é x4.",
+      "checklist_pt": [
+        "Placa no slot PCIe x16 de cima",
+        "Trava do slot fechada",
+        "Cabo 12V-2x6 encaixado até o fim, sem fresta",
+        "Cabo sem dobra forte perto do conector"
+      ],
+      "target_x_mm": 88,
+      "target_y_mm": 172,
+      "target_z_mm": 11,
+      "overlay": [
+        { "id": "contorno_x16", "purpose_pt": "Slot PCIe x16 certo", "shape": "contorno_retangular", "size_x_mm": 94, "size_y_mm": 12, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 0, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [1, 0.9, 0.1, 1], "animate": false, "animation_note": "" },
+        { "id": "contorno_x16_errado", "purpose_pt": "Slot x16 de baixo (x4 elétrico): não usar", "shape": "contorno_retangular", "size_x_mm": 94, "size_y_mm": 12, "size_z_mm": 1, "offset_x_mm": 0, "offset_y_mm": 81, "offset_z_mm": 0.5, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "gpu_fantasma", "purpose_pt": "Placa de vídeo fantasma descendo", "shape": "caixa", "size_x_mm": 230, "size_y_mm": 38, "size_z_mm": 105, "offset_x_mm": 19, "offset_y_mm": 15, "offset_z_mm": 52.5, "rotation_deg_about_up": 0, "color_rgba": [0.1, 0.85, 0.4, 0.22], "animate": true, "animation_note": "", "motion": "insert", "travel_z_mm": 40, "period_s": 2.6, "hold_fraction": 0.35 },
+        { "id": "trava_x16", "purpose_pt": "Trava do slot", "shape": "caixa", "size_x_mm": 4, "size_y_mm": 9, "size_z_mm": 6, "offset_x_mm": 47.5, "offset_y_mm": 0, "offset_z_mm": 1, "rotation_deg_about_up": 0, "color_rgba": [0.95, 0.15, 0.15, 1], "animate": false, "animation_note": "" },
+        { "id": "seta_gpu", "purpose_pt": "Empurrar por igual", "shape": "seta_para_baixo", "size_x_mm": 12, "size_y_mm": 12, "size_z_mm": 24, "offset_x_mm": 19, "offset_y_mm": 0, "offset_z_mm": 128, "rotation_deg_about_up": 0, "color_rgba": [1, 0.55, 0.05, 1], "animate": true, "animation_note": "", "motion": "bob", "travel_z_mm": 6, "period_s": 1.2, "hold_fraction": 0 }
+      ],
+      "part_id": "gpu",
+      "model_id": "gpu_12v2x6",
       "part_min_qty": 1,
       "part_max_qty": 0
     },
@@ -411,6 +617,8 @@
     { "name": "11_eps", "step_id": "eps_8p", "description_pt": "Plugue EPS 8 pinos descendo no canto superior esquerdo.", "cam_x_mm": 140, "cam_y_mm": 420, "cam_z_mm": 230, "look_x_mm": 128, "look_y_mm": 222, "look_z_mm": 10 },
     { "name": "13_cpu_am5", "step_id": "cpu_soquete_am5", "description_pt": "Close da CPU AM5 fantasma (quadrada) descendo no soquete, com o triângulo de alinhamento.", "cam_x_mm": 196, "cam_y_mm": 520, "cam_z_mm": 300, "look_x_mm": 196, "look_y_mm": 293, "look_z_mm": 5 },
     { "name": "14_cooler_am5", "step_id": "cooler_cpu_am5", "description_pt": "Cooler fantasma sobre a CPU AM5, com os 4 furos do suporte AMD (54 x 90 mm).", "cam_x_mm": 196, "cam_y_mm": 540, "cam_z_mm": 330, "look_x_mm": 196, "look_y_mm": 285, "look_z_mm": 20 },
+    { "name": "15_ram_4", "step_id": "ram_4_slots", "description_pt": "Quatro pentes fantasmas (A1, A2, B1 e B2), com as pontas para segurar em azul.", "cam_x_mm": 262, "cam_y_mm": 560, "cam_z_mm": 300, "look_x_mm": 262, "look_y_mm": 297, "look_z_mm": 10 },
+    { "name": "16_ssd_sata", "step_id": "ssd_sata", "description_pt": "SSD SATA deitado à direita da placa e o cabo de dados entrando na porta SATA.", "cam_x_mm": 360, "cam_y_mm": 720, "cam_z_mm": 330, "look_x_mm": 365, "look_y_mm": 445, "look_z_mm": 5 },
     { "name": "12_gpu", "step_id": "gpu_pcie", "description_pt": "Placa de vídeo fantasma no PCIe x16 de cima; o x16 de baixo em vermelho.", "cam_x_mm": 330, "cam_y_mm": 760, "cam_z_mm": 360, "look_x_mm": 200, "look_y_mm": 400, "look_z_mm": 40 }
   ],
   "precision_note_pt": "Precisão (v0, estimativa): o marcador fica a cerca de 17 cm do soquete. Cada 1° de erro na rotação estimada do marcador desloca o overlay cerca de 3 mm no soquete (2° ≈ 6 mm). Serve para mostrar onde e em que sentido encaixar, mas não para validar a etapa automaticamente: a validação continua pelo checklist.",
@@ -423,7 +631,9 @@
     "Furos do cooler em quadrado de 78 mm em volta do soquete (padrão LGA1700).",
     "M.2 sem dissipador, conector à direita e suporte 2280 à esquerda; conector ATX 24 pinos vertical, com a trava para fora da placa.",
     "Placa de vídeo genérica de 230 x 105 mm, ocupando 2 slots, com o cooler para baixo (lado do x16 de baixo).",
-    "Com um pente só, slot A2 (o mais comum nos manuais)."
+    "Com um pente só, slot A2 (o mais comum nos manuais).",
+    "Com 3 pentes, A2 e B2 primeiro e o terceiro em A1; a ordem certa depende do manual da placa (a confirmar com o kit real).",
+    "SSD SATA e HD ficam deitados no tapete, à direita da placa (montagem em bancada, sem gabinete); portas SATA na borda direita."
   ],
   "open_questions": [
     "Qual placa-mãe, CPU e RAM o laboratório vai usar (D5)? As posições da prévia dependem disso.",

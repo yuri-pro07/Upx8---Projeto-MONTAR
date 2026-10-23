@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_ssd_sata
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: ssd_sata
+  title: Ligue o SSD SATA
+  componentName: SSD SATA 2,5"
+  requiredPartId: ssd
+  requiredModelId: ssd_sata_25
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Na bancada, o SSD fica deitado no tapete, \xE0 direita da placa (marcadores azuis: segure pelas laterais). Ligue o cabo de dados SATA (o fino, com conector em L) numa porta SATA da borda direita da placa e a outra ponta no SSD. Depois ligue no SSD o cabo de energia SATA da fonte (o mais largo, tamb\xE9m em L)."
+  commonErrorAlert: "Os conectores SATA t\xEAm formato em L e s\xF3 entram num sentido: virado ao contr\xE1rio, a lingueta de pl\xE1stico quebra. N\xE3o force."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 1697185790222217441, guid: a7932162c4869474a9ad4898c426da8b, type: 3}
+  overlayPositionOffset: {x: 0.106, y: 0.0082, z: -0.325}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - Cabo de dados SATA no SSD e numa porta SATA da placa
+  - Cabo de energia SATA da fonte ligado no SSD
+  - "Os dois conectores encaixados at\xE9 o fim"
+  validationReferenceName: 

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_gpu_pcie_sem_cabo
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: gpu_pcie_sem_cabo
+  title: "Encaixe a placa de v\xEDdeo no PCIe x16"
+  componentName: "Placa de v\xEDdeo sem cabo de energia"
+  requiredPartId: gpu
+  requiredModelId: gpu_sem_cabo
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de v\xEDdeo e empurre por igual at\xE9 a trava fechar. Esta placa recebe toda a energia pelo slot: n\xE3o tem cabo para ligar."
+  commonErrorAlert: "O slot de baixo (em vermelho) tem o mesmo tamanho, mas \xE9 x4. Segure a placa pelas bordas, sem tocar nos contatos dourados."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 9154493725878090291, guid: eb2c310b08b56a94b838c3d6db7a04f5, type: 3}
+  overlayPositionOffset: {x: -0.042000003, y: 0.0122, z: -0.26700002}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - Placa no slot PCIe x16 de cima
+  - Trava do slot fechada
+  - Placa reta, sem um lado mais alto
+  validationReferenceName: 

@@ -102,11 +102,67 @@ def cubo(d, cx, cy, r, largura):
     linha(d, [(cx, cy), (cx, cy + r)], largura)
 
 
+def tracejado(d, pontos, largura, traco=16, vao=10):
+    # Linha tracejada (a peça "fantasma" do overlay).
+    for (x0, y0), (x1, y1) in zip(pontos, pontos[1:]):
+        comprimento = math.hypot(x1 - x0, y1 - y0)
+        t = 0.0
+        while t < comprimento:
+            u0, u1 = t / comprimento, min(t + traco, comprimento) / comprimento
+            linha(d, [(x0 + (x1 - x0) * u0, y0 + (y1 - y0) * u0), (x0 + (x1 - x0) * u1, y0 + (y1 - y0) * u1)], largura)
+            t += traco + vao
+
+
 def icone_guia():
     img, d = tela(256)
-    cubo(d, 128, 164, 62, 10)
-    seta_baixo(d, 128, 18, 76, 10, 16)
+    # Peça fantasma (tracejada) descendo no encaixe da placa: "faça o mesmo movimento".
+    linha(d, [(14, 170), (68, 170), (68, 230), (188, 230), (188, 170), (242, 170)], 12)
+    tracejado(d, [(84, 100), (172, 100), (172, 214), (84, 214), (84, 100)], 10, traco=20, vao=12)
+    seta_baixo(d, 128, 10, 62, 14, 22)
     return salvar(img, "icone_guia.png", 256)
+
+
+def cadeado(aberto):
+    img, d = tela(256)
+    d.rounded_rectangle(caixa(56, 116, 200, 232), radius=s(18), outline=BRANCO, width=s(12))
+    d.ellipse(caixa(116, 148, 140, 172), fill=BRANCO)
+    d.rectangle(caixa(123, 164, 133, 200), fill=BRANCO)
+    if aberto:
+        # Haste levantada e solta do lado esquerdo.
+        d.arc(caixa(84, 14, 172, 102), 180, 360, fill=BRANCO, width=s(14))
+        linha(d, [(165, 58), (165, 116)], 14)
+        linha(d, [(91, 58), (91, 74)], 14)
+        return salvar(img, "icone_cadeado_aberto.png", 256)
+    d.arc(caixa(84, 36, 172, 124), 180, 360, fill=BRANCO, width=s(14))
+    linha(d, [(91, 80), (91, 116)], 14)
+    linha(d, [(165, 80), (165, 116)], 14)
+    return salvar(img, "icone_cadeado_fechado.png", 256)
+
+
+def icone_observador():
+    img, d = tela(256)
+    # Olho: o observador acompanha a montagem.
+    d.ellipse(caixa(18, 72, 238, 184), outline=BRANCO, width=s(12))
+    d.ellipse(caixa(96, 96, 160, 160), fill=BRANCO)
+    return salvar(img, "icone_observador.png", 256)
+
+
+def icone_alerta():
+    img, d = tela(256)
+    linha(d, [(128, 28), (234, 218), (22, 218), (128, 28)], 14)
+    linha(d, [(128, 94), (128, 156)], 18)
+    d.ellipse(caixa(117, 176, 139, 198), fill=BRANCO)
+    return salvar(img, "icone_alerta.png", 256)
+
+
+def icone_historico():
+    img, d = tela(256)
+    # Relógio com a seta de "voltar no tempo".
+    d.arc(caixa(36, 36, 220, 220), 200, 520, fill=BRANCO, width=s(12))
+    d.polygon([(s(20), s(98)), (s(70), s(84)), (s(40), s(132))], fill=BRANCO)
+    linha(d, [(128, 128), (128, 78)], 12)
+    linha(d, [(128, 128), (166, 152)], 12)
+    return salvar(img, "icone_historico.png", 256)
 
 
 def icone_valida():
@@ -238,6 +294,7 @@ def main():
     gerados = [
         ui_arredondado(), ui_circulo(), ui_check(),
         icone_aponta(), icone_guia(), icone_valida(), icone_registra(), icone_cubo(), icone_camera(),
+        cadeado(False), cadeado(True), icone_observador(), icone_alerta(), icone_historico(),
         peca_placa_mae(), peca_cpu(), peca_cooler(), peca_ram(), peca_ssd(), peca_gpu(), peca_fonte(),
     ]
     for nome in gerados:

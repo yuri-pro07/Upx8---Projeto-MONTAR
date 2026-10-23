@@ -28,15 +28,15 @@ namespace MontAR
         [SerializeField] private float maxPitch = 88f;
         [SerializeField] private float minDistance = 0.12f;
         [SerializeField] private float maxDistance = 1.4f;
-        [Tooltip("Distância usada nas etapas sem overlay (placa inteira).")]
-        [SerializeField] private float boardDistance = 0.7f;
+        [Tooltip("Raio da placa inteira (m), enquadrado nas etapas sem overlay.")]
+        [SerializeField] private float boardRadius = 0.2f;
         [Tooltip("Folga do enquadramento em volta do overlay da etapa.")]
-        [SerializeField] private float framingMargin = 1.35f;
-        [Tooltip("Desloca o centro da imagem para cima (fração da meia-altura da tela), para a peça ficar na área livre entre o topo e o painel da etapa.")]
-        [Range(-0.6f, 0.6f)]
-        [SerializeField] private float verticalCenterOffset = 0.24f;
+        [SerializeField] private float framingMargin = 1.15f;
+        [Tooltip("Desloca o centro da imagem para cima (fração da meia-altura da tela), para a peça ficar na área livre entre o topo e o painel da etapa. A tela da montagem atualiza com SetFreeArea.")]
+        [Range(-0.9f, 0.9f)]
+        [SerializeField] private float verticalCenterOffset = 0.12f;
         [Tooltip("Fração da altura da tela livre para a peça (o resto fica sob o topo e o painel da etapa).")]
-        [Range(0.2f, 1f)]
+        [Range(0.1f, 1f)]
         [SerializeField] private float visibleHeightFraction = 0.42f;
         [Tooltip("Graus de giro para um arrasto da altura inteira da tela.")]
         [SerializeField] private float degreesPerScreen = 220f;
@@ -51,7 +51,9 @@ namespace MontAR
         private float targetPitch;
         private float targetDistance;
         private Vector3 targetFocus;
+        private float centerOffset;
         private bool snap = true;
+        private bool userAdjusted;
 
         public bool IsVisible => stageRoot != null && stageRoot.activeSelf;
 
@@ -99,19 +101,30 @@ namespace MontAR
         {
             if (immediate)
                 snap = true;
+            userAdjusted = false;
             targetYaw = defaultYaw;
             targetPitch = defaultPitch;
+            Frame();
+        }
 
-            if (overlay != null && TryGetBounds(overlay, out Bounds bounds))
-            {
-                targetFocus = bounds.center;
-                targetDistance = Mathf.Clamp(FitDistance(bounds.extents.magnitude), minDistance, maxDistance);
-            }
-            else
-            {
-                targetFocus = boardCenter != null ? boardCenter.position : transform.position;
-                targetDistance = Mathf.Clamp(boardDistance, minDistance, maxDistance);
-            }
+        /// <summary>
+        /// Área da tela que sobra para a peça, em fração da altura (0 = base, 1 = topo): entre o painel
+        /// da etapa e os cartões do topo. A peça fica centrada nessa faixa e cabe nela.
+        /// </summary>
+        public void SetFreeArea(float bottom, float top)
+        {
+            bottom = Mathf.Clamp01(bottom);
+            top = Mathf.Clamp(top, Mathf.Min(1f, bottom + 0.1f), 1f);
+            float offset = bottom + top - 1f;
+            float fraction = top - bottom;
+            if (Mathf.Abs(offset - verticalCenterOffset) < 0.005f && Mathf.Abs(fraction - visibleHeightFraction) < 0.005f)
+                return;
+
+            verticalCenterOffset = offset;
+            visibleHeightFraction = fraction;
+            // Só reenquadra se o usuário não girou nem aproximou desde o último "centralizar".
+            if (!userAdjusted)
+                Frame();
         }
 
         /// <summary>Gira a câmera em volta da peça. Arrastar para o lado gira, para cima/baixo inclina.</summary>
@@ -120,6 +133,7 @@ namespace MontAR
             float scale = degreesPerScreen / Mathf.Max(1f, Screen.height);
             targetYaw += deltaPixels.x * scale;
             targetPitch = Mathf.Clamp(targetPitch - deltaPixels.y * scale, minPitch, maxPitch);
+            userAdjusted = true;
         }
 
         /// <summary>Aproxima (fator maior que 1) ou afasta (menor que 1) a câmera.</summary>
@@ -128,6 +142,21 @@ namespace MontAR
             if (factor <= 0f)
                 return;
             targetDistance = Mathf.Clamp(targetDistance / factor, minDistance, maxDistance);
+            userAdjusted = true;
+        }
+
+        private void Frame()
+        {
+            if (overlay != null && TryGetBounds(overlay, out Bounds bounds))
+            {
+                targetFocus = bounds.center;
+                targetDistance = Mathf.Clamp(FitDistance(bounds.extents.magnitude), minDistance, maxDistance);
+            }
+            else
+            {
+                targetFocus = boardCenter != null ? boardCenter.position : transform.position;
+                targetDistance = Mathf.Clamp(FitDistance(boardRadius), minDistance, maxDistance);
+            }
         }
 
         private void LateUpdate()
@@ -141,6 +170,7 @@ namespace MontAR
                 pitch = targetPitch;
                 distance = targetDistance;
                 focus = targetFocus;
+                centerOffset = verticalCenterOffset;
                 snap = false;
             }
             else
@@ -150,6 +180,7 @@ namespace MontAR
                 pitch = Mathf.Lerp(pitch, targetPitch, t);
                 distance = Mathf.Lerp(distance, targetDistance, t);
                 focus = Vector3.Lerp(focus, targetFocus, t);
+                centerOffset = Mathf.Lerp(centerOffset, verticalCenterOffset, t);
             }
 
             Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
@@ -157,10 +188,10 @@ namespace MontAR
 
             // Projeção descentralizada: o ponto focado sobe na tela sem inclinar a câmera.
             stageCamera.ResetProjectionMatrix();
-            if (!Mathf.Approximately(verticalCenterOffset, 0f))
+            if (!Mathf.Approximately(centerOffset, 0f))
             {
                 Matrix4x4 projection = stageCamera.projectionMatrix;
-                projection.m12 = -verticalCenterOffset;
+                projection.m12 = -centerOffset;
                 stageCamera.projectionMatrix = projection;
             }
         }
@@ -168,7 +199,7 @@ namespace MontAR
         private float FitDistance(float radius)
         {
             if (stageCamera == null)
-                return boardDistance;
+                return radius * 3f;
 
             // Só parte da altura fica livre (topo e painel da etapa cobrem o resto). Em retrato o campo
             // horizontal também é estreito: enquadra pelo menor dos dois.

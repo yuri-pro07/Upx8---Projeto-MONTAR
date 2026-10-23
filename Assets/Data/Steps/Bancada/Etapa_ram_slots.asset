@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
   stepId: ram_slots
   title: Instale a RAM nos slots A2 e B2
-  componentName: "Mem\xF3ria DDR5 (2 m\xF3dulos)"
+  componentName: "Mem\xF3ria DDR5 (2 pentes, recomendado)"
   requiredPartId: ram
   requiredModelId: 
   minPartQuantity: 2

@@ -7,8 +7,9 @@ namespace MontAR
 {
     /// <summary>
     /// Navegação do app: apresentação → seleção de peças → início (código do participante e modo)
-    /// → montagem → conclusão. Também decide qual câmera aparece (RA, bancada virtual ou só o fundo
-    /// dos menus), verifica se o aparelho tem RA e oferece retomar uma montagem interrompida.
+    /// → montagem → conclusão → histórico de montagens. Também decide qual câmera aparece (RA, bancada
+    /// virtual ou só o fundo dos menus), verifica se o aparelho tem RA, pede a permissão da câmera antes
+    /// de ligar a RA e oferece retomar uma montagem interrompida.
     /// </summary>
     public class AppController : MonoBehaviour
     {
@@ -18,6 +19,8 @@ namespace MontAR
 
         [Header("Câmeras")]
         [SerializeField] private Camera arCamera;
+        [Tooltip("Sessão do ARCore. Fica desligada na cena e só liga depois da permissão da câmera.")]
+        [SerializeField] private ARSession arSession;
         [SerializeField] private DemoStage demoStage;
 
         [Header("Telas")]
@@ -26,6 +29,7 @@ namespace MontAR
         [SerializeField] private StartScreen startScreen;
         [SerializeField] private AssemblyScreen assemblyScreen;
         [SerializeField] private CompletionScreen completionScreen;
+        [SerializeField] private HistoryScreen historyScreen;
         [SerializeField] private ConfirmDialog dialog;
         [SerializeField] private Toast toast;
 
@@ -42,7 +46,11 @@ namespace MontAR
 
         private PartSelection selection;
         private SessionSummary summary;
+        private AssemblyHistoryStore historyStore;
         private UiScreen current;
+        private UiScreen historyReturn;
+        private string lastHistorySessionId;
+        private bool askingCamera;
         private GuidanceMode preferredMode = GuidanceMode.AugmentedReality;
         private bool arAvailable;
         private bool arChecked;
@@ -56,13 +64,23 @@ namespace MontAR
         public bool IsArChecked => arChecked;
         public PartSelection Selection => selection;
 
+        /// <summary>Histórico de montagens deste aparelho.</summary>
+        public AssemblyHistoryStore History => historyStore;
+
+        private UiScreen[] Screens => new UiScreen[] { welcomeScreen, partsScreen, startScreen, assemblyScreen, completionScreen, historyScreen };
+
         private void Awake()
         {
             selection = catalog != null ? catalog.CreateDefaultSelection() : new PartSelection();
+            historyStore = AssemblyHistoryStore.CreateDefault();
+            // A sessão do ARCore pede a câmera ao ligar: só liga quando a permissão já existe.
+            if (arSession != null && CameraPermission.IsGranted)
+                arSession.enabled = true;
 
             welcomeScreen.Finished += OnWelcomeFinished;
             partsScreen.Continued += () => ShowStart();
             partsScreen.Back += () => ShowScreen(welcomeScreen);
+            partsScreen.HistoryRequested += () => ShowHistory(partsScreen);
             startScreen.Back += () => ShowParts();
             startScreen.StartRequested += OnStartRequested;
             assemblyScreen.ExitRequested += ConfirmExit;
@@ -72,11 +90,13 @@ namespace MontAR
                 flowController.LeaveSession();
                 ShowParts();
             };
-            completionScreen.HomeRequested += () =>
+            completionScreen.HistoryRequested += () =>
             {
                 flowController.LeaveSession();
-                ShowScreen(welcomeScreen);
+                ShowHistory(completionScreen);
             };
+            historyScreen.Back += () => ShowScreen(historyReturn != null ? historyReturn : partsScreen);
+            historyScreen.NewSessionRequested += ShowParts;
 
             assemblyScreen.Bind(flowController);
             flowController.FlowEventRaised += OnFlowEvent;
@@ -86,7 +106,7 @@ namespace MontAR
             if (diagnosticsToggle != null)
                 diagnosticsToggle.OnLongPress.AddListener(ToggleDiagnostics);
 
-            foreach (UiScreen screen in new UiScreen[] { welcomeScreen, partsScreen, startScreen, assemblyScreen, completionScreen })
+            foreach (UiScreen screen in Screens)
                 screen.gameObject.SetActive(false);
             dialog.gameObject.SetActive(false);
         }
@@ -116,7 +136,7 @@ namespace MontAR
 
         private void ShowScreen(UiScreen screen)
         {
-            foreach (UiScreen other in new UiScreen[] { welcomeScreen, partsScreen, startScreen, assemblyScreen, completionScreen })
+            foreach (UiScreen other in Screens)
             {
                 if (other != screen && other.IsVisible)
                     other.Hide();
@@ -130,6 +150,14 @@ namespace MontAR
         {
             ShowScreen(partsScreen);
             partsScreen.Bind(catalog, selection, kit => flowController.StepsFor(kit).Count);
+        }
+
+        /// <summary>Histórico de montagens. <paramref name="returnTo"/> é para onde o "Voltar" leva.</summary>
+        private void ShowHistory(UiScreen returnTo)
+        {
+            historyReturn = returnTo == completionScreen && flowController.HasSession ? partsScreen : returnTo;
+            ShowScreen(historyScreen);
+            historyScreen.Bind(historyStore.Load(), lastHistorySessionId);
         }
 
         private void ShowStart()
@@ -167,18 +195,79 @@ namespace MontAR
                 otherwise);
         }
 
-        private void OnStartRequested(string participantCode, GuidanceMode mode)
+        private void OnStartRequested(string participantCode, string label, GuidanceMode mode)
         {
             lastParticipantCode = participantCode;
             preferredMode = mode;
-            BeginAssembly(() => flowController.StartNewSession(participantCode, selection));
+            WithCameraFor(mode, () => BeginAssembly(() => flowController.StartNewSession(participantCode, selection, label)));
         }
 
         private void Resume(SessionProgress saved)
         {
             selection = PartSelection.FromEntries(saved.parts);
             lastParticipantCode = saved.participantCode;
-            BeginAssembly(() => flowController.ResumeSession(saved));
+            WithCameraFor(arAvailable ? preferredMode : GuidanceMode.Demo3D, () => BeginAssembly(() => flowController.ResumeSession(saved)));
+        }
+
+        /// <summary>
+        /// Antes de usar a RA, explica para que serve a câmera e abre o pedido do Android ("Durante o uso
+        /// do app", "Só desta vez", "Não permitir"). Sem permissão, segue na demonstração 3D.
+        /// </summary>
+        private void WithCameraFor(GuidanceMode mode, System.Action then)
+        {
+            if (mode != GuidanceMode.AugmentedReality || !arAvailable || CameraPermission.IsGranted)
+            {
+                EnableArSession(mode == GuidanceMode.AugmentedReality && arAvailable);
+                then();
+                return;
+            }
+            if (askingCamera)
+                return;
+
+            askingCamera = true;
+            dialog.Show(
+                "Permitir o uso da câmera?",
+                "A RA usa a câmera para achar o marcador A do tapete e mostrar a peça fantasma sobre a placa. "
+                + "Nada é gravado nem enviado.\n\nNa próxima tela o Android pergunta: <b>Durante o uso do app</b>, "
+                + "<b>Só desta vez</b> ou <b>Não permitir</b>.",
+                "Continuar",
+                () => CameraPermission.Request(result =>
+                {
+                    askingCamera = false;
+                    if (result != CameraPermissionResult.Granted)
+                    {
+                        preferredMode = GuidanceMode.Demo3D;
+                        flowController.SetGuidanceMode(GuidanceMode.Demo3D);
+                        ShowCameraDenied(result);
+                    }
+                    EnableArSession(result == CameraPermissionResult.Granted);
+                    then();
+                }),
+                "Usar o 3D",
+                () =>
+                {
+                    askingCamera = false;
+                    preferredMode = GuidanceMode.Demo3D;
+                    flowController.SetGuidanceMode(GuidanceMode.Demo3D);
+                    then();
+                });
+        }
+
+        private void ShowCameraDenied(CameraPermissionResult result)
+        {
+            string message = result == CameraPermissionResult.DeniedPermanently
+                ? "Câmera bloqueada. Para usar a RA, libere em Configurações › Apps › MontAR › Permissões. Seguindo na demonstração 3D."
+                : "Sem a câmera, a montagem segue na demonstração 3D. Dá para tentar a RA de novo no botão Câmera.";
+            if (current == assemblyScreen)
+                assemblyScreen.ShowNotice(message, 4f);
+            else
+                toast.Show(message, 4f);
+        }
+
+        private void EnableArSession(bool enable)
+        {
+            if (arSession != null && enable && !arSession.enabled)
+                arSession.enabled = true;
         }
 
         private void BeginAssembly(System.Action start)
@@ -187,7 +276,8 @@ namespace MontAR
                 flowController.LeaveSession();
 
             summary = new SessionSummary(() => Time.realtimeSinceStartupAsDouble);
-            flowController.SetGuidanceMode(arAvailable ? preferredMode : GuidanceMode.Demo3D);
+            bool canUseAr = arAvailable && CameraPermission.IsGranted;
+            flowController.SetGuidanceMode(canUseAr ? preferredMode : GuidanceMode.Demo3D);
             assemblyScreen.SetArAvailable(arAvailable);
             start();
             ShowScreen(assemblyScreen);
@@ -218,6 +308,10 @@ namespace MontAR
 
             if (current == welcomeScreen)
                 welcomeScreen.Previous();
+            else if (current == historyScreen)
+                ShowScreen(historyReturn != null ? historyReturn : partsScreen);
+            else if (current == completionScreen)
+                ShowHistory(completionScreen);
             else if (current == partsScreen)
                 ShowScreen(welcomeScreen);
             else if (current == startScreen)
@@ -239,14 +333,35 @@ namespace MontAR
             assemblyScreen.HandleFlowEvent(flowEvent);
 
             if (flowEvent.Type == FlowEventType.SessionCompleted)
+            {
+                SaveToHistory();
                 StartCoroutine(ShowCompletionSoon());
+            }
+        }
+
+        private void SaveToHistory()
+        {
+            SessionProgress progress = flowController.Progress;
+            if (progress == null || summary == null)
+                return;
+            try
+            {
+                string kit = flowController.Selection != null ? flowController.Selection.Describe() : string.Empty;
+                historyStore.Add(AssemblyHistoryStore.CreateEntry(progress, summary, flowController.ActiveSteps, flowController.Mode, kit));
+                lastHistorySessionId = progress.sessionId;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[MontAR] Não deu para salvar no histórico: {e.Message}");
+            }
         }
 
         private IEnumerator ShowCompletionSoon()
         {
             yield return new WaitForSecondsRealtime(completionDelaySeconds);
             SessionProgress progress = flowController.Progress;
-            completionScreen.Bind(summary, flowController.ActiveSteps, progress != null ? progress.participantCode : "", flowController.MetricsFilePath);
+            completionScreen.Bind(summary, flowController.ActiveSteps, progress != null ? progress.participantCode : "",
+                flowController.MetricsFilePath, progress != null ? progress.label : "");
             ShowScreen(completionScreen);
         }
 
@@ -254,10 +369,26 @@ namespace MontAR
         {
             if (mode == GuidanceMode.AugmentedReality && !arAvailable)
             {
-                toast.Show("A RA não está disponível neste aparelho. Continuando na demonstração 3D.");
+                assemblyScreen.ShowNotice("A RA não está disponível neste aparelho. Continuando na demonstração 3D.");
                 mode = GuidanceMode.Demo3D;
             }
 
+            if (mode == GuidanceMode.AugmentedReality && !CameraPermission.IsGranted)
+            {
+                WithCameraFor(mode, () =>
+                {
+                    if (CameraPermission.IsGranted)
+                        ApplyMode(GuidanceMode.AugmentedReality);
+                });
+                return;
+            }
+
+            ApplyMode(mode);
+        }
+
+        private void ApplyMode(GuidanceMode mode)
+        {
+            EnableArSession(mode == GuidanceMode.AugmentedReality);
             preferredMode = mode;
             flowController.SetGuidanceMode(mode);
             ApplyView();

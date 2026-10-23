@@ -8,13 +8,15 @@ using UnityEngine.UI;
 namespace MontAR
 {
     /// <summary>
-    /// Última tela antes da montagem: código anônimo do participante, modo de orientação
-    /// (RA ou demonstração 3D) e o roteiro que o kit gerou.
+    /// Última tela antes da montagem: código anônimo do participante, nome opcional da montagem
+    /// (para achar no histórico), modo de orientação (RA ou demonstração 3D) e o roteiro que o kit gerou.
     /// </summary>
     public class StartScreen : UiScreen
     {
         [SerializeField] private TMP_InputField participantInput;
         [SerializeField] private TMP_Text participantError;
+        [Tooltip("Nome opcional da montagem (ex.: \"Bancada 3 · HP\"). Fica só no histórico do aparelho.")]
+        [SerializeField] private TMP_InputField labelInput;
         [SerializeField] private Button modeArButton;
         [SerializeField] private Image modeArBackground;
         [SerializeField] private TMP_Text modeArLabel;
@@ -30,8 +32,8 @@ namespace MontAR
         private GuidanceMode mode;
         private bool arAvailable;
 
-        /// <summary>Código já validado e modo escolhido.</summary>
-        public event Action<string, GuidanceMode> StartRequested;
+        /// <summary>Código já validado, nome da montagem (pode ser vazio) e modo escolhido.</summary>
+        public event Action<string, string, GuidanceMode> StartRequested;
         public event Action Back;
 
         private void Awake()
@@ -50,6 +52,8 @@ namespace MontAR
             };
             participantInput.onValueChanged.AddListener(_ => participantError.gameObject.SetActive(false));
             participantInput.onSubmit.AddListener(_ => TryStart());
+            if (labelInput != null)
+                labelInput.characterLimit = AssemblyHistoryStore.MaxLabelLength;
         }
 
         public void Bind(IReadOnlyList<AssemblyStep> steps, bool isArAvailable, GuidanceMode preferredMode, string lastCode)
@@ -57,6 +61,8 @@ namespace MontAR
             arAvailable = isArAvailable;
             participantInput.text = lastCode ?? string.Empty;
             participantError.gameObject.SetActive(false);
+            if (labelInput != null)
+                labelInput.text = string.Empty;
 
             stepsHeader.text = $"Roteiro ({steps.Count} etapas)";
             var text = new StringBuilder();
@@ -107,7 +113,8 @@ namespace MontAR
                 participantError.gameObject.SetActive(true);
                 return;
             }
-            StartRequested?.Invoke(ParticipantCode.Normalize(code), mode);
+            string label = labelInput != null ? AssemblyHistoryStore.NormalizeLabel(labelInput.text) : string.Empty;
+            StartRequested?.Invoke(ParticipantCode.Normalize(code), label, mode);
         }
     }
 }

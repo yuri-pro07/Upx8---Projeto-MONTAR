@@ -95,7 +95,7 @@ namespace MontAR
             return false;
         }
 
-        public void StartNewSession(string participantCode, PartSelection kit)
+        public void StartNewSession(string participantCode, PartSelection kit, string label = "")
         {
             if (kit == null)
                 throw new ArgumentNullException(nameof(kit));
@@ -104,6 +104,7 @@ namespace MontAR
             {
                 sessionId = ParticipantCode.CreateSessionId(participantCode, DateTime.UtcNow),
                 participantCode = ParticipantCode.Normalize(participantCode),
+                label = AssemblyHistoryStore.NormalizeLabel(label),
                 procedureId = procedure.ProcedureId,
                 completedSteps = 0,
                 parts = kit.ToEntries()

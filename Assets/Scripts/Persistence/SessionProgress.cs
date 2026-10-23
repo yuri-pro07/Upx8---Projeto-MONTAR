@@ -12,6 +12,10 @@ namespace MontAR
     {
         public string sessionId;
         public string participantCode;
+
+        /// <summary>Nome opcional da montagem (ex.: "Bancada 3 · HP"), mostrado no histórico. Não vai para o CSV.</summary>
+        public string label;
+
         public string procedureId;
 
         /// <summary>Etapas já aprovadas; é o índice da próxima etapa a executar.</summary>

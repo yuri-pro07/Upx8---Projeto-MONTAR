@@ -8,7 +8,10 @@ using UnityEngine.UI;
 
 namespace MontAR
 {
-    /// <summary>Tela de conclusão: resumo da sessão (tempo, tentativas, intervenções) e onde o CSV ficou.</summary>
+    /// <summary>
+    /// Tela de conclusão: resumo da sessão (tempo, tentativas, intervenções) e onde o CSV ficou.
+    /// Daqui o usuário vai para o histórico de montagens ou começa outra.
+    /// </summary>
     public class CompletionScreen : UiScreen
     {
         [SerializeField] private TMP_Text subtitleLabel;
@@ -19,23 +22,24 @@ namespace MontAR
         [SerializeField] private TMP_Text stepTimesList;
         [SerializeField] private TMP_Text fileLabel;
         [SerializeField] private Button newSessionButton;
-        [SerializeField] private Button homeButton;
+        [SerializeField] private Button historyButton;
 
         public event Action NewSessionRequested;
-        public event Action HomeRequested;
+        public event Action HistoryRequested;
 
         private void Awake()
         {
             newSessionButton.onClick.AddListener(() => NewSessionRequested?.Invoke());
-            homeButton.onClick.AddListener(() => HomeRequested?.Invoke());
+            historyButton.onClick.AddListener(() => HistoryRequested?.Invoke());
         }
 
-        public void Bind(SessionSummary summary, IReadOnlyList<AssemblyStep> steps, string participantCode, string csvPath)
+        public void Bind(SessionSummary summary, IReadOnlyList<AssemblyStep> steps, string participantCode, string csvPath, string label = "")
         {
             bool resumed = summary.StartedAtStep > 0;
+            string who = string.IsNullOrEmpty(label) ? $"Participante {participantCode}" : $"<b>{label}</b> (participante {participantCode})";
             subtitleLabel.text = resumed
-                ? $"Participante {participantCode}: as {steps.Count} etapas foram validadas (sessão retomada na etapa {summary.StartedAtStep + 1})."
-                : $"Participante {participantCode}: as {steps.Count} etapas foram validadas.";
+                ? $"{who}: as {steps.Count} etapas foram validadas (sessão retomada na etapa {summary.StartedAtStep + 1})."
+                : $"{who}: as {steps.Count} etapas foram validadas.";
 
             timeValue.text = SessionSummary.FormatDuration(summary.ElapsedSeconds);
             stepsValue.text = summary.CompletedSteps.ToString();

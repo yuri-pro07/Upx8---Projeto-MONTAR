@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
   stepId: gpu_pcie
   title: "Encaixe a placa de v\xEDdeo no PCIe x16"
-  componentName: "Placa de v\xEDdeo (PCIe x16)"
+  componentName: "Placa de v\xEDdeo com cabo PCIe 6+2"
   requiredPartId: gpu
-  requiredModelId: 
+  requiredModelId: gpu_pcie_x16
   minPartQuantity: 1
   maxPartQuantity: 0
-  instruction: "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de v\xEDdeo e empurre por igual at\xE9 a trava fechar. Se a placa tiver conector de energia, ligue o cabo PCIe 6+2 da fonte."
+  instruction: "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de v\xEDdeo e empurre por igual at\xE9 a trava fechar. Depois ligue o cabo PCIe 6+2 (8 pinos) da fonte no conector da placa de v\xEDdeo."
   commonErrorAlert: "O slot de baixo (em vermelho) tem o mesmo tamanho, mas \xE9 x4. E a placa de v\xEDdeo usa o cabo PCIe 6+2, nunca o EPS da CPU."
   referenceImageName: MontAR_Marcador_A
   overlayPrefab: {fileID: 5779155987555827300, guid: 1832f39f830c5ea4589054db20b96ceb, type: 3}
@@ -29,5 +29,5 @@ MonoBehaviour:
   checklistItems:
   - Placa no slot PCIe x16 de cima
   - Trava do slot fechada
-  - Cabo PCIe ligado (se a placa tiver conector de energia)
+  - "Cabo PCIe 6+2 ligado na placa de v\xEDdeo"
   validationReferenceName: 

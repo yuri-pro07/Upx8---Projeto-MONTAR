@@ -151,7 +151,8 @@ namespace MontAR.EditorTools
             new PartSpec { Id = "placa_mae", Name = "Placa-mãe", Icon = "peca_placa_mae", UnitSingular = "placa", UnitPlural = "placas", Min = 1, Max = 1, Default = 1,
                 Description = "Base da montagem: as outras peças encaixam nela. Fica deitada no tapete.",
                 Models = new[] { new ModelSpec("atx_generica_lga1700", "ATX genérica · LGA1700/AM5",
-                    "Modelo de demonstração, com posições aproximadas, até o kit do laboratório ser definido (D5). O soquete acompanha a CPU escolhida.") } },
+                    "Exemplo até definir o kit (D5): áudio HD 7.1 (codec Realtek ALC), rede 2,5 Gb/s, Wi-Fi 6E e Bluetooth 5.3, "
+                    + "USB-C 3.2 e 6 USB-A atrás, 4 slots de RAM. O soquete acompanha a CPU.") } },
             new PartSpec { Id = "cpu", Name = "Processador (CPU)", Icon = "peca_cpu", UnitSingular = "unidade", UnitPlural = "unidades", Min = 1, Max = 1, Default = 1,
                 Description = "Vai no soquete; o triângulo dourado mostra o sentido. Intel e AMD têm etapas próprias de CPU e cooler.",
                 Models = new[]
@@ -161,16 +162,48 @@ namespace MontAR.EditorTools
                 } },
             new PartSpec { Id = "cooler", Name = "Cooler do processador", Icon = "peca_cooler", UnitSingular = "unidade", UnitPlural = "unidades", Min = 1, Max = 1, Default = 1,
                 Description = "Tira o calor da CPU; o cabo vai no conector CPU_FAN.",
-                Models = new[] { new ModelSpec("cooler_ar_4pinos", "Cooler a ar · cabo de 4 pinos") } },
-            new PartSpec { Id = "ram", Name = "Memória RAM", Icon = "peca_ram", UnitSingular = "pente", UnitPlural = "pentes", Min = 1, Max = 2, Default = 2,
-                Description = "1 ou 2 pentes: o roteiro indica os slots certos para cada caso.",
-                Models = new[] { new ModelSpec("ddr5_dimm", "DDR5 · pente DIMM") } },
-            new PartSpec { Id = "ssd", Name = "SSD M.2", Icon = "peca_ssd", UnitSingular = "unidade", UnitPlural = "unidades", Min = 0, Max = 1, Default = 1,
-                Description = "Armazenamento: entra inclinado no conector e prende com parafuso.",
-                Models = new[] { new ModelSpec("ssd_m2_2280_nvme", "M.2 2280 · NVMe") } },
+                Models = new[]
+                {
+                    new ModelSpec("cooler_ar_4pinos", "Torre a ar · 4 heat pipes · 120 mm",
+                        "Heat pipes são os tubos de cobre que levam o calor da base até as aletas: mais tubos, mais calor dissipado. Cabo de 4 pinos (PWM)."),
+                    new ModelSpec("cooler_box", "Cooler box (de fábrica) · sem heat pipes",
+                        "Dissipador baixo de alumínio que vem com algumas CPUs: só para uso leve. Cabo de 4 pinos."),
+                    new ModelSpec("cooler_torre_dupla", "Torre dupla · 6 heat pipes · 2 fans",
+                        "Para CPUs que esquentam mais. É alto: confira a altura máxima do gabinete. Os 2 fans ligam juntos no CPU_FAN (cabo em Y)."),
+                } },
+            new PartSpec { Id = "ram", Name = "Memória RAM", Icon = "peca_ram", UnitSingular = "pente", UnitPlural = "pentes", Min = 1, Max = 4, Default = 2,
+                Description = "Recomendado: 2 pentes iguais (dual channel). A placa aceita até 4; o roteiro indica os slots de cada caso.",
+                Models = new[]
+                {
+                    new ModelSpec("ddr5_dimm", "DDR5 · 16 GB · 5600 MT/s · CL40",
+                        "Capacidade por pente. Frequência (MT/s) e latência (CL) mudam o desempenho, não o encaixe: o roteiro é o mesmo."),
+                    new ModelSpec("ddr5_8gb_4800_cl40", "DDR5 · 8 GB · 4800 MT/s · CL40",
+                        "Capacidade por pente. Use pentes iguais (mesma capacidade, frequência e latência)."),
+                    new ModelSpec("ddr5_32gb_6000_cl30", "DDR5 · 32 GB · 6000 MT/s · CL30",
+                        "Capacidade por pente. Para chegar a 6000 MT/s, ative o perfil XMP/EXPO na BIOS depois de montar."),
+                } },
+            new PartSpec { Id = "ssd", Name = "Armazenamento", Icon = "peca_ssd", UnitSingular = "unidade", UnitPlural = "unidades", Min = 0, Max = 1, Default = 1,
+                Description = "Onde ficam o sistema e os arquivos. Cada tipo liga de um jeito: o roteiro muda com o modelo.",
+                Models = new[]
+                {
+                    new ModelSpec("ssd_m2_2280_nvme", "SSD M.2 2280 · NVMe",
+                        "O mais rápido: encaixa direto na placa, inclinado, e prende com um parafuso. Sem cabos."),
+                    new ModelSpec("ssd_sata_25", "SSD SATA 2,5\"",
+                        "Liga por dois cabos: dados SATA (na placa) e energia SATA (da fonte). Mais lento que o NVMe."),
+                    new ModelSpec("hd_sata_35", "HD SATA 3,5\" · 7200 rpm",
+                        "Disco com peças móveis: mais espaço por preço, mais lento e frágil a batidas. Usa os mesmos cabos do SSD SATA."),
+                } },
             new PartSpec { Id = "gpu", Name = "Placa de vídeo", Icon = "peca_gpu", UnitSingular = "unidade", UnitPlural = "unidades", Min = 0, Max = 1, Default = 1,
-                Description = "Opcional: vai no slot PCIe x16 de cima.",
-                Models = new[] { new ModelSpec("gpu_pcie_x16", "PCIe x16 · 1 cabo de energia PCIe") } },
+                Description = "Opcional: vai no slot PCIe x16 de cima. O tipo define o cabo de energia.",
+                Models = new[]
+                {
+                    new ModelSpec("gpu_pcie_x16", "PCIe x16 · 1 cabo PCIe 8 pinos (6+2)",
+                        "Intermediária: além do slot, recebe energia por um cabo PCIe 6+2 da fonte. Ocupa 2 slots de altura."),
+                    new ModelSpec("gpu_sem_cabo", "PCIe x16 · sem cabo de energia (até 75 W)",
+                        "De entrada: toda a energia vem do próprio slot PCIe. Não tem conector de energia na placa."),
+                    new ModelSpec("gpu_12v2x6", "PCIe x16 · conector 12V-2x6 (16 pinos)",
+                        "Alto desempenho: um cabo único de 16 pinos (12V-2x6/12VHPWR). Exige fonte com esse cabo ou o adaptador da placa. Ocupa 3 slots ou mais."),
+                } },
             new PartSpec { Id = "fonte", Name = "Fonte de alimentação", Icon = "peca_fonte", UnitSingular = "unidade", UnitPlural = "unidades", Min = 1, Max = 1, Default = 1,
                 Description = "Liga a placa pelos cabos de 24 pinos e EPS 8 pinos. Tem chave 110/220 V atrás? Escolha o modelo com chave.",
                 Models = new[]
@@ -247,14 +280,13 @@ namespace MontAR.EditorTools
             WelcomeScreen welcome = BuildWelcome(screens);
             PartsScreen parts = BuildParts(screens);
             StartScreen start = BuildStart(screens);
-            Toast toast;
             AssemblyScreen assembly = BuildAssembly(screens);
             CompletionScreen completion = BuildCompletion(screens);
-            toast = BuildToast(root.transform);
+            HistoryScreen history = BuildHistory(screens);
+            BuildToast(root.transform);
             ConfirmDialog dialog = BuildDialog(root.transform);
-            Bind(assembly, ("toast", toast));
 
-            foreach (UiScreen screen in new UiScreen[] { welcome, parts, start, assembly, completion })
+            foreach (UiScreen screen in new UiScreen[] { welcome, parts, start, assembly, completion, history })
                 screen.gameObject.SetActive(false);
             dialog.gameObject.SetActive(false);
 
@@ -281,13 +313,22 @@ namespace MontAR.EditorTools
             RectTransform content = ScreenRoot(parent, "Tela 1 - Apresentação", UiTheme.Background, out WelcomeScreen screen);
             VLayout(content.gameObject, Pad(64, 64, 36, 40), 0f, TextAnchor.UpperCenter);
 
+            // Topo: "‹ Voltar" no canto esquerdo (longe do Próximo, que ocupa a base) e "Pular" no direito.
             RectTransform top = Node("Topo", content);
-            HLayout(top.gameObject, null, 16f, TextAnchor.MiddleLeft);
+            HLayout(top.gameObject, null, 16f, TextAnchor.MiddleCenter);
             Layout(top.gameObject, preferredHeight: 110f);
-            TextMeshProUGUI logo = Label(top, "Logo", "Mont<color=#16A34A>AR</color>", 60f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+            RectTransform backSlot = Node("Lugar do voltar", top);
+            Layout(backSlot.gameObject, preferredHeight: 88f, preferredWidth: 220f, minWidth: 220f);
+            Button back = MakeButton(backSlot, "Botão Voltar", "‹ Voltar", ButtonStyle.Ghost, out TextMeshProUGUI backLabel, 88f, 36f);
+            Stretch((RectTransform)back.transform);
+            backLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            backLabel.rectTransform.offsetMin = Vector2.zero;
+            TextMeshProUGUI logo = Label(top, "Logo", "Mont<color=#16A34A>AR</color>", 60f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.Center);
             Layout(logo.gameObject, flexibleWidth: 1f);
-            Button skip = MakeButton(top, "Botão Pular", "Pular", ButtonStyle.Ghost, out _, 88f, 36f);
-            Layout(skip.gameObject, preferredHeight: 88f, preferredWidth: 200f);
+            Button skip = MakeButton(top, "Botão Pular", "Pular", ButtonStyle.Ghost, out TextMeshProUGUI skipLabel, 88f, 36f);
+            skipLabel.alignment = TextAlignmentOptions.MidlineRight;
+            skipLabel.rectTransform.offsetMax = Vector2.zero;
+            Layout(skip.gameObject, preferredHeight: 88f, preferredWidth: 220f, minWidth: 220f);
 
             Spacer(content, 1f);
             RectTransform iconRow = Node("Linha do ícone", content);
@@ -309,13 +350,7 @@ namespace MontAR.EditorTools
             dotImage.raycastTarget = false;
             Spacer(content, 0f, 44f);
 
-            RectTransform buttons = Node("Botões", content);
-            HLayout(buttons.gameObject, null, 24f, TextAnchor.MiddleCenter);
-            Layout(buttons.gameObject, preferredHeight: 132f);
-            Button back = MakeButton(buttons, "Botão Voltar", "Voltar", ButtonStyle.Secondary, out _, 132f);
-            Layout(back.gameObject, preferredHeight: 132f, preferredWidth: 300f);
-            Button next = MakeButton(buttons, "Botão Próximo", "Próximo", ButtonStyle.Primary, out TextMeshProUGUI nextLabel, 132f);
-            Layout(next.gameObject, preferredHeight: 132f, flexibleWidth: 1f);
+            Button next = MakeButton(content, "Botão Próximo", "Próximo", ButtonStyle.Primary, out TextMeshProUGUI nextLabel, 132f);
 
             Spacer(content, 0f, 28f);
             TextMeshProUGUI version = Label(content, "Versão (toque longo: diagnóstico)", "versão", 26f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
@@ -352,6 +387,12 @@ namespace MontAR.EditorTools
 
         private static RectTransform Header(Transform content, string title, string subtitle, out Button back)
         {
+            return Header(content, title, subtitle, out back, null, out _);
+        }
+
+        /// <summary>Cabeçalho com "‹ Voltar" e, se <paramref name="actionText"/> vier, um botão à direita na mesma linha.</summary>
+        private static RectTransform Header(Transform content, string title, string subtitle, out Button back, string actionText, out Button action)
+        {
             RectTransform header = Node("Cabeçalho", content);
             VLayout(header.gameObject, Pad(56, 56, 20, 24), 10f);
             RectTransform backRow = Node("Linha do voltar", header);
@@ -361,6 +402,15 @@ namespace MontAR.EditorTools
             backLabel.alignment = TextAlignmentOptions.MidlineLeft;
             backLabel.rectTransform.offsetMin = new Vector2(0f, 0f);
             Layout(back.gameObject, preferredHeight: 88f, preferredWidth: 220f);
+            action = null;
+            if (!string.IsNullOrEmpty(actionText))
+            {
+                Layout(Node("Espaço", backRow).gameObject, flexibleWidth: 1f);
+                action = MakeButton(backRow, "Botão " + actionText, actionText, ButtonStyle.Ghost, out TextMeshProUGUI actionLabel, 88f, 34f);
+                actionLabel.alignment = TextAlignmentOptions.MidlineRight;
+                actionLabel.rectTransform.offsetMax = new Vector2(0f, 0f);
+                Layout(action.gameObject, preferredHeight: 88f, preferredWidth: 360f);
+            }
             Label(header, "Título", title, 62f, UiTheme.TextPrimary, FontStyles.Bold);
             TextMeshProUGUI sub = Label(header, "Subtítulo", subtitle, 34f, UiTheme.TextSecondary);
             sub.lineSpacing = 8f;
@@ -379,7 +429,8 @@ namespace MontAR.EditorTools
         {
             RectTransform content = ScreenRoot(parent, "Tela 2 - Peças", UiTheme.Background, out PartsScreen screen);
             VLayout(content.gameObject, null, 0f);
-            Header(content, "Escolha as peças", "Use ‹ › para trocar o modelo (ex.: Intel ou AMD). O roteiro se ajusta ao que você marcar.", out Button back);
+            Header(content, "Escolha as peças", "Use ‹ › para trocar o modelo (ex.: Intel ou AMD). O roteiro se ajusta ao que você marcar.", out Button back,
+                "Histórico ›", out Button history);
 
             RectTransform list = Scroll(content, "Lista de peças", Pad(40, 40, 8, 40), 22f, out ScrollRect scroll);
             PartRowView row = BuildPartRow(list);
@@ -389,7 +440,7 @@ namespace MontAR.EditorTools
             Button next = MakeButton(footer, "Botão Continuar", "Continuar", ButtonStyle.Primary, out _, 132f);
 
             Bind(screen, ("listContainer", list), ("rowTemplate", row), ("summaryLabel", summary), ("continueButton", next),
-                ("backButton", back), ("scrollRect", scroll));
+                ("backButton", back), ("historyButton", history), ("scrollRect", scroll));
             return screen;
         }
 
@@ -415,6 +466,8 @@ namespace MontAR.EditorTools
             TextMeshProUGUI model = Label(modelRow, "Nome do modelo", "Modelo", 30f, UiTheme.Primary, FontStyles.Bold);
             Layout(model.gameObject, flexibleWidth: 1f);
             Button nextModel = IconButton(modelRow, "Próximo modelo", "›", null, UiTheme.SurfaceMuted, UiTheme.TextPrimary, 56f, 40f, out _);
+            TextMeshProUGUI modelDetail = Label(texts, "Detalhe do modelo", "", 26f, UiTheme.TextSecondary);
+            modelDetail.lineSpacing = 2f;
             TextMeshProUGUI description = Label(texts, "Descrição", "", 28f, UiTheme.TextMuted);
             TextMeshProUGUI requirement = Label(texts, "Obrigatória ou opcional", "obrigatória", 24f, UiTheme.TextMuted, FontStyles.Bold | FontStyles.UpperCase);
 
@@ -429,7 +482,7 @@ namespace MontAR.EditorTools
             TextMeshProUGUI quantity = Label(stepper, "Quantidade escolhida", "1 unidade", 28f, UiTheme.TextSecondary, FontStyles.Bold, TextAlignmentOptions.Center);
 
             var view = row.gameObject.AddComponent<PartRowView>();
-            Bind(view, ("icon", icon), ("nameLabel", name), ("modelLabel", model), ("descriptionLabel", description),
+            Bind(view, ("icon", icon), ("nameLabel", name), ("modelLabel", model), ("modelDetailLabel", modelDetail), ("descriptionLabel", description),
                 ("requirementLabel", requirement), ("previousModelButton", previous), ("nextModelButton", nextModel),
                 ("minusButton", minus), ("plusButton", plus), ("quantityLabel", quantity), ("quantityButtons", buttonsGroup), ("dimmedGroup", group));
             return view;
@@ -458,6 +511,10 @@ namespace MontAR.EditorTools
             TextMeshProUGUI error = Label(participant, "Erro", "", 28f, UiTheme.Danger, FontStyles.Bold);
             error.gameObject.SetActive(false);
 
+            RectTransform labelCard = CardSection(scrollContent, "Nome da montagem", "Nome da montagem (opcional)", out _);
+            TMP_InputField labelInput = TextInput(labelCard, "Campo do nome", "Ex.: Bancada 3 · HP", out _);
+            Label(labelCard, "Dica", "Ajuda a achar a montagem no histórico. Não use o nome do participante.", 28f, UiTheme.TextMuted);
+
             RectTransform modeCard = CardSection(scrollContent, "Modo", "Como ver a instrução", out _);
             RectTransform segmented = Node("Escolha do modo", modeCard);
             Card(segmented.gameObject, UiTheme.SurfaceMuted, 34f);
@@ -477,7 +534,7 @@ namespace MontAR.EditorTools
             RectTransform footer = Footer(content);
             Button startButton = MakeButton(footer, "Botão Iniciar", "Iniciar montagem", ButtonStyle.Primary, out _, 132f);
 
-            Bind(screen, ("participantInput", input), ("participantError", error),
+            Bind(screen, ("participantInput", input), ("participantError", error), ("labelInput", labelInput),
                 ("modeArButton", ar), ("modeArBackground", ar.targetGraphic), ("modeArLabel", arLabel),
                 ("modeDemoButton", demo), ("modeDemoBackground", demo.targetGraphic), ("modeDemoLabel", demoLabel),
                 ("modeNote", note), ("stepsHeader", stepsHeader), ("stepsList", steps), ("startButton", startButton), ("backButton", back));
@@ -497,10 +554,16 @@ namespace MontAR.EditorTools
             RectTransform safe = Stretch(Node("Área segura", root));
             safe.gameObject.AddComponent<SafeAreaFitter>();
 
-            // Topo: etapa, componente, progresso, sair e o botão discreto do observador.
-            RectTransform top = TopBand(Node("Topo", safe), 24f, 214f, 24f, 24f);
+            // Topo: cartão da etapa (com a situação dela) e, embaixo, a linha do modo e do 3D.
+            // A peça 3D fica centralizada entre o fim desta área e o painel da etapa.
+            RectTransform topArea = TopBand(Node("Topo da montagem", safe), 24f, 420f, 24f, 24f);
+            VLayout(topArea.gameObject, null, 16f);
+            FitHeight(topArea.gameObject);
+
+            // Cartão: etapa, componente, progresso, sair, botão discreto do observador e a situação da etapa.
+            RectTransform top = Node("Topo", topArea);
             Card(top.gameObject, UiTheme.SurfaceDark, 40f);
-            VLayout(top.gameObject, Pad(30, 30, 26, 30), 20f);
+            VLayout(top.gameObject, Pad(30, 30, 26, 26), 18f);
             RectTransform row = Node("Linha", top);
             HLayout(row.gameObject, null, 24f, TextAnchor.MiddleLeft);
             Layout(row.gameObject, preferredHeight: 118f);
@@ -513,8 +576,12 @@ namespace MontAR.EditorTools
             component.textWrappingMode = TextWrappingModes.NoWrap;
             component.overflowMode = TextOverflowModes.Ellipsis;
 
-            RectTransform observer = Node("Observador (toque longo)", row);
-            Layout(observer.gameObject, preferredHeight: 60f, preferredWidth: 60f, minHeight: 60f, minWidth: 60f);
+            // Observador: olho dentro do círculo e legenda. Toque curto explica, toque longo registra a ajuda.
+            RectTransform observerGroup = Node("Observador", row);
+            VLayout(observerGroup.gameObject, null, 4f, TextAnchor.MiddleCenter, true, false);
+            Layout(observerGroup.gameObject, preferredWidth: 120f, minWidth: 120f);
+            RectTransform observer = Node("Observador (toque longo)", observerGroup);
+            Layout(observer.gameObject, preferredHeight: 64f, preferredWidth: 64f, minHeight: 64f, minWidth: 64f);
             Img(observer.gameObject, new Color(1f, 1f, 1f, 0.14f), Circle);
             RectTransform fill = Stretch(Node("Progresso", observer));
             Image fillImage = Img(fill.gameObject, UiTheme.Primary, Circle);
@@ -523,6 +590,12 @@ namespace MontAR.EditorTools
             fillImage.fillOrigin = (int)Image.Origin360.Top;
             fillImage.fillAmount = 0f;
             fillImage.raycastTarget = false;
+            RectTransform eye = Stretch(Node("Ícone", observer), 14f, 14f, 14f, 14f);
+            Image eyeImage = Img(eye.gameObject, new Color(1f, 1f, 1f, 0.8f), LoadSprite("icone_observador"));
+            eyeImage.preserveAspect = true;
+            eyeImage.raycastTarget = false;
+            TextMeshProUGUI observerCaption = Label(observerGroup, "Legenda", "observador", 20f, UiTheme.TextOnDarkMuted, FontStyles.Normal, TextAlignmentOptions.Center);
+            observerCaption.textWrappingMode = TextWrappingModes.NoWrap;
             var longPress = observer.gameObject.AddComponent<LongPressButton>();
             Bind(longPress, ("holdSeconds", 1.2f), ("progressFill", fillImage));
 
@@ -535,18 +608,39 @@ namespace MontAR.EditorTools
             progress.fillMethod = Image.FillMethod.Horizontal;
             progress.fillAmount = 0.1f;
 
-            // Situação da etapa e troca de modo.
-            RectTransform status = TopBand(Node("Situação e modo", safe), 258f, 84f, 24f, 24f);
-            HLayout(status.gameObject, null, 14f, TextAnchor.MiddleLeft);
-            RectTransform chip = Node("Situação da etapa", status);
-            Image chipImage = Card(chip.gameObject, UiTheme.StatusLocating, 42f);
-            Layout(chip.gameObject, preferredHeight: 84f, flexibleWidth: 1f, minWidth: 0f, preferredWidth: 0f);
-            TextMeshProUGUI statusLabel = Label(chip, "Texto", "Aponte a câmera para o marcador A", 29f, UiTheme.TextOnDark, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
-            Stretch(statusLabel.rectTransform, 32f, 0f, 24f, 0f);
-            statusLabel.textWrappingMode = TextWrappingModes.Normal;
-            statusLabel.enableAutoSizing = true;
-            statusLabel.fontSizeMin = 22f;
-            statusLabel.fontSizeMax = 29f;
+            // Situação da etapa dentro do cartão do topo, com ícone (antes era um cartão solto sobre a cena).
+            RectTransform chip = Node("Situação da etapa", top);
+            Image chipImage = Card(chip.gameObject, UiTheme.StatusLocating, 30f);
+            chipImage.raycastTarget = false;
+            HLayout(chip.gameObject, Pad(22, 24, 14, 14), 18f, TextAnchor.MiddleLeft);
+            Layout(chip.gameObject, minHeight: 84f);
+            RectTransform statusIconRect = Node("Ícone", chip);
+            Layout(statusIconRect.gameObject, preferredHeight: 52f, preferredWidth: 52f, minHeight: 52f, minWidth: 52f);
+            Image statusIcon = Img(statusIconRect.gameObject, UiTheme.TextOnDark, LoadSprite("icone_cubo"));
+            statusIcon.preserveAspect = true;
+            statusIcon.raycastTarget = false;
+            TextMeshProUGUI statusLabel = Label(chip, "Texto", "Aponte a câmera para o marcador A", 30f, UiTheme.TextOnDark, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
+            Layout(statusLabel.gameObject, flexibleWidth: 1f);
+
+            // Linha do modo: aviso do 3D (com cadeado) à esquerda e a troca Câmera/3D à direita.
+            RectTransform status = Node("Modo e 3D", topArea);
+            HLayout(status.gameObject, null, 14f, TextAnchor.MiddleRight);
+            Layout(status.gameObject, preferredHeight: 84f, minHeight: 84f);
+            RectTransform hint = Node("Aviso do 3D (cadeado)", status);
+            Image hintBackground = Card(hint.gameObject, new Color(0f, 0f, 0f, 0.5f), 42f);
+            hintBackground.raycastTarget = false;
+            HLayout(hint.gameObject, Pad(22, 22, 8, 8), 14f, TextAnchor.MiddleLeft);
+            Layout(hint.gameObject, preferredHeight: 84f, flexibleWidth: 1f, minWidth: 0f, preferredWidth: 0f);
+            RectTransform lockRect = Node("Cadeado", hint);
+            Layout(lockRect.gameObject, preferredHeight: 44f, preferredWidth: 44f, minHeight: 44f, minWidth: 44f);
+            Image lockIcon = Img(lockRect.gameObject, UiTheme.TextOnDark, LoadSprite("icone_cadeado_aberto"));
+            lockIcon.preserveAspect = true;
+            lockIcon.raycastTarget = false;
+            TextMeshProUGUI lockLabel = Label(hint, "Texto", "3D livre", 24f, UiTheme.TextOnDark, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
+            Layout(lockLabel.gameObject, flexibleWidth: 1f);
+            lockLabel.enableAutoSizing = true;
+            lockLabel.fontSizeMin = 18f;
+            lockLabel.fontSizeMax = 24f;
 
             RectTransform modes = Node("Modo", status);
             Card(modes.gameObject, UiTheme.SurfaceDark, 42f);
@@ -559,20 +653,12 @@ namespace MontAR.EditorTools
             arLabel.color = UiTheme.TextOnDark;
             demoLabel.color = UiTheme.TextOnDark;
 
-            RectTransform hint = TopBand(Node("Dica da demonstração 3D", safe), 358f, 64f, 24f, 24f);
-            HLayout(hint.gameObject, null, 0f, TextAnchor.MiddleCenter, false, false);
-            RectTransform hintPill = Node("Fundo", hint);
-            hintPill.sizeDelta = new Vector2(940f, 64f);
-            Card(hintPill.gameObject, new Color(0f, 0f, 0f, 0.45f), 32f).raycastTarget = false;
-            TextMeshProUGUI hintLabel = Label(hintPill, "Texto", "Arraste para girar · pinça para aproximar · toque duplo centraliza", 26f, UiTheme.TextOnDark, FontStyles.Normal, TextAlignmentOptions.Center);
-            Stretch(hintLabel.rectTransform, 20f, 0f, 20f, 0f);
-            hintLabel.textWrappingMode = TextWrappingModes.NoWrap;
-
-            // Painel da etapa (Guia).
+            // Painel da etapa (Guia). Arrastar para cima/baixo mostra ou esconde a instrução.
             RectTransform sheet = BottomBand(Node("Painel da etapa", safe), 24f, 24f, 24f);
             Card(sheet.gameObject, UiTheme.Surface, 44f);
             VLayout(sheet.gameObject, Pad(44, 44, 10, 40), 18f);
             FitHeight(sheet.gameObject);
+            var sheetDrag = sheet.gameObject.AddComponent<SheetDragHandler>();
 
             RectTransform handle = Node("Esconder instrução", sheet);
             Image handleImage = Img(handle.gameObject, new Color(1f, 1f, 1f, 0f));
@@ -587,7 +673,7 @@ namespace MontAR.EditorTools
             grabber.sizeDelta = new Vector2(110f, 10f);
             Card(grabber.gameObject, UiTheme.Border, 5f).raycastTarget = false;
             Layout(grabber.gameObject, preferredHeight: 10f, preferredWidth: 110f);
-            TextMeshProUGUI collapseLabel = Label(handle, "Texto", "Esconder instrução", 24f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
+            TextMeshProUGUI collapseLabel = Label(handle, "Texto", "Arraste para baixo para esconder a instrução", 24f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
             Layout(collapseLabel.gameObject, preferredHeight: 34f);
 
             TextMeshProUGUI title = Label(sheet, "Título", "Título da etapa", 46f, UiTheme.TextPrimary, FontStyles.Bold);
@@ -600,6 +686,21 @@ namespace MontAR.EditorTools
             VLayout(alert.gameObject, Pad(30, 30, 24, 26), 0f);
             TextMeshProUGUI alertLabel = Label(alert, "Texto", "", 31f, UiTheme.AlertText);
             alertLabel.lineSpacing = 6f;
+
+            // Erro da validação: vermelho, grande e logo acima do botão. Fica fora dos detalhes (não some ao esconder).
+            RectTransform errorBox = Node("Erro da validação", sheet);
+            Card(errorBox.gameObject, UiTheme.Danger, 28f);
+            HLayout(errorBox.gameObject, Pad(28, 28, 24, 26), 20f, TextAnchor.UpperLeft);
+            RectTransform errorIconRect = Node("Ícone", errorBox);
+            Layout(errorIconRect.gameObject, preferredHeight: 52f, preferredWidth: 52f, minHeight: 52f, minWidth: 52f);
+            Image errorIcon = Img(errorIconRect.gameObject, Color.white, LoadSprite("icone_alerta"));
+            errorIcon.preserveAspect = true;
+            errorIcon.raycastTarget = false;
+            TextMeshProUGUI errorLabel = Label(errorBox, "Texto", "", 34f, Color.white);
+            errorLabel.lineSpacing = 6f;
+            Layout(errorLabel.gameObject, flexibleWidth: 1f);
+            errorBox.gameObject.SetActive(false);
+
             Button validate = MakeButton(sheet, "Botão Validar", "Validar etapa", ButtonStyle.Primary, out TextMeshProUGUI validateLabel, 128f);
 
             // Painel da validação (Valida).
@@ -624,17 +725,24 @@ namespace MontAR.EditorTools
             Layout(confirm.gameObject, preferredHeight: 128f, flexibleWidth: 1f);
             validation.gameObject.SetActive(false);
 
+            // Aviso curto ("Etapa concluída!") logo acima do painel; a tela reposiciona a cada quadro.
+            Toast notice = BuildToastBand(safe, "Aviso da etapa", false);
+
             Bind(screen,
                 ("exitButton", exit), ("stepCounter", counter), ("componentLabel", component), ("progressFill", progress), ("observerButton", longPress),
-                ("statusChip", chipImage), ("statusLabel", statusLabel),
+                ("statusRow", chip.gameObject), ("statusChip", chipImage), ("statusIcon", statusIcon), ("statusLabel", statusLabel),
+                ("locatingSprite", LoadSprite("icone_aponta")), ("guidingSprite", LoadSprite("icone_guia")), ("demoSprite", LoadSprite("icone_cubo")),
                 ("modeArButton", ar), ("modeArBackground", ar.targetGraphic), ("modeArLabel", arLabel),
                 ("modeDemoButton", demo), ("modeDemoBackground", demo.targetGraphic), ("modeDemoLabel", demoLabel),
-                ("stepSheet", sheet.gameObject), ("collapseButton", collapse), ("collapseLabel", collapseLabel), ("titleLabel", title),
+                ("viewHint", hint.gameObject), ("viewHintBackground", hintBackground), ("lockIcon", lockIcon), ("lockLabel", lockLabel),
+                ("lockedSprite", LoadSprite("icone_cadeado_fechado")), ("unlockedSprite", LoadSprite("icone_cadeado_aberto")), ("topArea", topArea),
+                ("stepSheet", sheet.gameObject), ("sheetDrag", sheetDrag), ("collapseButton", collapse), ("collapseLabel", collapseLabel), ("titleLabel", title),
                 ("detailsGroup", details.gameObject), ("instructionLabel", instruction), ("alertBox", alert.gameObject), ("alertLabel", alertLabel),
+                ("errorBox", errorBox.gameObject), ("errorLabel", errorLabel),
                 ("validateButton", validate), ("validateLabel", validateLabel),
                 ("validationSheet", validation.gameObject), ("validationHint", validationHint), ("checklistContainer", checklist),
                 ("checklistTemplate", item), ("confirmButton", confirm), ("confirmLabel", confirmLabel), ("cancelButton", cancel),
-                ("orbitSurface", orbit.gameObject), ("demoHint", hint.gameObject));
+                ("orbitSurface", orbit.gameObject), ("toast", notice));
             return screen;
         }
 
@@ -669,13 +777,67 @@ namespace MontAR.EditorTools
             TextMeshProUGUI file = Label(scroll, "Arquivo", "", 26f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Top);
 
             RectTransform footer = Footer(content);
-            Button again = MakeButton(footer, "Botão Nova montagem", "Nova montagem", ButtonStyle.Primary, out _, 128f);
-            Button home = MakeButton(footer, "Botão Início", "Voltar ao início", ButtonStyle.Secondary, out _, 112f);
+            Button history = MakeButton(footer, "Botão Histórico", "Ver histórico de montagens", ButtonStyle.Primary, out _, 128f);
+            Button again = MakeButton(footer, "Botão Nova montagem", "Nova montagem", ButtonStyle.Secondary, out _, 112f);
 
             Bind(screen, ("subtitleLabel", subtitle), ("timeValue", time), ("stepsValue", steps), ("failuresValue", failures),
                 ("interventionsValue", interventions), ("stepTimesList", times), ("fileLabel", file),
-                ("newSessionButton", again), ("homeButton", home));
+                ("newSessionButton", again), ("historyButton", history));
             return screen;
+        }
+
+        private static HistoryScreen BuildHistory(Transform parent)
+        {
+            RectTransform content = ScreenRoot(parent, "Tela 6 - Histórico", UiTheme.Background, out HistoryScreen screen);
+            VLayout(content.gameObject, null, 0f);
+            Header(content, "Histórico de montagens", "Cada montagem concluída neste aparelho: nome, tempo, erros apontados e etapas.", out Button back);
+
+            RectTransform list = Scroll(content, "Lista de montagens", Pad(40, 40, 8, 40), 22f, out ScrollRect scroll);
+            TextMeshProUGUI empty = Label(list, "Vazio", "Nenhuma montagem concluída ainda. Quando você terminar uma, ela aparece aqui.", 32f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
+            HistoryEntryView entry = BuildHistoryEntry(list);
+
+            RectTransform footer = Footer(content);
+            TextMeshProUGUI summary = Label(footer, "Resumo", "", 30f, UiTheme.TextSecondary, FontStyles.Normal, TextAlignmentOptions.Center);
+            Button again = MakeButton(footer, "Botão Nova montagem", "Nova montagem", ButtonStyle.Primary, out _, 128f);
+
+            Bind(screen, ("listContainer", list), ("entryTemplate", entry), ("emptyLabel", empty), ("summaryLabel", summary),
+                ("backButton", back), ("newSessionButton", again), ("scrollRect", scroll));
+            return screen;
+        }
+
+        private static HistoryEntryView BuildHistoryEntry(Transform parent)
+        {
+            RectTransform card = Node("Montagem (modelo)", parent);
+            Card(card.gameObject, UiTheme.Surface, 36f);
+            VLayout(card.gameObject, Pad(40, 40, 32, 28), 14f);
+
+            RectTransform badgeRow = Node("Linha do selo", card);
+            HLayout(badgeRow.gameObject, null, 0f, TextAnchor.MiddleLeft);
+            RectTransform badge = Node("Recém-concluída", badgeRow);
+            Card(badge.gameObject, UiTheme.PrimarySoft, 22f).raycastTarget = false;
+            HLayout(badge.gameObject, Pad(18, 18, 6, 6), 0f, TextAnchor.MiddleCenter);
+            Label(badge, "Texto", "RECÉM-CONCLUÍDA", 22f, UiTheme.Primary, FontStyles.Bold, TextAlignmentOptions.Center).textWrappingMode = TextWrappingModes.NoWrap;
+
+            RectTransform head = Node("Cabeçalho", card);
+            HLayout(head.gameObject, null, 24f, TextAnchor.MiddleLeft);
+            Badge(head, "Ícone", LoadSprite("icone_historico"), UiTheme.PrimarySoft, UiTheme.Primary, 96f, 0.6f);
+            RectTransform texts = Node("Textos", head);
+            VLayout(texts.gameObject, null, 4f);
+            Layout(texts.gameObject, flexibleWidth: 1f);
+            TextMeshProUGUI name = Label(texts, "Nome", "Montagem", 40f, UiTheme.TextPrimary, FontStyles.Bold);
+            TextMeshProUGUI meta = Label(texts, "Data e participante", "", 26f, UiTheme.TextMuted);
+
+            TextMeshProUGUI stats = Label(card, "Resumo", "", 30f, UiTheme.TextSecondary);
+            TextMeshProUGUI steps = Label(card, "Etapas", "", 28f, UiTheme.TextSecondary);
+            steps.lineSpacing = 14f;
+            Button toggle = MakeButton(card, "Botão Ver etapas", "Ver etapas", ButtonStyle.Ghost, out TextMeshProUGUI toggleLabel, 72f, 30f);
+            toggleLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            toggleLabel.rectTransform.offsetMin = new Vector2(0f, 0f);
+
+            var view = card.gameObject.AddComponent<HistoryEntryView>();
+            Bind(view, ("nameLabel", name), ("metaLabel", meta), ("statsLabel", stats), ("stepsLabel", steps),
+                ("toggleButton", toggle), ("toggleLabel", toggleLabel), ("latestBadge", badgeRow.gameObject));
+            return view;
         }
 
         private static TextMeshProUGUI Stat(Transform grid, string label)
@@ -688,9 +850,27 @@ namespace MontAR.EditorTools
             return value;
         }
 
-        private static Toast BuildToast(Transform parent)
+        private static Toast BuildToast(Transform parent) => BuildToastBand(parent, "Aviso", true);
+
+        /// <summary>
+        /// Aviso curto. <paramref name="atTop"/>: faixa fixa no alto (menus). Senão, presa à base e
+        /// reposicionada pela tela da montagem logo acima do painel da etapa.
+        /// </summary>
+        private static Toast BuildToastBand(Transform parent, string name, bool atTop)
         {
-            RectTransform band = TopBand(Node("Aviso", parent), 470f, 120f, 80f, 80f);
+            RectTransform band = Node(name, parent);
+            if (atTop)
+            {
+                TopBand(band, 470f, 120f, 80f, 80f);
+            }
+            else
+            {
+                band.anchorMin = new Vector2(0f, 0f);
+                band.anchorMax = new Vector2(1f, 0f);
+                band.pivot = new Vector2(0.5f, 0f);
+                band.offsetMin = new Vector2(64f, 600f);
+                band.offsetMax = new Vector2(-64f, 720f);
+            }
             band.gameObject.AddComponent<CanvasGroup>();
             Card(band.gameObject, new Color(0.09f, 0.09f, 0.1f, 0.92f), 36f).raycastTarget = false;
             VLayout(band.gameObject, Pad(36, 36, 22, 22), 0f, TextAnchor.MiddleCenter);
@@ -778,18 +958,27 @@ namespace MontAR.EditorTools
             Camera arCamera = Object.FindAnyObjectByType<ARCameraManager>()?.GetComponent<Camera>();
             if (arCamera == null)
                 throw new InvalidOperationException("Câmera da RA (ARCameraManager) não encontrada na cena.");
+            // A sessão do ARCore pede a câmera ao ligar: começa desligada e o AppController liga
+            // depois de explicar e pedir a permissão (ou na hora, se ela já foi dada).
+            ARSession arSession = Object.FindAnyObjectByType<ARSession>(FindObjectsInactive.Include);
+            if (arSession == null)
+                throw new InvalidOperationException("ARSession não encontrada na cena.");
+            arSession.enabled = false;
+            EditorUtility.SetDirty(arSession);
 
             Bind(flow, ("procedure", procedure), ("imageTracking", tracking), ("contentManager", content), ("demoStage", stage), ("metricsLogger", logger));
             Bind(ui.GetComponentInChildren<DemoOrbitInput>(true), ("stage", stage));
+            Bind(ui.GetComponentInChildren<AssemblyScreen>(true), ("demoStage", stage));
             Bind(app,
-                ("flowController", flow), ("catalog", catalog), ("arCamera", arCamera), ("demoStage", stage),
+                ("flowController", flow), ("catalog", catalog), ("arCamera", arCamera), ("arSession", arSession), ("demoStage", stage),
                 ("welcomeScreen", ui.GetComponentInChildren<WelcomeScreen>(true)),
                 ("partsScreen", ui.GetComponentInChildren<PartsScreen>(true)),
                 ("startScreen", ui.GetComponentInChildren<StartScreen>(true)),
                 ("assemblyScreen", ui.GetComponentInChildren<AssemblyScreen>(true)),
                 ("completionScreen", ui.GetComponentInChildren<CompletionScreen>(true)),
+                ("historyScreen", ui.GetComponentInChildren<HistoryScreen>(true)),
                 ("dialog", ui.GetComponentInChildren<ConfirmDialog>(true)),
-                ("toast", ui.GetComponentInChildren<Toast>(true)),
+                ("toast", ui.transform.Find("Aviso").GetComponent<Toast>()),
                 ("diagnosticsHud", hud),
                 ("diagnosticsToggle", ui.GetComponentInChildren<WelcomeScreen>(true).GetComponentInChildren<LongPressButton>(true)));
 

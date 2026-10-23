@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_gpu_pcie_12v2x6
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: gpu_pcie_12v2x6
+  title: "Encaixe a placa de v\xEDdeo e o cabo 12V-2x6"
+  componentName: "Placa de v\xEDdeo com conector 12V-2x6"
+  requiredPartId: gpu
+  requiredModelId: gpu_12v2x6
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos e empurre por igual at\xE9 a trava fechar. Depois ligue o cabo de 16 pinos 12V-2x6 (ou o adaptador que veio com a placa) e empurre at\xE9 n\xE3o sobrar fresta."
+  commonErrorAlert: "Cabo 12V-2x6 meio encaixado esquenta e pode derreter: empurre at\xE9 o fim e n\xE3o dobre o cabo logo na sa\xEDda do conector. O slot de baixo (em vermelho) \xE9 x4."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 8370325604689628514, guid: 2a48963a4dec907449229ff8088ff5f0, type: 3}
+  overlayPositionOffset: {x: -0.042000003, y: 0.0122, z: -0.26700002}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - Placa no slot PCIe x16 de cima
+  - Trava do slot fechada
+  - "Cabo 12V-2x6 encaixado at\xE9 o fim, sem fresta"
+  - Cabo sem dobra forte perto do conector
+  validationReferenceName: 

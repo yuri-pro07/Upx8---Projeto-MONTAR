@@ -8,6 +8,7 @@ namespace MontAR
     /// <summary>
     /// Botão que só dispara se ficar pressionado por um tempo. Usado no botão discreto do
     /// observador, para um toque acidental do participante não virar intervenção no CSV.
+    /// Um toque curto dispara <see cref="OnShortPress"/> (ex.: explicar para que serve o botão).
     /// </summary>
     public class LongPressButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
@@ -15,11 +16,15 @@ namespace MontAR
         [Tooltip("Imagem preenchida (Filled) que mostra o progresso do toque longo. Opcional.")]
         [SerializeField] private Image progressFill;
         [SerializeField] private UnityEvent onLongPress = new UnityEvent();
+        [SerializeField] private UnityEvent onShortPress = new UnityEvent();
 
         private float pressedAt = -1f;
         private bool fired;
 
         public UnityEvent OnLongPress => onLongPress;
+
+        /// <summary>Soltou antes do tempo do toque longo (sem sair do botão).</summary>
+        public UnityEvent OnShortPress => onShortPress;
 
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -27,7 +32,13 @@ namespace MontAR
             fired = false;
         }
 
-        public void OnPointerUp(PointerEventData eventData) => Release();
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            bool shortPress = pressedAt >= 0f && !fired;
+            Release();
+            if (shortPress)
+                onShortPress.Invoke();
+        }
 
         public void OnPointerExit(PointerEventData eventData) => Release();
 

@@ -12,7 +12,8 @@ namespace MontAR.Tests
 {
     /// <summary>
     /// Teste de ponta a ponta na cena real (MontAR.unity), no modo demonstração 3D: apresentação →
-    /// peças → início → todas as etapas (com uma validação reprovada) → conclusão, conferindo o CSV.
+    /// peças → início → todas as etapas (com uma validação reprovada) → conclusão → histórico,
+    /// conferindo o CSV e o histórico salvo.
     /// Salva capturas das telas em Builds/Screens (fora do git) para revisão visual.
     /// </summary>
     public class AppFlowSmokeTests
@@ -22,6 +23,8 @@ namespace MontAR.Tests
 
         private string progressPath;
         private string progressBackup;
+        private string historyPath;
+        private string historyBackup;
         private string createdCsv;
         private AppController app;
         private StepFlowController flow;
@@ -36,6 +39,10 @@ namespace MontAR.Tests
             progressBackup = File.Exists(progressPath) ? File.ReadAllText(progressPath) : null;
             if (progressBackup != null)
                 File.Delete(progressPath);
+            historyPath = Path.Combine(Application.persistentDataPath, AssemblyHistoryStore.FileName);
+            historyBackup = File.Exists(historyPath) ? File.ReadAllText(historyPath) : null;
+            if (historyBackup != null)
+                File.Delete(historyPath);
             createdCsv = null;
         }
 
@@ -46,6 +53,10 @@ namespace MontAR.Tests
                 File.Delete(progressPath);
             if (progressBackup != null)
                 File.WriteAllText(progressPath, progressBackup);
+            if (File.Exists(historyPath))
+                File.Delete(historyPath);
+            if (historyBackup != null)
+                File.WriteAllText(historyPath, historyBackup);
             if (createdCsv != null && File.Exists(createdCsv))
                 File.Delete(createdCsv);
         }
@@ -98,6 +109,24 @@ namespace MontAR.Tests
             Assert.AreEqual(1, app.Selection.GetQuantity("ram"));
             Click("Mais", "Peça ram");
             Assert.AreEqual(2, app.Selection.GetQuantity("ram"));
+            Click("Mais", "Peça ram");
+            Click("Mais", "Peça ram");
+            Assert.AreEqual(4, app.Selection.GetQuantity("ram"), "a placa aceita até 4 pentes");
+            StringAssert.Contains("9 etapas", summary.text, "com 4 pentes a etapa da RAM troca, não soma");
+            Click("Menos", "Peça ram");
+            Click("Menos", "Peça ram");
+            Assert.AreEqual(2, app.Selection.GetQuantity("ram"));
+            Click("Próximo modelo", "Peça ssd");
+            Assert.AreEqual("ssd_sata_25", app.Selection.GetModelId("ssd"));
+            StringAssert.Contains("9 etapas", summary.text, "SSD SATA troca a etapa do M.2");
+            Click("Próximo modelo", "Peça ssd");
+            Click("Próximo modelo", "Peça ssd");
+            Assert.AreEqual("ssd_m2_2280_nvme", app.Selection.GetModelId("ssd"));
+            Click("Próximo modelo", "Peça gpu");
+            Assert.AreEqual("gpu_sem_cabo", app.Selection.GetModelId("gpu"));
+            StringAssert.Contains("9 etapas", summary.text);
+            Click("Modelo anterior", "Peça gpu");
+            Assert.AreEqual("gpu_pcie_x16", app.Selection.GetModelId("gpu"));
             Click("Próximo modelo", "Peça cpu");
             Assert.AreEqual("amd_am5", app.Selection.GetModelId("cpu"));
             StringAssert.Contains("9 etapas", summary.text, "com AMD as etapas da CPU e do cooler trocam, não somam");
@@ -118,6 +147,7 @@ namespace MontAR.Tests
             Click("Botão Iniciar");
             Assert.IsInstanceOf<StartScreen>(app.CurrentScreen, "sem código não começa");
             code.text = "T01";
+            Find<TMP_InputField>("Campo do nome").text = "  Bancada   de teste ";
             Click("Modo 3D");
             yield return null;
             yield return Capture("04_inicio");
@@ -161,6 +191,16 @@ namespace MontAR.Tests
                     yield return null;
                     Assert.AreEqual(StepPhase.Guiding, flow.Flow.Phase);
                     Assert.AreEqual(0, flow.Flow.CompletedCount);
+
+                    // O erro fica perto do botão, cita o que faltou e não some ao esconder a instrução.
+                    var assembly = (AssemblyScreen)app.CurrentScreen;
+                    StringAssert.Contains("Etapa não validada", assembly.ValidationError);
+                    Assert.IsTrue(Find<RectTransform>("Erro da validação").gameObject.activeInHierarchy);
+                    yield return Capture("14b_erro_validacao");
+                    assembly.SetCollapsed(true);
+                    yield return null;
+                    Assert.IsTrue(Find<RectTransform>("Erro da validação").gameObject.activeInHierarchy, "erro visível com a instrução escondida");
+                    assembly.SetCollapsed(false);
                     failedOnce = true;
                     Click("Botão Validar");
                     yield return null;
@@ -186,6 +226,19 @@ namespace MontAR.Tests
             StringAssert.Contains("validation_failed", csv);
             StringAssert.Contains("session_completed", csv);
             Assert.AreEqual(9, csv.Split('\n').Count(line => line.Contains(",step_completed,")));
+            Assert.IsFalse(csv.Contains("Bancada"), "o nome da montagem fica só no histórico, não no CSV");
+
+            // 6. A conclusão leva ao histórico (não volta para a apresentação).
+            Click("Botão Histórico");
+            yield return null;
+            Assert.IsInstanceOf<HistoryScreen>(app.CurrentScreen);
+            Assert.AreEqual(1, ((HistoryScreen)app.CurrentScreen).EntryCount);
+            var saved = app.History.Load();
+            Assert.AreEqual(1, saved.Count);
+            Assert.AreEqual("Bancada de teste", saved[0].label);
+            Assert.AreEqual(9, saved[0].completedSteps);
+            Assert.AreEqual(1, saved[0].failedValidations);
+            yield return Capture("16_historico");
         }
 
         // ------------------------------------------------------------ utilitários

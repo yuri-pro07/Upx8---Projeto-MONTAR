@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_hd_sata
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: hd_sata
+  title: Ligue o HD SATA
+  componentName: HD SATA 3,5"
+  requiredPartId: ssd
+  requiredModelId: hd_sata_35
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "O HD tem pe\xE7as m\xF3veis por dentro: segure pelas laterais (marcadores azuis), sem tocar na placa de circuito de baixo, e apoie devagar no tapete, \xE0 direita da placa. Ligue o cabo de dados SATA (o fino, em L) numa porta SATA da borda direita da placa e no HD. Depois ligue no HD o cabo de energia SATA da fonte (o mais largo)."
+  commonErrorAlert: "Batida ou queda estraga o HD, mesmo desligado. E os conectores em L s\xF3 entram num sentido: n\xE3o force."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 7607874980080403365, guid: 26a68278c5d9cfd4492a78c284a9ac48, type: 3}
+  overlayPositionOffset: {x: 0.106, y: 0.0082, z: -0.325}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - HD apoiado no tapete, sem bater
+  - Cabo de dados SATA no HD e numa porta SATA da placa
+  - Cabo de energia SATA da fonte ligado no HD
+  validationReferenceName: 

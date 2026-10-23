@@ -17,6 +17,8 @@ namespace MontAR
         [SerializeField] private TMP_Text summaryLabel;
         [SerializeField] private Button continueButton;
         [SerializeField] private Button backButton;
+        [Tooltip("Abre o histórico de montagens do aparelho. Opcional.")]
+        [SerializeField] private Button historyButton;
         [SerializeField] private ScrollRect scrollRect;
 
         private readonly List<PartRowView> rows = new List<PartRowView>();
@@ -25,11 +27,14 @@ namespace MontAR
 
         public event Action Continued;
         public event Action Back;
+        public event Action HistoryRequested;
 
         private void Awake()
         {
             continueButton.onClick.AddListener(() => Continued?.Invoke());
             backButton.onClick.AddListener(() => Back?.Invoke());
+            if (historyButton != null)
+                historyButton.onClick.AddListener(() => HistoryRequested?.Invoke());
             rowTemplate.gameObject.SetActive(false);
         }
 

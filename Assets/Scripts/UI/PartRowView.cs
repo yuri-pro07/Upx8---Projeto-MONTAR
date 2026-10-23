@@ -5,12 +5,14 @@ using UnityEngine.UI;
 
 namespace MontAR
 {
-    /// <summary>Linha da tela de peças: componente, modelo escolhido e quantidade.</summary>
+    /// <summary>Linha da tela de peças: componente, modelo escolhido (com o detalhe dele) e quantidade.</summary>
     public class PartRowView : MonoBehaviour
     {
         [SerializeField] private Image icon;
         [SerializeField] private TMP_Text nameLabel;
         [SerializeField] private TMP_Text modelLabel;
+        [Tooltip("Detalhe do modelo escolhido (ex.: heat pipes do cooler, rede da placa-mãe). Opcional.")]
+        [SerializeField] private TMP_Text modelDetailLabel;
         [SerializeField] private TMP_Text descriptionLabel;
         [SerializeField] private TMP_Text requirementLabel;
         [SerializeField] private Button previousModelButton;
@@ -82,6 +84,12 @@ namespace MontAR
             int quantity = selection.GetQuantity(part.PartId);
             PartModel model = part.FindModel(selection.GetModelId(part.PartId));
             modelLabel.text = model != null ? model.DisplayName : "—";
+            if (modelDetailLabel != null)
+            {
+                bool hasDetail = model != null && !string.IsNullOrEmpty(model.Detail);
+                modelDetailLabel.text = hasDetail ? model.Detail : string.Empty;
+                modelDetailLabel.gameObject.SetActive(hasDetail);
+            }
             quantityLabel.text = quantity == 0 ? "não vai" : $"{quantity} {part.UnitFor(quantity)}";
 
             // Quantidade fixa (ex.: 1 placa-mãe): botões invisíveis, mas no layout (desativá-los encolhe a coluna).

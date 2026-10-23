@@ -25,7 +25,7 @@ MonoBehaviour:
     models:
     - modelId: atx_generica_lga1700
       displayName: "ATX gen\xE9rica \xB7 LGA1700/AM5"
-      detail: "Modelo de demonstra\xE7\xE3o, com posi\xE7\xF5es aproximadas, at\xE9 o kit do laborat\xF3rio ser definido (D5). O soquete acompanha a CPU escolhida."
+      detail: "Exemplo at\xE9 definir o kit (D5): \xE1udio HD 7.1 (codec Realtek ALC), rede 2,5 Gb/s, Wi-Fi 6E e Bluetooth 5.3, USB-C 3.2 e 6 USB-A atr\xE1s, 4 slots de RAM. O soquete acompanha a CPU."
   - partId: cpu
     displayName: Processador (CPU)
     description: "Vai no soquete; o tri\xE2ngulo dourado mostra o sentido. Intel e AMD t\xEAm etapas pr\xF3prias de CPU e cooler."
@@ -53,24 +53,36 @@ MonoBehaviour:
     defaultQuantity: 1
     models:
     - modelId: cooler_ar_4pinos
-      displayName: "Cooler a ar \xB7 cabo de 4 pinos"
-      detail: 
+      displayName: "Torre a ar \xB7 4 heat pipes \xB7 120 mm"
+      detail: "Heat pipes s\xE3o os tubos de cobre que levam o calor da base at\xE9 as aletas: mais tubos, mais calor dissipado. Cabo de 4 pinos (PWM)."
+    - modelId: cooler_box
+      displayName: "Cooler box (de f\xE1brica) \xB7 sem heat pipes"
+      detail: "Dissipador baixo de alum\xEDnio que vem com algumas CPUs: s\xF3 para uso leve. Cabo de 4 pinos."
+    - modelId: cooler_torre_dupla
+      displayName: "Torre dupla \xB7 6 heat pipes \xB7 2 fans"
+      detail: "Para CPUs que esquentam mais. \xC9 alto: confira a altura m\xE1xima do gabinete. Os 2 fans ligam juntos no CPU_FAN (cabo em Y)."
   - partId: ram
     displayName: "Mem\xF3ria RAM"
-    description: '1 ou 2 pentes: o roteiro indica os slots certos para cada caso.'
+    description: "Recomendado: 2 pentes iguais (dual channel). A placa aceita at\xE9 4; o roteiro indica os slots de cada caso."
     icon: {fileID: 21300000, guid: 4b103703f3e65014caebb7e4dfd3c720, type: 3}
     unitSingular: pente
     unitPlural: pentes
     minQuantity: 1
-    maxQuantity: 2
+    maxQuantity: 4
     defaultQuantity: 2
     models:
     - modelId: ddr5_dimm
-      displayName: "DDR5 \xB7 pente DIMM"
-      detail: 
+      displayName: "DDR5 \xB7 16 GB \xB7 5600 MT/s \xB7 CL40"
+      detail: "Capacidade por pente. Frequ\xEAncia (MT/s) e lat\xEAncia (CL) mudam o desempenho, n\xE3o o encaixe: o roteiro \xE9 o mesmo."
+    - modelId: ddr5_8gb_4800_cl40
+      displayName: "DDR5 \xB7 8 GB \xB7 4800 MT/s \xB7 CL40"
+      detail: "Capacidade por pente. Use pentes iguais (mesma capacidade, frequ\xEAncia e lat\xEAncia)."
+    - modelId: ddr5_32gb_6000_cl30
+      displayName: "DDR5 \xB7 32 GB \xB7 6000 MT/s \xB7 CL30"
+      detail: Capacidade por pente. Para chegar a 6000 MT/s, ative o perfil XMP/EXPO na BIOS depois de montar.
   - partId: ssd
-    displayName: SSD M.2
-    description: 'Armazenamento: entra inclinado no conector e prende com parafuso.'
+    displayName: Armazenamento
+    description: 'Onde ficam o sistema e os arquivos. Cada tipo liga de um jeito: o roteiro muda com o modelo.'
     icon: {fileID: 21300000, guid: 7074859d22a9d884c9c450bb2a260e7a, type: 3}
     unitSingular: unidade
     unitPlural: unidades
@@ -79,11 +91,17 @@ MonoBehaviour:
     defaultQuantity: 1
     models:
     - modelId: ssd_m2_2280_nvme
-      displayName: "M.2 2280 \xB7 NVMe"
-      detail: 
+      displayName: "SSD M.2 2280 \xB7 NVMe"
+      detail: "O mais r\xE1pido: encaixa direto na placa, inclinado, e prende com um parafuso. Sem cabos."
+    - modelId: ssd_sata_25
+      displayName: SSD SATA 2,5"
+      detail: 'Liga por dois cabos: dados SATA (na placa) e energia SATA (da fonte). Mais lento que o NVMe.'
+    - modelId: hd_sata_35
+      displayName: "HD SATA 3,5\" \xB7 7200 rpm"
+      detail: "Disco com pe\xE7as m\xF3veis: mais espa\xE7o por pre\xE7o, mais lento e fr\xE1gil a batidas. Usa os mesmos cabos do SSD SATA."
   - partId: gpu
     displayName: "Placa de v\xEDdeo"
-    description: 'Opcional: vai no slot PCIe x16 de cima.'
+    description: 'Opcional: vai no slot PCIe x16 de cima. O tipo define o cabo de energia.'
     icon: {fileID: 21300000, guid: ae991b5174a1c014ebb72ac6949e83fb, type: 3}
     unitSingular: unidade
     unitPlural: unidades
@@ -92,8 +110,14 @@ MonoBehaviour:
     defaultQuantity: 1
     models:
     - modelId: gpu_pcie_x16
-      displayName: "PCIe x16 \xB7 1 cabo de energia PCIe"
-      detail: 
+      displayName: "PCIe x16 \xB7 1 cabo PCIe 8 pinos (6+2)"
+      detail: "Intermedi\xE1ria: al\xE9m do slot, recebe energia por um cabo PCIe 6+2 da fonte. Ocupa 2 slots de altura."
+    - modelId: gpu_sem_cabo
+      displayName: "PCIe x16 \xB7 sem cabo de energia (at\xE9 75 W)"
+      detail: "De entrada: toda a energia vem do pr\xF3prio slot PCIe. N\xE3o tem conector de energia na placa."
+    - modelId: gpu_12v2x6
+      displayName: "PCIe x16 \xB7 conector 12V-2x6 (16 pinos)"
+      detail: "Alto desempenho: um cabo \xFAnico de 16 pinos (12V-2x6/12VHPWR). Exige fonte com esse cabo ou o adaptador da placa. Ocupa 3 slots ou mais."
   - partId: fonte
     displayName: "Fonte de alimenta\xE7\xE3o"
     description: "Liga a placa pelos cabos de 24 pinos e EPS 8 pinos. Tem chave 110/220 V atr\xE1s? Escolha o modelo com chave."

@@ -12,10 +12,10 @@ O app, o **manual técnico** e o **tutorial em vídeo** das condições de contr
 |---|---|---|---|
 | Placa-mãe (`placa_mae`) | ATX genérica · LGA1700/AM5 (`atx_generica_lga1700`) | 1 | 1 |
 | Processador (CPU) (`cpu`) | Intel · soquete LGA1700 (`intel_lga1700`)<br>AMD · soquete AM5 (`amd_am5`) | 1 | 1 |
-| Cooler do processador (`cooler`) | Cooler a ar · cabo de 4 pinos (`cooler_ar_4pinos`) | 1 | 1 |
-| Memória RAM (`ram`) | DDR5 · pente DIMM (`ddr5_dimm`) | 1 a 2 | 2 |
-| SSD M.2 (`ssd`) | M.2 2280 · NVMe (`ssd_m2_2280_nvme`) | 0 a 1 (opcional) | 1 |
-| Placa de vídeo (`gpu`) | PCIe x16 · 1 cabo de energia PCIe (`gpu_pcie_x16`) | 0 a 1 (opcional) | 1 |
+| Cooler do processador (`cooler`) | Torre a ar · 4 heat pipes · 120 mm (`cooler_ar_4pinos`)<br>Cooler box (de fábrica) · sem heat pipes (`cooler_box`)<br>Torre dupla · 6 heat pipes · 2 fans (`cooler_torre_dupla`) | 1 | 1 |
+| Memória RAM (`ram`) | DDR5 · 16 GB · 5600 MT/s · CL40 (`ddr5_dimm`)<br>DDR5 · 8 GB · 4800 MT/s · CL40 (`ddr5_8gb_4800_cl40`)<br>DDR5 · 32 GB · 6000 MT/s · CL30 (`ddr5_32gb_6000_cl30`) | 1 a 4 | 2 |
+| Armazenamento (`ssd`) | SSD M.2 2280 · NVMe (`ssd_m2_2280_nvme`)<br>SSD SATA 2,5" (`ssd_sata_25`)<br>HD SATA 3,5" · 7200 rpm (`hd_sata_35`) | 0 a 1 (opcional) | 1 |
+| Placa de vídeo (`gpu`) | PCIe x16 · 1 cabo PCIe 8 pinos (6+2) (`gpu_pcie_x16`)<br>PCIe x16 · sem cabo de energia (até 75 W) (`gpu_sem_cabo`)<br>PCIe x16 · conector 12V-2x6 (16 pinos) (`gpu_12v2x6`) | 0 a 1 (opcional) | 1 |
 | Fonte de alimentação (`fonte`) | ATX bivolt automática (100–240 V) (`fonte_atx`)<br>ATX com chave 110/220 V (`fonte_atx_chave`) | 1 | 1 |
 
 ## Etapas
@@ -31,12 +31,18 @@ A coluna "entra quando" diz de qual peça a etapa depende. Com o kit padrão (2 
 | 5 | Instale o cooler e ligue no CPU_FAN | Processador (CPU), modelo AMD · soquete AM5 (`amd_am5`) | `cooler_cpu_am5` |
 | 6 | Instale a RAM no slot A2 | Memória RAM: exatamente 1 pente | `ram_slot_a2` |
 | 7 | Instale a RAM nos slots A2 e B2 | Memória RAM: exatamente 2 pentes | `ram_slots` |
-| 8 | Instale o SSD M.2 | SSD M.2 no kit | `ssd_m2` |
-| 9 | Ligue o cabo de 24 pinos | Fonte de alimentação | `atx_24p` |
-| 10 | Ligue o cabo EPS 12V da CPU | Fonte de alimentação | `eps_8p` |
-| 11 | Encaixe a placa de vídeo no PCIe x16 | Placa de vídeo no kit | `gpu_pcie` |
-| 12 | Confira a chave 110/220 V da fonte | Fonte de alimentação, modelo ATX com chave 110/220 V (`fonte_atx_chave`) | `fonte_tensao` |
-| 13 | Verificação final | sempre | `verificacao_final` |
+| 8 | Instale a RAM nos slots A2, B2 e A1 | Memória RAM: exatamente 3 pentes | `ram_3_slots` |
+| 9 | Instale a RAM nos quatro slots | Memória RAM: exatamente 4 pentes | `ram_4_slots` |
+| 10 | Instale o SSD M.2 | Armazenamento no kit, modelo SSD M.2 2280 · NVMe (`ssd_m2_2280_nvme`) | `ssd_m2` |
+| 11 | Ligue o cabo de 24 pinos | Fonte de alimentação | `atx_24p` |
+| 12 | Ligue o cabo EPS 12V da CPU | Fonte de alimentação | `eps_8p` |
+| 13 | Ligue o SSD SATA | Armazenamento no kit, modelo SSD SATA 2,5" (`ssd_sata_25`) | `ssd_sata` |
+| 14 | Ligue o HD SATA | Armazenamento no kit, modelo HD SATA 3,5" · 7200 rpm (`hd_sata_35`) | `hd_sata` |
+| 15 | Encaixe a placa de vídeo no PCIe x16 | Placa de vídeo no kit, modelo PCIe x16 · 1 cabo PCIe 8 pinos (6+2) (`gpu_pcie_x16`) | `gpu_pcie` |
+| 16 | Encaixe a placa de vídeo no PCIe x16 | Placa de vídeo no kit, modelo PCIe x16 · sem cabo de energia (até 75 W) (`gpu_sem_cabo`) | `gpu_pcie_sem_cabo` |
+| 17 | Encaixe a placa de vídeo e o cabo 12V-2x6 | Placa de vídeo no kit, modelo PCIe x16 · conector 12V-2x6 (16 pinos) (`gpu_12v2x6`) | `gpu_pcie_12v2x6` |
+| 18 | Confira a chave 110/220 V da fonte | Fonte de alimentação, modelo ATX com chave 110/220 V (`fonte_atx_chave`) | `fonte_tensao` |
+| 19 | Verificação final | sempre | `verificacao_final` |
 
 ### 1. Coloque a placa-mãe no tapete
 
@@ -136,7 +142,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 
 ### 7. Instale a RAM nos slots A2 e B2
 
-- **Componente:** Memória DDR5 (2 módulos)
+- **Componente:** Memória DDR5 (2 pentes, recomendado)
 - **Entra quando:** Memória RAM: exatamente 2 pentes
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
@@ -150,10 +156,42 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Chanfro alinhado com a chave do slot
 - [ ] Travas fechadas nos dois slots
 
-### 8. Instale o SSD M.2
+### 8. Instale a RAM nos slots A2, B2 e A1
+
+- **Componente:** Memória DDR5 (3 pentes)
+- **Entra quando:** Memória RAM: exatamente 3 pentes
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Coloque primeiro dois pentes em A2 e B2 (2º e 4º a partir da CPU), como na montagem recomendada, e o terceiro em A1. Abra as travas, alinhe o chanfro com a chave do slot e empurre na vertical até as travas fecharem. Confira no manual da placa a ordem para 3 pentes.
+
+> **Atenção:** Com 3 pentes os dois canais ficam desiguais e a memória pode render menos: o recomendado é 2 ou 4 pentes iguais. O pente só entra num sentido; nunca force.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Pentes nos slots A2, B2 e A1
+- [ ] Chanfro alinhado com a chave de cada slot
+- [ ] Travas fechadas nos três slots
+
+### 9. Instale a RAM nos quatro slots
+
+- **Componente:** Memória DDR5 (4 pentes)
+- **Entra quando:** Memória RAM: exatamente 4 pentes
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Com 4 pentes, todos os slots ficam ocupados. Encaixe primeiro A2 e B2 (2º e 4º a partir da CPU), depois A1 e B1. Abra as travas, alinhe o chanfro com a chave do slot e empurre na vertical até as travas fecharem.
+
+> **Atenção:** O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force. Com 4 pentes o primeiro boot demora mais (a placa testa a memória): é normal.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Pentes nos 4 slots (A1, A2, B1 e B2)
+- [ ] Chanfro alinhado com a chave de cada slot
+- [ ] Travas fechadas nos quatro slots
+
+### 10. Instale o SSD M.2
 
 - **Componente:** SSD M.2 2280 (NVMe)
-- **Entra quando:** SSD M.2 no kit
+- **Entra quando:** Armazenamento no kit, modelo SSD M.2 2280 · NVMe (`ssd_m2_2280_nvme`)
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
 Tire o parafuso do suporte do M.2. Segure o SSD pelas bordas laterais, sem tocar nos contatos dourados nem nos chips. Encaixe o SSD inclinado no conector M.2 (entre a CPU e o slot da placa de vídeo), com o chanfro dos contatos alinhado à chave. Abaixe a outra ponta até o suporte e prenda com o parafuso.
@@ -166,7 +204,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Ponta do SSD presa pelo parafuso
 - [ ] SSD paralelo à placa
 
-### 9. Ligue o cabo de 24 pinos
+### 11. Ligue o cabo de 24 pinos
 
 - **Componente:** Fonte · cabo ATX 24 pinos
 - **Entra quando:** Fonte de alimentação
@@ -181,7 +219,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Cabo de 24 pinos todo dentro do conector
 - [ ] Trava do cabo presa na lingueta (clique)
 
-### 10. Ligue o cabo EPS 12V da CPU
+### 12. Ligue o cabo EPS 12V da CPU
 
 - **Componente:** Fonte · cabo EPS 8 pinos (4+4)
 - **Entra quando:** Fonte de alimentação
@@ -196,13 +234,45 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Cabo marcado CPU/EPS (não PCI-E)
 - [ ] As 8 vias encaixadas e a trava presa
 
-### 11. Encaixe a placa de vídeo no PCIe x16
+### 13. Ligue o SSD SATA
 
-- **Componente:** Placa de vídeo (PCIe x16)
-- **Entra quando:** Placa de vídeo no kit
+- **Componente:** SSD SATA 2,5"
+- **Entra quando:** Armazenamento no kit, modelo SSD SATA 2,5" (`ssd_sata_25`)
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
-Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Se a placa tiver conector de energia, ligue o cabo PCIe 6+2 da fonte.
+Na bancada, o SSD fica deitado no tapete, à direita da placa (marcadores azuis: segure pelas laterais). Ligue o cabo de dados SATA (o fino, com conector em L) numa porta SATA da borda direita da placa e a outra ponta no SSD. Depois ligue no SSD o cabo de energia SATA da fonte (o mais largo, também em L).
+
+> **Atenção:** Os conectores SATA têm formato em L e só entram num sentido: virado ao contrário, a lingueta de plástico quebra. Não force.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Cabo de dados SATA no SSD e numa porta SATA da placa
+- [ ] Cabo de energia SATA da fonte ligado no SSD
+- [ ] Os dois conectores encaixados até o fim
+
+### 14. Ligue o HD SATA
+
+- **Componente:** HD SATA 3,5"
+- **Entra quando:** Armazenamento no kit, modelo HD SATA 3,5" · 7200 rpm (`hd_sata_35`)
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+O HD tem peças móveis por dentro: segure pelas laterais (marcadores azuis), sem tocar na placa de circuito de baixo, e apoie devagar no tapete, à direita da placa. Ligue o cabo de dados SATA (o fino, em L) numa porta SATA da borda direita da placa e no HD. Depois ligue no HD o cabo de energia SATA da fonte (o mais largo).
+
+> **Atenção:** Batida ou queda estraga o HD, mesmo desligado. E os conectores em L só entram num sentido: não force.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] HD apoiado no tapete, sem bater
+- [ ] Cabo de dados SATA no HD e numa porta SATA da placa
+- [ ] Cabo de energia SATA da fonte ligado no HD
+
+### 15. Encaixe a placa de vídeo no PCIe x16
+
+- **Componente:** Placa de vídeo com cabo PCIe 6+2
+- **Entra quando:** Placa de vídeo no kit, modelo PCIe x16 · 1 cabo PCIe 8 pinos (6+2) (`gpu_pcie_x16`)
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Depois ligue o cabo PCIe 6+2 (8 pinos) da fonte no conector da placa de vídeo.
 
 > **Atenção:** O slot de baixo (em vermelho) tem o mesmo tamanho, mas é x4. E a placa de vídeo usa o cabo PCIe 6+2, nunca o EPS da CPU.
 
@@ -210,9 +280,42 @@ Validação (checklist, todos os itens precisam ser confirmados):
 
 - [ ] Placa no slot PCIe x16 de cima
 - [ ] Trava do slot fechada
-- [ ] Cabo PCIe ligado (se a placa tiver conector de energia)
+- [ ] Cabo PCIe 6+2 ligado na placa de vídeo
 
-### 12. Confira a chave 110/220 V da fonte
+### 16. Encaixe a placa de vídeo no PCIe x16
+
+- **Componente:** Placa de vídeo sem cabo de energia
+- **Entra quando:** Placa de vídeo no kit, modelo PCIe x16 · sem cabo de energia (até 75 W) (`gpu_sem_cabo`)
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos da placa de vídeo e empurre por igual até a trava fechar. Esta placa recebe toda a energia pelo slot: não tem cabo para ligar.
+
+> **Atenção:** O slot de baixo (em vermelho) tem o mesmo tamanho, mas é x4. Segure a placa pelas bordas, sem tocar nos contatos dourados.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Placa no slot PCIe x16 de cima
+- [ ] Trava do slot fechada
+- [ ] Placa reta, sem um lado mais alto
+
+### 17. Encaixe a placa de vídeo e o cabo 12V-2x6
+
+- **Componente:** Placa de vídeo com conector 12V-2x6
+- **Entra quando:** Placa de vídeo no kit, modelo PCIe x16 · conector 12V-2x6 (16 pinos) (`gpu_12v2x6`)
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos e empurre por igual até a trava fechar. Depois ligue o cabo de 16 pinos 12V-2x6 (ou o adaptador que veio com a placa) e empurre até não sobrar fresta.
+
+> **Atenção:** Cabo 12V-2x6 meio encaixado esquenta e pode derreter: empurre até o fim e não dobre o cabo logo na saída do conector. O slot de baixo (em vermelho) é x4.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Placa no slot PCIe x16 de cima
+- [ ] Trava do slot fechada
+- [ ] Cabo 12V-2x6 encaixado até o fim, sem fresta
+- [ ] Cabo sem dobra forte perto do conector
+
+### 18. Confira a chave 110/220 V da fonte
 
 - **Componente:** Fonte com chave seletora de tensão
 - **Entra quando:** Fonte de alimentação, modelo ATX com chave 110/220 V (`fonte_atx_chave`)
@@ -228,7 +331,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Chave da fonte na mesma tensão da tomada
 - [ ] Fonte ainda fora da tomada
 
-### 13. Verificação final
+### 19. Verificação final
 
 - **Componente:** Montagem completa
 - **Entra quando:** sempre

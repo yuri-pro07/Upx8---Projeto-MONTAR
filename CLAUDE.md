@@ -147,7 +147,7 @@ Câmera do celular → Reconhece a peça → Sobrepõe o modelo 3D → Valida e 
                                                  SessionMetricsLogger (CSV) + ProgressStore (JSON)
 ```
 
-Assemblies: `Assets/Scripts/MontAR.asmdef` (runtime), `Assets/Tests/EditMode/MontAR.Tests.EditMode.asmdef` e `Assets/Tests/PlayMode/MontAR.Tests.PlayMode.asmdef`. Os scripts de Editor (`Assets/Editor/MontAR/` e `Assets/Dev/PreviewOverlay/Editor/`) caem no `Assembly-CSharp-Editor`. **62 testes EditMode + 1 PlayMode passando** (07/10).
+Assemblies: `Assets/Scripts/MontAR.asmdef` (runtime), `Assets/Tests/EditMode/MontAR.Tests.EditMode.asmdef` e `Assets/Tests/PlayMode/MontAR.Tests.PlayMode.asmdef`. Os scripts de Editor (`Assets/Editor/MontAR/` e `Assets/Dev/PreviewOverlay/Editor/`) caem no `Assembly-CSharp-Editor`. **74 testes EditMode + 1 PlayMode passando** (23/10).
 
 **Decisão de 06–07/10 (D8): como o app mostra "como faz".** A instrução é dada **em tempo real sobre a peça real** (RA): a peça fantasma anima o gesto no encaixe certo, o usuário repete com a peça dele e depois **valida** (checklist) antes de liberar a próxima. Não há a sequência "assiste ao vídeo/demonstração e depois mostra a peça para o app conferir". Motivos: é a proposta do artigo (instrução projetada sobre o computador real + validação sequencial); separar demonstração e execução vira um vídeo, que já é a condição de controle; e o ARCore não reconhece a peça em si (só o marcador do tapete), então "mostrar a peça para o app validar" exigiria marcador por componente ou ML (D1/D2). A **demonstração 3D** existe como apoio: mesma animação numa bancada virtual, para quando o marcador não está à vista ou o aparelho não tem ARCore. Ela também deixa testar o fluxo inteiro no Editor. Fica registrada no CSV (`mode_changed`), e **a condição do experimento é a RA**.
 
@@ -171,6 +171,10 @@ Assemblies: `Assets/Scripts/MontAR.asmdef` (runtime), `Assets/Tests/EditMode/Mon
 | `Persistence/ProgressStore` + `SessionProgress` | ✅ testado | `progress.json` em `persistentDataPath`, uma sessão por aparelho; arquivo corrompido → ignora com aviso |
 | `AR/ImageTrackingController` | ✅ código, na cena | `trackablesChanged` → eventos `ReferenceTracked(ARTrackedImage)` / `ReferenceLost(nome)`. Só `Tracking` conta; `Limited` = perdido. Ignora imagens sem nome na biblioteca |
 | `AR/ARContentManager` | ✅ código, na cena | Instancia o overlay como filho do `ARTrackedImage`, no offset da etapa. `keepOverlayWhenLimited` (padrão true) mantém o overlay quando as mãos cobrem o marcador. `previewStep` mostra uma etapa sem o fluxo (PoC) |
+| `Persistence/AssemblyHistoryStore` + `HistoryEntry` | ✅ testado | `history.json` em `persistentDataPath`: montagens concluídas (mais recente primeiro, até 100), com nome opcional, tempo, erros e etapas. Só para o usuário rever; não substitui o CSV |
+| `UI/HistoryScreen`, `HistoryEntryView` | ✅ código, no prefab | Tela do histórico: aberta pela conclusão e pelo "Histórico ›" da tela de peças |
+| `AR/CameraPermission` | ✅ código | Pedido da câmera do Android (`Permission.RequestUserPermission`). O `AppController` explica antes, liga a `ARSession` (desligada na cena) só com a permissão e cai no 3D sem ela |
+| `UI/SheetDragHandler` | ✅ código, no prefab | Arrastar o painel da etapa para cima/baixo mostra ou esconde a instrução |
 | `AR/PocDiagnosticsHud` | ✅ código, na cena (desligado) | IMGUI: estado da `ARSession`, FPS (1 s), referências rastreadas e botão "Medir detecção" (toque → apontar → tempo). Loga `[MontAR][PoC]` no logcat. Toque longo (2 s) na versão, na apresentação, liga/desliga. **Manter desligado no experimento** |
 | `MarkerPoseValidator` | ⬜ | Marcador do componente na pose esperada ± tolerância (D2, camada 2) |
 | `InteractionController` | ⬜ | Toques na cena AR (nome do modelo) |
@@ -195,9 +199,11 @@ Assets da PoC (continuam no projeto, fora do roteiro):
 | RF07 | Registrar métricas e exportar CSV (§9) | 🚧 CSV gravado no teste PlayMode do Editor, falta rodar no celular |
 | RF08 | Botão discreto "intervenção do observador", que alimenta a taxa de conclusão sem intervenção | 🚧 toque longo no topo da montagem |
 | RF09 | Tela de conclusão com resumo da sessão | 🚧 tela pronta, testada no Editor |
-| RF10 | Apresentação do app (como funciona: Aponta, Guia, Valida, Registra) | 🚧 tela pronta, testada no Editor |
-| RF11 | Seleção das peças do kit (modelo e quantidade), que ajusta o roteiro | 🚧 CPU (Intel/AMD) e fonte (bivolt/chave 110/220 V) com 2 modelos; testada no Editor |
+| RF10 | Apresentação do app (como funciona: Aponta, Guia, Validação, Registra) | 🚧 tela pronta, testada no Editor |
+| RF11 | Seleção das peças do kit (modelo e quantidade), que ajusta o roteiro | 🚧 CPU, cooler, RAM (1–4), armazenamento (M.2/SATA/HD), placa de vídeo e fonte com vários modelos; testada no Editor |
 | RF12 | Demonstração 3D sem câmera (bancada virtual com o mesmo overlay) | 🚧 testada no Editor |
+| RF13 | Histórico de montagens (nome, tempo, erros e etapas), aberto depois da conclusão | 🚧 testado no Editor |
+| RF14 | Pedido da permissão da câmera explicado antes da RA (sem permissão, segue no 3D) | 🚧 código pronto, falta testar no celular |
 
 **Legenda:** ✅ implementado · 🚧 em desenvolvimento · ⬜ planejado · ❌ cancelado. Usar a mesma legenda do README. Critério para ✅: funcionando **no celular**.
 

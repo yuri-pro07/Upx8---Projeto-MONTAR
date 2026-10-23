@@ -124,9 +124,11 @@ O detalhamento está no artigo V1, em [`docs/documents/artigo-v1-montar.docx`](d
 | RF07 | Registrar métricas | Grava o log de eventos da sessão e exporta em CSV | 🚧 |
 | RF08 | Intervenção do observador | Botão discreto para o pesquisador registrar quando precisou intervir | 🚧 |
 | RF09 | Tela de conclusão | Mostra o resumo da sessão ao final da montagem | 🚧 |
-| RF10 | Apresentação | Explica como o app funciona (Aponta, Guia, Valida, Registra) antes de começar | 🚧 |
-| RF11 | Seleção de peças | Escolha do modelo (ex.: CPU Intel ou AMD, fonte bivolt ou com chave 110/220 V) e da quantidade de cada peça; o roteiro se ajusta ao kit | 🚧 |
+| RF10 | Apresentação | Explica como o app funciona (Aponta, Guia, Validação, Registra) antes de começar | 🚧 |
+| RF11 | Seleção de peças | Escolha do modelo (ex.: CPU Intel ou AMD, SSD M.2, SATA ou HD, fonte bivolt ou com chave 110/220 V) e da quantidade (RAM de 1 a 4 pentes); o roteiro se ajusta ao kit | 🚧 |
 | RF12 | Demonstração 3D | Mostra o encaixe numa bancada virtual, sem câmera, com o mesmo overlay da RA | 🚧 |
+| RF13 | Histórico de montagens | Lista as montagens concluídas no aparelho (nome, tempo, erros apontados e etapas) | 🚧 |
+| RF14 | Permissão da câmera | Explica para que serve a câmera e abre o pedido do Android antes da RA; sem permissão, segue no 3D | 🚧 |
 
 **Legenda:** ✅ Implementado · 🚧 Em desenvolvimento · ⬜ Planejado · ❌ Cancelado
 
@@ -569,7 +571,7 @@ Conclusão (resumo da sessão)  →  Nova montagem / Voltar ao início
 
 ## 21. Interface
 
-Capturas reais do app **no Editor**, no modo demonstração 3D, feitas pelo teste automatizado de 07/10/2026. Não são capturas do celular nem da RA, que ainda não foi testada.
+Capturas reais do app **no Editor**, no modo demonstração 3D, feitas pelo teste automatizado de 23/10/2026. Não são capturas do celular nem da RA, que ainda não foi testada.
 
 | Apresentação | Peças | Início |
 |---|---|---|
@@ -578,6 +580,10 @@ Capturas reais do app **no Editor**, no modo demonstração 3D, feitas pelo test
 | Montagem (CPU, 3D) | Montagem (RAM, 3D) | Validação | Conclusão |
 |---|---|---|---|
 | ![Etapa da CPU](docs/images/montagem-3d-cpu.png) | ![Etapa da RAM](docs/images/montagem-3d-ram.png) | ![Checklist](docs/images/tela-validacao.png) | ![Conclusão](docs/images/tela-conclusao.png) |
+
+| Erro da validação | Histórico de montagens |
+|---|---|
+| ![Erro da validação](docs/images/tela-erro-validacao.png) | ![Histórico](docs/images/tela-historico.png) |
 
 A captura da experiência de RA (`experiencia-ra.png`) será adicionada depois do teste no celular.
 

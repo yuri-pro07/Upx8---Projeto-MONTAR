@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_cooler_cpu_am5
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: cooler_cpu_am5
+  title: Instale o cooler e ligue no CPU_FAN
+  componentName: Cooler do processador (AM5)
+  requiredPartId: cpu
+  requiredModelId: amd_am5
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Confira a pasta t\xE9rmica. No AM5, o cooler prende nos 4 furos do suporte AMD em volta do soquete (ret\xE2ngulo de 54 x 90 mm, mais alto do que largo) ou nos ganchos do suporte pl\xE1stico, conforme o modelo. Apoie o cooler sobre a CPU e prenda em diagonal (parafusos em X). Depois ligue o cabo do cooler no conector CPU_FAN, acima do soquete."
+  commonErrorAlert: Sem o cabo no CPU_FAN (ou com ele em outro conector), a placa acusa erro ou o processador esquenta demais.
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 2549332246031541865, guid: 55a39fd0735d24346872f84b21d72630, type: 3}
+  overlayPositionOffset: {x: -0.022, y: 0.0092, z: -0.17300001}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Pasta t\xE9rmica no lugar (j\xE1 vem no cooler ou uma gota no centro da CPU)"
+  - "Cooler firme, sem balan\xE7ar, com os 4 pontos presos"
+  - Cabo do cooler ligado no conector CPU_FAN
+  validationReferenceName: 

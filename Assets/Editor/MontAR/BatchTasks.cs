@@ -24,6 +24,13 @@ namespace MontAR.EditorTools
             Debug.Log("[MontAR] Roteiro exportado: " + RoteiroExporter.Export());
         }
 
+        /// <summary>Recria o catálogo de peças com os valores padrão do AppBuilder (sobrescreve ajustes no Inspector).</summary>
+        public static void RebuildCatalog()
+        {
+            Debug.Log("[MontAR] Catálogo recriado: " + AssetDatabase.GetAssetPath(AppBuilder.BuildCatalog(true)));
+            AssetDatabase.SaveAssets();
+        }
+
         /// <summary>Renderiza as prévias dos overlays em Builds/Previews/v1.</summary>
         public static void RenderPreviews()
         {

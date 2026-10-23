@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_fonte_tensao
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: fonte_tensao
+  title: Confira a chave 110/220 V da fonte
+  componentName: "Fonte com chave seletora de tens\xE3o"
+  requiredPartId: fonte
+  requiredModelId: fonte_atx_chave
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Esta fonte tem uma chave de tens\xE3o atr\xE1s, perto da entrada do cabo de for\xE7a (geralmente vermelha). Com a fonte ainda fora da tomada, descubra a tens\xE3o da tomada da bancada (etiqueta da tomada ou pergunte ao professor) e deixe a chave no mesmo valor: 110/115 V para tomada de 127 V e 220/230 V para tomada de 220 V."
+  commonErrorAlert: "Chave em 110 V numa tomada de 220 V queima a fonte e pode danificar a placa-m\xE3e e as outras pe\xE7as. Chave em 220 V numa tomada de 127 V: o PC n\xE3o liga ou desliga sozinho. Na d\xFAvida, n\xE3o ligue e chame o professor."
+  referenceImageName: 
+  overlayPrefab: {fileID: 0}
+  overlayPositionOffset: {x: 0, y: 0, z: 0}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Tens\xE3o da tomada da bancada confirmada (127 V ou 220 V)"
+  - "Chave da fonte na mesma tens\xE3o da tomada"
+  - Fonte ainda fora da tomada
+  validationReferenceName: 

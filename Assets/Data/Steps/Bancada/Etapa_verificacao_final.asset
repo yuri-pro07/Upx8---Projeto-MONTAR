@@ -20,7 +20,7 @@ MonoBehaviour:
   minPartQuantity: 1
   maxPartQuantity: 0
   instruction: Antes de ligar, revise tudo com calma. Se algo estiver solto ou fora do lugar, corrija agora.
-  commonErrorAlert: "S\xF3 ligue a fonte na tomada depois desta verifica\xE7\xE3o."
+  commonErrorAlert: "S\xF3 ligue a fonte na tomada depois desta verifica\xE7\xE3o. Confira a tens\xE3o: fonte com chave 110/220 V na posi\xE7\xE3o errada pode queimar."
   referenceImageName: 
   overlayPrefab: {fileID: 0}
   overlayPositionOffset: {x: 0, y: 0, z: 0}
@@ -30,4 +30,5 @@ MonoBehaviour:
   - "Pe\xE7as instaladas firmes e com as travas fechadas"
   - "Cabos de energia encaixados at\xE9 a trava"
   - Nenhum parafuso ou ferramenta solto sobre a placa
+  - "Tens\xE3o da fonte conferida com a da tomada (bivolt autom\xE1tica ou chave na posi\xE7\xE3o certa)"
   validationReferenceName: 

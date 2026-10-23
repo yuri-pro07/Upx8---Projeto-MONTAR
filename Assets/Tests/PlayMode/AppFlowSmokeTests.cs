@@ -98,6 +98,16 @@ namespace MontAR.Tests
             Assert.AreEqual(1, app.Selection.GetQuantity("ram"));
             Click("Mais", "Peça ram");
             Assert.AreEqual(2, app.Selection.GetQuantity("ram"));
+            Click("Próximo modelo", "Peça cpu");
+            Assert.AreEqual("amd_am5", app.Selection.GetModelId("cpu"));
+            StringAssert.Contains("9 etapas", summary.text, "com AMD as etapas da CPU e do cooler trocam, não somam");
+            Click("Próximo modelo", "Peça cpu");
+            Assert.AreEqual("intel_lga1700", app.Selection.GetModelId("cpu"));
+            Click("Próximo modelo", "Peça fonte");
+            Assert.AreEqual("fonte_atx_chave", app.Selection.GetModelId("fonte"));
+            StringAssert.Contains("10 etapas", summary.text, "fonte com chave 110/220 V ganha a etapa da tensão");
+            Click("Próximo modelo", "Peça fonte");
+            Assert.AreEqual("fonte_atx", app.Selection.GetModelId("fonte"));
             Click("Botão Continuar");
             yield return null;
 

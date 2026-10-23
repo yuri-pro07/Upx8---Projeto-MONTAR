@@ -27,6 +27,11 @@ Prova de conceito em andamento. Ainda não testada em celular.
 - Roteiro de montagem em bancada v0 (`Assets/Data/Roteiro_bancada_v0.asset`), com 10 etapas e overlays animados. Com o kit padrão, a montagem tem 9 etapas: placa no tapete, CPU, cooler + CPU_FAN, RAM (A2 ou A2+B2), SSD M.2, cabo de 24 pinos, cabo EPS 8 pinos, placa de vídeo e verificação final. As posições são aproximadas: o kit ainda não foi definido (D5).
 - `docs/documents/roteiro-bancada-v0.md`, exportado das etapas, para o manual e o vídeo seguirem o mesmo roteiro.
 - Construtores no Editor (menu **MontAR › App**): interface, cena, catálogo e exportação do roteiro, além de `BatchTasks` para rodar tudo em linha de comando.
+- Feedback do teste de usabilidade (23/10):
+  - **Mais tipos de processador**: a CPU agora tem dois modelos, Intel LGA1700 e AMD AM5, cada um com etapas próprias de CPU (`cpu_soquete`, `cpu_soquete_am5`) e cooler (`cooler_cpu`, `cooler_cpu_am5`, com a furação AMD de 54 x 90 mm). A placa genérica é a mesma.
+  - **Onde segurar a peça**: RAM, SSD e CPU dizem para segurar pelas bordas, sem tocar nos contatos dourados nem nos chips. Na RAM, marcadores azuis no overlay mostram as pontas do pente onde segurar.
+  - **Tensão da fonte**: a fonte ganhou o modelo "com chave 110/220 V", que acrescenta a etapa `fonte_tensao` (conferir a chave antes de ligar, com alerta de que a chave errada queima a fonte). A verificação final passa a pedir a conferência da tensão para qualquer fonte.
+  - Página "3. Valida" da apresentação renomeada para "3. Validação".
 - Evento `mode_changed` no CSV. O `session_started` passa a trazer `mode=ar|demo_3d` e `kit=peça:modelo:quantidade|…` no `detail`.
 - `SessionSummary`, o resumo da sessão para a tela de conclusão.
 - `tools/gerar_icones_ui.py`, que gera os ícones e os sprites da interface.

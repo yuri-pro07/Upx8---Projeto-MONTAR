@@ -1,22 +1,22 @@
 # Roteiro de montagem em bancada (bancada_v0)
 
-> Gerado a partir de `Assets/Data/Roteiro_bancada_v0.asset` e `Assets/Data/Pecas/Catalogo_pecas_v0.asset` em 07/10/2026 (menu **MontAR › App › Exportar roteiro**). Não edite este arquivo à mão: mude as etapas na Unity (ou no `spec_montagem.json`) e exporte de novo.
+> Gerado a partir de `Assets/Data/Roteiro_bancada_v0.asset` e `Assets/Data/Pecas/Catalogo_pecas_v0.asset` em 23/10/2026 (menu **MontAR › App › Exportar roteiro**). Não edite este arquivo à mão: mude as etapas na Unity (ou no `spec_montagem.json`) e exporte de novo.
 
 O app, o **manual técnico** e o **tutorial em vídeo** das condições de controle precisam seguir exatamente estas etapas, na mesma ordem e com o mesmo kit (CLAUDE.md, §2).
 
 **Rascunho v0.** Placa ATX genérica com posições aproximadas: o kit do laboratório ainda não foi definido (decisão D5). Montagem em bancada, sem gabinete (decisão D4 em aberto).
 
-## Peças (uma opção de cada, por enquanto)
+## Peças
 
-| Peça | Modelo | Quantidade aceita | Padrão |
+| Peça | Modelos (o primeiro é o padrão) | Quantidade aceita | Padrão |
 |---|---|---|---|
-| Placa-mãe (`placa_mae`) | ATX genérica · LGA1700 · DDR5 | 1 | 1 |
-| Processador (CPU) (`cpu`) | Intel · soquete LGA1700 | 1 | 1 |
-| Cooler do processador (`cooler`) | Cooler a ar · cabo de 4 pinos | 1 | 1 |
-| Memória RAM (`ram`) | DDR5 · pente DIMM | 1 a 2 | 2 |
-| SSD M.2 (`ssd`) | M.2 2280 · NVMe | 0 a 1 (opcional) | 1 |
-| Placa de vídeo (`gpu`) | PCIe x16 · 1 cabo de energia PCIe | 0 a 1 (opcional) | 1 |
-| Fonte de alimentação (`fonte`) | ATX · cabos 24 pinos, EPS 4+4 e PCIe 6+2 | 1 | 1 |
+| Placa-mãe (`placa_mae`) | ATX genérica · LGA1700/AM5 (`atx_generica_lga1700`) | 1 | 1 |
+| Processador (CPU) (`cpu`) | Intel · soquete LGA1700 (`intel_lga1700`)<br>AMD · soquete AM5 (`amd_am5`) | 1 | 1 |
+| Cooler do processador (`cooler`) | Cooler a ar · cabo de 4 pinos (`cooler_ar_4pinos`) | 1 | 1 |
+| Memória RAM (`ram`) | DDR5 · pente DIMM (`ddr5_dimm`) | 1 a 2 | 2 |
+| SSD M.2 (`ssd`) | M.2 2280 · NVMe (`ssd_m2_2280_nvme`) | 0 a 1 (opcional) | 1 |
+| Placa de vídeo (`gpu`) | PCIe x16 · 1 cabo de energia PCIe (`gpu_pcie_x16`) | 0 a 1 (opcional) | 1 |
+| Fonte de alimentação (`fonte`) | ATX bivolt automática (100–240 V) (`fonte_atx`)<br>ATX com chave 110/220 V (`fonte_atx_chave`) | 1 | 1 |
 
 ## Etapas
 
@@ -25,15 +25,18 @@ A coluna "entra quando" diz de qual peça a etapa depende. Com o kit padrão (2 
 | # | Etapa | Entra quando | ID no CSV |
 |---|---|---|---|
 | 1 | Coloque a placa-mãe no tapete | Placa-mãe | `placa_tapete` |
-| 2 | Encaixe a CPU no soquete | Processador (CPU) | `cpu_soquete` |
-| 3 | Instale o cooler e ligue no CPU_FAN | Cooler do processador | `cooler_cpu` |
-| 4 | Instale a RAM no slot A2 | Memória RAM: exatamente 1 pente | `ram_slot_a2` |
-| 5 | Instale a RAM nos slots A2 e B2 | Memória RAM: exatamente 2 pentes | `ram_slots` |
-| 6 | Instale o SSD M.2 | SSD M.2 no kit | `ssd_m2` |
-| 7 | Ligue o cabo de 24 pinos | Fonte de alimentação | `atx_24p` |
-| 8 | Ligue o cabo EPS 12V da CPU | Fonte de alimentação | `eps_8p` |
-| 9 | Encaixe a placa de vídeo no PCIe x16 | Placa de vídeo no kit | `gpu_pcie` |
-| 10 | Verificação final | sempre | `verificacao_final` |
+| 2 | Encaixe a CPU no soquete | Processador (CPU), modelo Intel · soquete LGA1700 (`intel_lga1700`) | `cpu_soquete` |
+| 3 | Encaixe a CPU no soquete | Processador (CPU), modelo AMD · soquete AM5 (`amd_am5`) | `cpu_soquete_am5` |
+| 4 | Instale o cooler e ligue no CPU_FAN | Processador (CPU), modelo Intel · soquete LGA1700 (`intel_lga1700`) | `cooler_cpu` |
+| 5 | Instale o cooler e ligue no CPU_FAN | Processador (CPU), modelo AMD · soquete AM5 (`amd_am5`) | `cooler_cpu_am5` |
+| 6 | Instale a RAM no slot A2 | Memória RAM: exatamente 1 pente | `ram_slot_a2` |
+| 7 | Instale a RAM nos slots A2 e B2 | Memória RAM: exatamente 2 pentes | `ram_slots` |
+| 8 | Instale o SSD M.2 | SSD M.2 no kit | `ssd_m2` |
+| 9 | Ligue o cabo de 24 pinos | Fonte de alimentação | `atx_24p` |
+| 10 | Ligue o cabo EPS 12V da CPU | Fonte de alimentação | `eps_8p` |
+| 11 | Encaixe a placa de vídeo no PCIe x16 | Placa de vídeo no kit | `gpu_pcie` |
+| 12 | Confira a chave 110/220 V da fonte | Fonte de alimentação, modelo ATX com chave 110/220 V (`fonte_atx_chave`) | `fonte_tensao` |
+| 13 | Verificação final | sempre | `verificacao_final` |
 
 ### 1. Coloque a placa-mãe no tapete
 
@@ -53,11 +56,11 @@ Validação (checklist, todos os itens precisam ser confirmados):
 
 ### 2. Encaixe a CPU no soquete
 
-- **Componente:** Processador (LGA1700)
-- **Entra quando:** Processador (CPU)
+- **Componente:** Processador Intel (LGA1700)
+- **Entra quando:** Processador (CPU), modelo Intel · soquete LGA1700 (`intel_lga1700`)
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
-Levante a alavanca e abra a moldura. Alinhe o triângulo dourado da CPU com a marca do soquete e apoie a CPU sem empurrar. Feche a moldura e trave a alavanca.
+Levante a alavanca e abra a moldura. Segure a CPU pelas bordas, sem tocar nos contatos dourados de baixo. Alinhe o triângulo dourado da CPU com a marca do soquete e apoie a CPU sem empurrar. Feche a moldura e trave a alavanca.
 
 > **Atenção:** Não encoste nos contatos do soquete nem force a CPU: um pino LGA torto inutiliza a placa.
 
@@ -67,10 +70,26 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] CPU apoiada sem forçar
 - [ ] Moldura fechada e alavanca travada
 
-### 3. Instale o cooler e ligue no CPU_FAN
+### 3. Encaixe a CPU no soquete
+
+- **Componente:** Processador AMD (AM5)
+- **Entra quando:** Processador (CPU), modelo AMD · soquete AM5 (`amd_am5`)
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Levante a alavanca até o fim e abra a moldura. Segure a CPU pelas bordas, sem tocar nos contatos dourados de baixo. Alinhe o triângulo dourado do canto da CPU com o triângulo do soquete (os entalhes das laterais também precisam bater) e apoie a CPU sem empurrar. Feche a moldura, abaixe a alavanca e prenda-a embaixo da trava. A capa plástica do soquete solta sozinha: guarde-a.
+
+> **Atenção:** O AM5 também é LGA: os pinos ficam no soquete da placa. Não encoste neles nem force a CPU, porque um pino torto inutiliza a placa.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Triângulo da CPU alinhado com o do soquete
+- [ ] CPU apoiada sem forçar
+- [ ] Moldura fechada e alavanca presa na trava
+
+### 4. Instale o cooler e ligue no CPU_FAN
 
 - **Componente:** Cooler do processador
-- **Entra quando:** Cooler do processador
+- **Entra quando:** Processador (CPU), modelo Intel · soquete LGA1700 (`intel_lga1700`)
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
 Confira a pasta térmica. Apoie o cooler sobre a CPU com os 4 pontos de fixação alinhados aos furos em volta do soquete e prenda em diagonal (pinos ou parafusos em X). Depois ligue o cabo do cooler no conector CPU_FAN, acima do soquete.
@@ -83,13 +102,29 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Cooler firme, sem balançar, com os 4 pontos presos
 - [ ] Cabo do cooler ligado no conector CPU_FAN
 
-### 4. Instale a RAM no slot A2
+### 5. Instale o cooler e ligue no CPU_FAN
+
+- **Componente:** Cooler do processador (AM5)
+- **Entra quando:** Processador (CPU), modelo AMD · soquete AM5 (`amd_am5`)
+- **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
+
+Confira a pasta térmica. No AM5, o cooler prende nos 4 furos do suporte AMD em volta do soquete (retângulo de 54 x 90 mm, mais alto do que largo) ou nos ganchos do suporte plástico, conforme o modelo. Apoie o cooler sobre a CPU e prenda em diagonal (parafusos em X). Depois ligue o cabo do cooler no conector CPU_FAN, acima do soquete.
+
+> **Atenção:** Sem o cabo no CPU_FAN (ou com ele em outro conector), a placa acusa erro ou o processador esquenta demais.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Pasta térmica no lugar (já vem no cooler ou uma gota no centro da CPU)
+- [ ] Cooler firme, sem balançar, com os 4 pontos presos
+- [ ] Cabo do cooler ligado no conector CPU_FAN
+
+### 6. Instale a RAM no slot A2
 
 - **Componente:** Memória DDR5 (1 pente)
 - **Entra quando:** Memória RAM: exatamente 1 pente
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
-Com um pente só, use o slot A2 (2º a partir da CPU; confira no manual da placa). Abra as travas, alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.
+Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Com um pente só, use o slot A2 (2º a partir da CPU; confira no manual da placa). Abra as travas, alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.
 
 > **Atenção:** O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force.
 
@@ -99,13 +134,13 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Chanfro alinhado com a chave do slot
 - [ ] Travas fechadas
 
-### 5. Instale a RAM nos slots A2 e B2
+### 7. Instale a RAM nos slots A2 e B2
 
 - **Componente:** Memória DDR5 (2 módulos)
 - **Entra quando:** Memória RAM: exatamente 2 pentes
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
-Abra as travas dos slots A2 e B2 (2º e 4º a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.
+Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a estática da mão pode queimar a memória. Abra as travas dos slots A2 e B2 (2º e 4º a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical até as travas fecharem.
 
 > **Atenção:** O pente só entra num sentido: se o chanfro não bater, gire 180°. Nunca force.
 
@@ -115,13 +150,13 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Chanfro alinhado com a chave do slot
 - [ ] Travas fechadas nos dois slots
 
-### 6. Instale o SSD M.2
+### 8. Instale o SSD M.2
 
 - **Componente:** SSD M.2 2280 (NVMe)
 - **Entra quando:** SSD M.2 no kit
 - **Na RA:** overlay preso ao marcador `MontAR_Marcador_A`
 
-Tire o parafuso do suporte do M.2. Encaixe o SSD inclinado no conector M.2 (entre a CPU e o slot da placa de vídeo), com o chanfro dos contatos alinhado à chave. Abaixe a outra ponta até o suporte e prenda com o parafuso.
+Tire o parafuso do suporte do M.2. Segure o SSD pelas bordas laterais, sem tocar nos contatos dourados nem nos chips. Encaixe o SSD inclinado no conector M.2 (entre a CPU e o slot da placa de vídeo), com o chanfro dos contatos alinhado à chave. Abaixe a outra ponta até o suporte e prenda com o parafuso.
 
 > **Atenção:** SSD sem parafuso fica levantado e pode soltar. Aperte só até firmar: forçar entorta o SSD.
 
@@ -131,7 +166,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Ponta do SSD presa pelo parafuso
 - [ ] SSD paralelo à placa
 
-### 7. Ligue o cabo de 24 pinos
+### 9. Ligue o cabo de 24 pinos
 
 - **Componente:** Fonte · cabo ATX 24 pinos
 - **Entra quando:** Fonte de alimentação
@@ -146,7 +181,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Cabo de 24 pinos todo dentro do conector
 - [ ] Trava do cabo presa na lingueta (clique)
 
-### 8. Ligue o cabo EPS 12V da CPU
+### 10. Ligue o cabo EPS 12V da CPU
 
 - **Componente:** Fonte · cabo EPS 8 pinos (4+4)
 - **Entra quando:** Fonte de alimentação
@@ -161,7 +196,7 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Cabo marcado CPU/EPS (não PCI-E)
 - [ ] As 8 vias encaixadas e a trava presa
 
-### 9. Encaixe a placa de vídeo no PCIe x16
+### 11. Encaixe a placa de vídeo no PCIe x16
 
 - **Componente:** Placa de vídeo (PCIe x16)
 - **Entra quando:** Placa de vídeo no kit
@@ -177,7 +212,23 @@ Validação (checklist, todos os itens precisam ser confirmados):
 - [ ] Trava do slot fechada
 - [ ] Cabo PCIe ligado (se a placa tiver conector de energia)
 
-### 10. Verificação final
+### 12. Confira a chave 110/220 V da fonte
+
+- **Componente:** Fonte com chave seletora de tensão
+- **Entra quando:** Fonte de alimentação, modelo ATX com chave 110/220 V (`fonte_atx_chave`)
+- **Na RA:** sem marcador (só instrução e checklist)
+
+Esta fonte tem uma chave de tensão atrás, perto da entrada do cabo de força (geralmente vermelha). Com a fonte ainda fora da tomada, descubra a tensão da tomada da bancada (etiqueta da tomada ou pergunte ao professor) e deixe a chave no mesmo valor: 110/115 V para tomada de 127 V e 220/230 V para tomada de 220 V.
+
+> **Atenção:** Chave em 110 V numa tomada de 220 V queima a fonte e pode danificar a placa-mãe e as outras peças. Chave em 220 V numa tomada de 127 V: o PC não liga ou desliga sozinho. Na dúvida, não ligue e chame o professor.
+
+Validação (checklist, todos os itens precisam ser confirmados):
+
+- [ ] Tensão da tomada da bancada confirmada (127 V ou 220 V)
+- [ ] Chave da fonte na mesma tensão da tomada
+- [ ] Fonte ainda fora da tomada
+
+### 13. Verificação final
 
 - **Componente:** Montagem completa
 - **Entra quando:** sempre
@@ -185,11 +236,12 @@ Validação (checklist, todos os itens precisam ser confirmados):
 
 Antes de ligar, revise tudo com calma. Se algo estiver solto ou fora do lugar, corrija agora.
 
-> **Atenção:** Só ligue a fonte na tomada depois desta verificação.
+> **Atenção:** Só ligue a fonte na tomada depois desta verificação. Confira a tensão: fonte com chave 110/220 V na posição errada pode queimar.
 
 Validação (checklist, todos os itens precisam ser confirmados):
 
 - [ ] Peças instaladas firmes e com as travas fechadas
 - [ ] Cabos de energia encaixados até a trava
 - [ ] Nenhum parafuso ou ferramenta solto sobre a placa
+- [ ] Tensão da fonte conferida com a da tomada (bivolt automática ou chave na posição certa)
 

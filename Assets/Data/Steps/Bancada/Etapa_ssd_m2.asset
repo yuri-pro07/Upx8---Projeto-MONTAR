@@ -19,7 +19,7 @@ MonoBehaviour:
   requiredModelId: 
   minPartQuantity: 1
   maxPartQuantity: 0
-  instruction: "Tire o parafuso do suporte do M.2. Encaixe o SSD inclinado no conector M.2 (entre a CPU e o slot da placa de v\xEDdeo), com o chanfro dos contatos alinhado \xE0 chave. Abaixe a outra ponta at\xE9 o suporte e prenda com o parafuso."
+  instruction: "Tire o parafuso do suporte do M.2. Segure o SSD pelas bordas laterais, sem tocar nos contatos dourados nem nos chips. Encaixe o SSD inclinado no conector M.2 (entre a CPU e o slot da placa de v\xEDdeo), com o chanfro dos contatos alinhado \xE0 chave. Abaixe a outra ponta at\xE9 o suporte e prenda com o parafuso."
   commonErrorAlert: "SSD sem parafuso fica levantado e pode soltar. Aperte s\xF3 at\xE9 firmar: for\xE7ar entorta o SSD."
   referenceImageName: MontAR_Marcador_A
   overlayPrefab: {fileID: 5649226712800629888, guid: dd75d3fe41d6ee64a9037d2635b319e6, type: 3}

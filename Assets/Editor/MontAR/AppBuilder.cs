@@ -126,36 +126,59 @@ namespace MontAR.EditorTools
 
         // ------------------------------------------------------------ catálogo
 
+        private struct ModelSpec
+        {
+            public string Id, Name, Detail;
+
+            public ModelSpec(string id, string name, string detail = "")
+            {
+                Id = id;
+                Name = name;
+                Detail = detail;
+            }
+        }
+
         private struct PartSpec
         {
-            public string Id, Name, Description, Icon, UnitSingular, UnitPlural, ModelId, ModelName, ModelDetail;
+            public string Id, Name, Description, Icon, UnitSingular, UnitPlural;
             public int Min, Max, Default;
+            // O primeiro modelo é o do kit padrão. Os ids vão para o CSV e para o progresso salvo: não renomear.
+            public ModelSpec[] Models;
         }
 
         private static readonly PartSpec[] DefaultParts =
         {
             new PartSpec { Id = "placa_mae", Name = "Placa-mãe", Icon = "peca_placa_mae", UnitSingular = "placa", UnitPlural = "placas", Min = 1, Max = 1, Default = 1,
                 Description = "Base da montagem: as outras peças encaixam nela. Fica deitada no tapete.",
-                ModelId = "atx_generica_lga1700", ModelName = "ATX genérica · LGA1700 · DDR5",
-                ModelDetail = "Modelo de demonstração, com posições aproximadas, até o kit do laboratório ser definido (D5)." },
+                Models = new[] { new ModelSpec("atx_generica_lga1700", "ATX genérica · LGA1700/AM5",
+                    "Modelo de demonstração, com posições aproximadas, até o kit do laboratório ser definido (D5). O soquete acompanha a CPU escolhida.") } },
             new PartSpec { Id = "cpu", Name = "Processador (CPU)", Icon = "peca_cpu", UnitSingular = "unidade", UnitPlural = "unidades", Min = 1, Max = 1, Default = 1,
-                Description = "Vai no soquete; o triângulo dourado mostra o sentido.",
-                ModelId = "intel_lga1700", ModelName = "Intel · soquete LGA1700" },
+                Description = "Vai no soquete; o triângulo dourado mostra o sentido. Intel e AMD têm etapas próprias de CPU e cooler.",
+                Models = new[]
+                {
+                    new ModelSpec("intel_lga1700", "Intel · soquete LGA1700"),
+                    new ModelSpec("amd_am5", "AMD · soquete AM5"),
+                } },
             new PartSpec { Id = "cooler", Name = "Cooler do processador", Icon = "peca_cooler", UnitSingular = "unidade", UnitPlural = "unidades", Min = 1, Max = 1, Default = 1,
                 Description = "Tira o calor da CPU; o cabo vai no conector CPU_FAN.",
-                ModelId = "cooler_ar_4pinos", ModelName = "Cooler a ar · cabo de 4 pinos" },
+                Models = new[] { new ModelSpec("cooler_ar_4pinos", "Cooler a ar · cabo de 4 pinos") } },
             new PartSpec { Id = "ram", Name = "Memória RAM", Icon = "peca_ram", UnitSingular = "pente", UnitPlural = "pentes", Min = 1, Max = 2, Default = 2,
                 Description = "1 ou 2 pentes: o roteiro indica os slots certos para cada caso.",
-                ModelId = "ddr5_dimm", ModelName = "DDR5 · pente DIMM" },
+                Models = new[] { new ModelSpec("ddr5_dimm", "DDR5 · pente DIMM") } },
             new PartSpec { Id = "ssd", Name = "SSD M.2", Icon = "peca_ssd", UnitSingular = "unidade", UnitPlural = "unidades", Min = 0, Max = 1, Default = 1,
                 Description = "Armazenamento: entra inclinado no conector e prende com parafuso.",
-                ModelId = "ssd_m2_2280_nvme", ModelName = "M.2 2280 · NVMe" },
+                Models = new[] { new ModelSpec("ssd_m2_2280_nvme", "M.2 2280 · NVMe") } },
             new PartSpec { Id = "gpu", Name = "Placa de vídeo", Icon = "peca_gpu", UnitSingular = "unidade", UnitPlural = "unidades", Min = 0, Max = 1, Default = 1,
                 Description = "Opcional: vai no slot PCIe x16 de cima.",
-                ModelId = "gpu_pcie_x16", ModelName = "PCIe x16 · 1 cabo de energia PCIe" },
+                Models = new[] { new ModelSpec("gpu_pcie_x16", "PCIe x16 · 1 cabo de energia PCIe") } },
             new PartSpec { Id = "fonte", Name = "Fonte de alimentação", Icon = "peca_fonte", UnitSingular = "unidade", UnitPlural = "unidades", Min = 1, Max = 1, Default = 1,
-                Description = "Liga a placa pelos cabos de 24 pinos e EPS 8 pinos.",
-                ModelId = "fonte_atx", ModelName = "ATX · cabos 24 pinos, EPS 4+4 e PCIe 6+2" },
+                Description = "Liga a placa pelos cabos de 24 pinos e EPS 8 pinos. Tem chave 110/220 V atrás? Escolha o modelo com chave.",
+                Models = new[]
+                {
+                    new ModelSpec("fonte_atx", "ATX bivolt automática (100–240 V)"),
+                    new ModelSpec("fonte_atx_chave", "ATX com chave 110/220 V",
+                        "Fonte com chave seletora de tensão: o roteiro ganha uma etapa para conferir a chave antes de ligar."),
+                } },
         };
 
         public static PartCatalog BuildCatalog(bool overwrite)
@@ -188,11 +211,14 @@ namespace MontAR.EditorTools
                 part.FindPropertyRelative("maxQuantity").intValue = spec.Max;
                 part.FindPropertyRelative("defaultQuantity").intValue = spec.Default;
                 SerializedProperty models = part.FindPropertyRelative("models");
-                models.arraySize = 1;
-                SerializedProperty model = models.GetArrayElementAtIndex(0);
-                model.FindPropertyRelative("modelId").stringValue = spec.ModelId;
-                model.FindPropertyRelative("displayName").stringValue = spec.ModelName;
-                model.FindPropertyRelative("detail").stringValue = spec.ModelDetail ?? string.Empty;
+                models.arraySize = spec.Models.Length;
+                for (int m = 0; m < spec.Models.Length; m++)
+                {
+                    SerializedProperty model = models.GetArrayElementAtIndex(m);
+                    model.FindPropertyRelative("modelId").stringValue = spec.Models[m].Id;
+                    model.FindPropertyRelative("displayName").stringValue = spec.Models[m].Name;
+                    model.FindPropertyRelative("detail").stringValue = spec.Models[m].Detail ?? string.Empty;
+                }
             }
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(catalog);
@@ -308,7 +334,7 @@ namespace MontAR.EditorTools
                 ("Bem-vindo ao MontAR", "Monte um computador de verdade com a instrução em 3D em cima da peça real. O app guia uma etapa por vez e só libera a próxima depois que você confirma a anterior.", "icone_cubo"),
                 ("1. Aponta", "Aponte a câmera do celular para o marcador A do tapete de montagem. É por ele que o app sabe onde fica cada encaixe da placa-mãe.", "icone_aponta"),
                 ("2. Guia", "Uma peça fantasma em 3D mostra onde e em que sentido encaixar. Faça o mesmo movimento com a peça de verdade. Sem câmera? Toque em 3D e veja tudo numa bancada virtual.", "icone_guia"),
-                ("3. Valida", "Terminou a etapa? Toque em Validar e confira a lista. Se algo não bate, a etapa volta para você corrigir antes de seguir.", "icone_valida"),
+                ("3. Validação", "Terminou a etapa? Toque em Validar e confira a lista. Se algo não bate, a etapa volta para você corrigir antes de seguir.", "icone_valida"),
                 ("4. Registra", "Cada etapa validada fica salva. Se o app fechar, a montagem continua de onde parou.", "icone_registra"),
                 ("Antes de começar", "Tapete impresso sobre a mesa, com o marcador A à vista. Peças separadas ao lado e a fonte fora da tomada. Luz boa e o celular na mão.", "icone_camera"),
             };
@@ -353,7 +379,7 @@ namespace MontAR.EditorTools
         {
             RectTransform content = ScreenRoot(parent, "Tela 2 - Peças", UiTheme.Background, out PartsScreen screen);
             VLayout(content.gameObject, null, 0f);
-            Header(content, "Escolha as peças", "Por enquanto há uma opção de cada componente. O roteiro se ajusta ao que você marcar.", out Button back);
+            Header(content, "Escolha as peças", "Use ‹ › para trocar o modelo (ex.: Intel ou AMD). O roteiro se ajusta ao que você marcar.", out Button back);
 
             RectTransform list = Scroll(content, "Lista de peças", Pad(40, 40, 8, 40), 22f, out ScrollRect scroll);
             PartRowView row = BuildPartRow(list);

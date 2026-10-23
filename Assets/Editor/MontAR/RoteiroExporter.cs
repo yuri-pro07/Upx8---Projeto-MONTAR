@@ -43,13 +43,16 @@ namespace MontAR.EditorTools
                 + "Montagem em bancada, sem gabinete (decisão D4 em aberto).");
             md.AppendLine();
 
-            md.AppendLine("## Peças (uma opção de cada, por enquanto)");
+            md.AppendLine("## Peças");
             md.AppendLine();
-            md.AppendLine("| Peça | Modelo | Quantidade aceita | Padrão |");
+            md.AppendLine("| Peça | Modelos (o primeiro é o padrão) | Quantidade aceita | Padrão |");
             md.AppendLine("|---|---|---|---|");
             foreach (PartDefinition part in catalog.Parts)
             {
-                string model = part.Models.Count > 0 ? part.Models[0].DisplayName : "—";
+                var names = new StringBuilder();
+                foreach (PartModel option in part.Models)
+                    names.Append(names.Length > 0 ? "<br>" : "").Append(option.DisplayName).Append($" (`{option.ModelId}`)");
+                string model = names.Length > 0 ? names.ToString() : "—";
                 string range = part.MinQuantity == part.MaxQuantity ? part.MinQuantity.ToString() : $"{part.MinQuantity} a {part.MaxQuantity}";
                 string optional = part.IsRequired ? "" : " (opcional)";
                 md.AppendLine($"| {part.DisplayName} (`{part.PartId}`) | {model} | {range}{optional} | {part.DefaultQuantity} |");
@@ -119,7 +122,10 @@ namespace MontAR.EditorTools
                 text = part != null && !part.IsRequired ? $"{name} no kit" : name;
 
             if (!string.IsNullOrEmpty(step.RequiredModelId))
-                text += $" (modelo `{step.RequiredModelId}`)";
+            {
+                PartModel model = part?.FindModel(step.RequiredModelId);
+                text += model != null ? $", modelo {model.DisplayName} (`{step.RequiredModelId}`)" : $" (modelo `{step.RequiredModelId}`)";
+            }
             return text;
         }
     }

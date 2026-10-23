@@ -125,7 +125,7 @@ O detalhamento está no artigo V1, em [`docs/documents/artigo-v1-montar.docx`](d
 | RF08 | Intervenção do observador | Botão discreto para o pesquisador registrar quando precisou intervir | 🚧 |
 | RF09 | Tela de conclusão | Mostra o resumo da sessão ao final da montagem | 🚧 |
 | RF10 | Apresentação | Explica como o app funciona (Aponta, Guia, Valida, Registra) antes de começar | 🚧 |
-| RF11 | Seleção de peças | Escolha do modelo e da quantidade de cada peça; o roteiro se ajusta ao kit | 🚧 |
+| RF11 | Seleção de peças | Escolha do modelo (ex.: CPU Intel ou AMD, fonte bivolt ou com chave 110/220 V) e da quantidade de cada peça; o roteiro se ajusta ao kit | 🚧 |
 | RF12 | Demonstração 3D | Mostra o encaixe numa bancada virtual, sem câmera, com o mesmo overlay da RA | 🚧 |
 
 **Legenda:** ✅ Implementado · 🚧 Em desenvolvimento · ⬜ Planejado · ❌ Cancelado

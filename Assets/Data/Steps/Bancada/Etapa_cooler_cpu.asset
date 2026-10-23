@@ -15,8 +15,8 @@ MonoBehaviour:
   stepId: cooler_cpu
   title: Instale o cooler e ligue no CPU_FAN
   componentName: Cooler do processador
-  requiredPartId: cooler
-  requiredModelId: 
+  requiredPartId: cpu
+  requiredModelId: intel_lga1700
   minPartQuantity: 1
   maxPartQuantity: 0
   instruction: "Confira a pasta t\xE9rmica. Apoie o cooler sobre a CPU com os 4 pontos de fixa\xE7\xE3o alinhados aos furos em volta do soquete e prenda em diagonal (pinos ou parafusos em X). Depois ligue o cabo do cooler no conector CPU_FAN, acima do soquete."

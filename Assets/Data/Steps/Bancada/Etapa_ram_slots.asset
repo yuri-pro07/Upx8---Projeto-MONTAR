@@ -19,7 +19,7 @@ MonoBehaviour:
   requiredModelId: 
   minPartQuantity: 2
   maxPartQuantity: 2
-  instruction: "Abra as travas dos slots A2 e B2 (2\xBA e 4\xBA a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical at\xE9 as travas fecharem."
+  instruction: "Segure o pente pelas pontas (as bordas curtas, marcadas em azul), sem encostar nos contatos dourados nem nos chips: a est\xE1tica da m\xE3o pode queimar a mem\xF3ria. Abra as travas dos slots A2 e B2 (2\xBA e 4\xBA a partir da CPU). Alinhe o chanfro do pente com a chave do slot e empurre na vertical at\xE9 as travas fecharem."
   commonErrorAlert: "O pente s\xF3 entra num sentido: se o chanfro n\xE3o bater, gire 180\xB0. Nunca force."
   referenceImageName: MontAR_Marcador_A
   overlayPrefab: {fileID: 8332214140385242610, guid: 0186c235fa1bcf149961d7881d86cf08, type: 3}

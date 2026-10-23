@@ -53,7 +53,7 @@ namespace MontAR
         [SerializeField] private int maxQuantity = 1;
         [Min(0)]
         [SerializeField] private int defaultQuantity = 1;
-        [Tooltip("Por enquanto um modelo por peça; novos modelos entram aqui.")]
+        [Tooltip("O primeiro é o do kit padrão. Etapas com Required Model Id só entram com o modelo escolhido.")]
         [SerializeField] private List<PartModel> models = new List<PartModel>();
 
         public PartDefinition()

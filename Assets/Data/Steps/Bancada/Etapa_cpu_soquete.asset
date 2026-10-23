@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
   stepId: cpu_soquete
   title: Encaixe a CPU no soquete
-  componentName: Processador (LGA1700)
+  componentName: Processador Intel (LGA1700)
   requiredPartId: cpu
-  requiredModelId: 
+  requiredModelId: intel_lga1700
   minPartQuantity: 1
   maxPartQuantity: 0
-  instruction: "Levante a alavanca e abra a moldura. Alinhe o tri\xE2ngulo dourado da CPU com a marca do soquete e apoie a CPU sem empurrar. Feche a moldura e trave a alavanca."
+  instruction: "Levante a alavanca e abra a moldura. Segure a CPU pelas bordas, sem tocar nos contatos dourados de baixo. Alinhe o tri\xE2ngulo dourado da CPU com a marca do soquete e apoie a CPU sem empurrar. Feche a moldura e trave a alavanca."
   commonErrorAlert: "N\xE3o encoste nos contatos do soquete nem force a CPU: um pino LGA torto inutiliza a placa."
   referenceImageName: MontAR_Marcador_A
   overlayPrefab: {fileID: 6432339756113537538, guid: 3d9c00ca25002f54fbca0de38427cf9c, type: 3}

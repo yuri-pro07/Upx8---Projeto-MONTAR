@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67851b7518f3cad428835550db9f24ff, type: 3}
+  m_Name: Etapa_cpu_soquete_am5
+  m_EditorClassIdentifier: MontAR::MontAR.AssemblyStep
+  stepId: cpu_soquete_am5
+  title: Encaixe a CPU no soquete
+  componentName: Processador AMD (AM5)
+  requiredPartId: cpu
+  requiredModelId: amd_am5
+  minPartQuantity: 1
+  maxPartQuantity: 0
+  instruction: "Levante a alavanca at\xE9 o fim e abra a moldura. Segure a CPU pelas bordas, sem tocar nos contatos dourados de baixo. Alinhe o tri\xE2ngulo dourado do canto da CPU com o tri\xE2ngulo do soquete (os entalhes das laterais tamb\xE9m precisam bater) e apoie a CPU sem empurrar. Feche a moldura, abaixe a alavanca e prenda-a embaixo da trava. A capa pl\xE1stica do soquete solta sozinha: guarde-a."
+  commonErrorAlert: "O AM5 tamb\xE9m \xE9 LGA: os pinos ficam no soquete da placa. N\xE3o encoste neles nem force a CPU, porque um pino torto inutiliza a placa."
+  referenceImageName: MontAR_Marcador_A
+  overlayPrefab: {fileID: 3971170312022753943, guid: b5223b749c09b2a40bf3fcab04f5ee9d, type: 3}
+  overlayPositionOffset: {x: -0.022, y: 0.0042, z: -0.17300001}
+  overlayRotationOffset: {x: 0, y: 0, z: 0}
+  validationType: 0
+  checklistItems:
+  - "Tri\xE2ngulo da CPU alinhado com o do soquete"
+  - "CPU apoiada sem for\xE7ar"
+  - Moldura fechada e alavanca presa na trava
+  validationReferenceName: 

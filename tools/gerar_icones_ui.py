@@ -3,6 +3,9 @@
 Tudo em branco sobre fundo transparente: a cor vem do Image da Unity (campo Color).
   - ui_arredondado.png: retângulo arredondado para 9-slice (borda de 48 px), base de cartões e botões;
   - ui_circulo.png e ui_check.png: pontos, caixas de marcar e o sinal de concluído;
+  - ui_contorno.png, ui_brilho.png, ui_gradiente.png, ui_sombra.png e ui_halo.png: acabamento do vidro
+    (contorno claro, reflexo, botão principal, sombra/brilho e halo dos ícones);
+  - fundo_aurora.png (e fundo_aurora_desfocado.png): fundo escuro com luzes, atrás dos menus e da bancada 3D;
   - icone_*.png: ícones da apresentação (Aponta, Guia, Valida, Registra) e do modo 3D;
   - peca_*.png: um ícone por peça do catálogo.
 
@@ -17,7 +20,7 @@ Requer: pip install pillow
 import math
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 RAIZ = Path(__file__).resolve().parent.parent
 PASTA = RAIZ / "Assets" / "Textures" / "UI"
@@ -289,12 +292,129 @@ def peca_fonte():
     return salvar(img, "peca_fonte.png", 256)
 
 
+def icone_encaixe():
+    # Botão "Simular encaixe": a peça descendo dentro do encaixe, com rastros de movimento.
+    img, d = tela(128)
+    linha(d, [(20, 66), (20, 106), (108, 106), (108, 66)], 9)
+    d.rounded_rectangle(caixa(38, 34, 90, 88), radius=s(9), fill=BRANCO)
+    for x, topo in ((50, 14), (64, 8), (78, 14)):
+        linha(d, [(x, topo), (x, 22)], 6)
+    return salvar(img, "icone_encaixe.png", 128)
+
+
+# ------------------------------------------------------------------ vidro (glassmorphism)
+# Os cartões de vidro usam o shader MontAR/UI Glass (desfoque do que está atrás) e, por cima,
+# o contorno claro e o reflexo. Bordas de 9-slice: 48 px (88 px na sombra), configuradas pelo AppBuilder.
+
+def _mascara_arredondada(tamanho, x0, y0, x1, y1, raio):
+    mascara = Image.new("L", (tamanho * ESCALA, tamanho * ESCALA), 0)
+    ImageDraw.Draw(mascara).rounded_rectangle(caixa(x0, y0, x1, y1), radius=s(raio), fill=255)
+    return mascara
+
+
+def _degrade_vertical(tamanho, valor):
+    """Faixa vertical em escala de cinza: valor(t) com t de 0 (topo) a 1 (base)."""
+    lado = tamanho * ESCALA
+    faixa = Image.new("L", (1, lado))
+    for y in range(lado):
+        faixa.putpixel((0, y), max(0, min(255, round(255 * valor(y / (lado - 1))))))
+    return faixa.resize((lado, lado))
+
+
+def ui_contorno():
+    img, d = tela(128)
+    d.rounded_rectangle(caixa(1.5, 1.5, 126.5, 126.5), radius=s(46.5), outline=BRANCO, width=s(3))
+    return salvar(img, "ui_contorno.png", 128)
+
+
+def ui_anel():
+    # Contorno dos botões e selos redondos.
+    img, d = tela(128)
+    d.ellipse(caixa(1.5, 1.5, 126.5, 126.5), outline=BRANCO, width=s(3))
+    return salvar(img, "ui_anel.png", 128)
+
+
+def ui_brilho():
+    # Reflexo do vidro: forte no alto e sumindo antes da metade.
+    mascara = _mascara_arredondada(128, 0, 0, 127.9, 127.9, 48)
+    alfa = ImageChops.multiply(mascara, _degrade_vertical(128, lambda t: max(0.0, 1 - t / 0.6) ** 2))
+    img = Image.new("RGBA", alfa.size, (255, 255, 255, 0))
+    img.putalpha(alfa)
+    return salvar(img, "ui_brilho.png", 128)
+
+
+def ui_gradiente():
+    # Botão principal: a cor vem do Image; o alto fica mais claro que a base.
+    mascara = _mascara_arredondada(128, 0, 0, 127.9, 127.9, 48)
+    luz = _degrade_vertical(128, lambda t: 1 - 0.2 * t)
+    img = Image.merge("RGBA", (luz, luz, luz, mascara))
+    return salvar(img, "ui_gradiente.png", 128)
+
+
+def ui_sombra():
+    # Sombra suave (e brilho colorido do botão principal): retângulo no meio, bem desfocado.
+    mascara = _mascara_arredondada(192, 48, 48, 144, 144, 40).filter(ImageFilter.GaussianBlur(s(18)))
+    img = Image.new("RGBA", mascara.size, (255, 255, 255, 0))
+    img.putalpha(mascara)
+    return salvar(img, "ui_sombra.png", 192)
+
+
+def ui_halo():
+    # Halo radial atrás dos ícones grandes.
+    img, _ = tela(256)
+    lado = img.size[0]
+    # radial_gradient vai de 0 no centro a 255 nos cantos (181 no meio da borda): normaliza pelo raio,
+    # para o halo sumir antes da borda do quadrado.
+    alfa = Image.radial_gradient("L").resize((lado, lado))
+    alfa = alfa.point(lambda v: round(255 * max(0.0, 1 - v * 1.4142 / 255) ** 2.2))
+    img.putalpha(alfa)
+    return salvar(img, "ui_halo.png", 256)
+
+
+AURORA_BASE_TOPO = (5, 8, 15)
+AURORA_BASE_FIM = (8, 13, 26)
+# (x, y, raio) em fração da largura/altura, cor e intensidade de cada luz da aurora.
+AURORA_LUZES = [
+    ((0.08, 0.07, 0.40), (22, 163, 74), 0.62),
+    ((0.66, 0.15, 0.15), (74, 222, 128), 0.20),
+    ((0.98, 0.42, 0.32), (13, 148, 136), 0.45),
+    ((0.04, 0.72, 0.36), (124, 58, 237), 0.48),
+    ((0.84, 0.98, 0.34), (37, 99, 235), 0.40),
+]
+
+
+def fundo_aurora():
+    """Fundo dos menus e da bancada 3D: noite azul-escura com luzes verde, azul-esverdeada e violeta."""
+    largura, altura = 1080, 1920
+    pequena = (270, 480)
+    base = Image.new("RGB", (1, pequena[1]))
+    for y in range(pequena[1]):
+        t = y / (pequena[1] - 1)
+        base.putpixel((0, y), tuple(round(a + (b - a) * t) for a, b in zip(AURORA_BASE_TOPO, AURORA_BASE_FIM)))
+    img = base.resize(pequena)
+    for (fx, fy, fr), cor, forca in AURORA_LUZES:
+        luz = Image.new("L", pequena, 0)
+        cx, cy, r = fx * pequena[0], fy * pequena[1], fr * pequena[0]
+        ImageDraw.Draw(luz).ellipse([cx - r, cy - r, cx + r, cy + r], fill=round(255 * forca))
+        luz = luz.filter(ImageFilter.GaussianBlur(r * 0.55))
+        img = Image.composite(Image.new("RGB", pequena, cor), img, luz)
+    img = img.filter(ImageFilter.GaussianBlur(6)).resize((largura, altura), Image.BICUBIC)
+    # Grão fino para não aparecer degrau no degradê.
+    grao = Image.effect_noise((largura, altura), 9).convert("RGB")
+    img = Image.blend(img, ImageChops.add(img, grao, scale=1.0, offset=-128), 0.06)
+    img.save(PASTA / "fundo_aurora.png")
+    # Versão desfocada e pequena: o vidro usa ela até o desfoque da câmera ficar pronto.
+    img.resize((135, 240), Image.BILINEAR).filter(ImageFilter.GaussianBlur(10)).save(PASTA / "fundo_aurora_desfocado.png")
+    return "fundo_aurora.png"
+
+
 def main():
     PASTA.mkdir(parents=True, exist_ok=True)
     gerados = [
         ui_arredondado(), ui_circulo(), ui_check(),
+        ui_contorno(), ui_anel(), ui_brilho(), ui_gradiente(), ui_sombra(), ui_halo(), fundo_aurora(),
         icone_aponta(), icone_guia(), icone_valida(), icone_registra(), icone_cubo(), icone_camera(),
-        cadeado(False), cadeado(True), icone_observador(), icone_alerta(), icone_historico(),
+        cadeado(False), cadeado(True), icone_observador(), icone_alerta(), icone_historico(), icone_encaixe(),
         peca_placa_mae(), peca_cpu(), peca_cooler(), peca_ram(), peca_ssd(), peca_gpu(), peca_fonte(),
     ]
     for nome in gerados:

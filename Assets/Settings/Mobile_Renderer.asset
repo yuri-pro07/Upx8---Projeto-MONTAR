@@ -27,7 +27,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 886973467773452466}
   - {fileID: 274718085446749691}
-  m_RendererFeatureMap: b240d567ab294f0cfbcd6da8a4fecf03l
+  - {fileID: 8413186058540273789}
+  m_RendererFeatureMap: b240d567ab294f0cfbcd6da8a4fecf037dd08f3025a4c174l
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   m_AssetVersion: 3
@@ -82,3 +83,19 @@ MonoBehaviour:
   m_Name: ARCommandBufferSupportRendererFeature
   m_EditorClassIdentifier: Unity.XR.ARFoundation::UnityEngine.XR.ARFoundation.ARCommandBufferSupportRendererFeature
   m_Active: 1
+--- !u!114 &8413186058540273789
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25636d7d0b9956b4ca6c15ec2cae0992, type: 3}
+  m_Name: MontAR Glass Blur
+  m_EditorClassIdentifier: MontAR::MontAR.GlassBlurFeature
+  m_Active: 1
+  blurShader: {fileID: 4800000, guid: f422a423e860911448052fde813f3489, type: 3}
+  downsample: 4
+  spread: 1.8

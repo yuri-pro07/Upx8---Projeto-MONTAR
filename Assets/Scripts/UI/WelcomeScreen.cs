@@ -135,7 +135,7 @@ namespace MontAR
 
             for (int i = 0; i < dots.Count; i++)
             {
-                dots[i].color = i == page ? UiTheme.Primary : UiTheme.Border;
+                dots[i].color = i == page ? UiTheme.Primary : UiTheme.GlassBorderStrong;
                 dots[i].rectTransform.sizeDelta = new Vector2(i == page ? 44f : 18f, 18f);
             }
         }

@@ -129,6 +129,8 @@ O detalhamento está no artigo V1, em [`docs/documents/artigo-v1-montar.docx`](d
 | RF12 | Demonstração 3D | Mostra o encaixe numa bancada virtual, sem câmera, com o mesmo overlay da RA | 🚧 |
 | RF13 | Histórico de montagens | Lista as montagens concluídas no aparelho (nome, tempo, erros apontados e etapas) | 🚧 |
 | RF14 | Permissão da câmera | Explica para que serve a câmera e abre o pedido do Android antes da RA; sem permissão, segue no 3D | 🚧 |
+| RF15 | Peças virtuais e "Simular encaixe" | Sem o kit: a placa-mãe aparece em 3D (na RA, presa ao marcador A) e o botão **Simular encaixe** mostra a peça da etapa entrando no lugar; ela fica montada nas etapas seguintes. Escolha "Kit de verdade" ou "Peças virtuais" na tela de início | 🚧 |
+| RF16 | Interface em vidro | Cartões de vidro fosco com o que está atrás (câmera ou bancada 3D) desfocado, fundo escuro com luzes e fonte Plus Jakarta Sans | 🚧 |
 
 **Legenda:** ✅ Implementado · 🚧 Em desenvolvimento · ⬜ Planejado · ❌ Cancelado
 
@@ -335,9 +337,10 @@ Upx8---Projeto-MONTAR/
 │   ├── diagrams/
 │   ├── documents/                  artigo, pitch, roteiro de montagem e demais documentos
 │   │   └── marcadores/             PDFs para impressão dos marcadores
-│   └── images/                     capturas das telas
+│   ├── images/                     capturas das telas
+│   └── simulador/                  simulador web da montagem, para avaliadores (gerado)
 │
-├── tools/                          scripts auxiliares (marcadores, texturas da bancada, ícones da interface)
+├── tools/                          scripts auxiliares (marcadores, texturas da bancada, ícones, simulador web)
 │
 ├── .gitattributes
 ├── .gitignore
@@ -363,7 +366,8 @@ Upx8---Projeto-MONTAR/
 | `docs/documents` | Artigo, pitch e documentos complementares |
 | `docs/documents/marcadores` | Marcadores prontos para imprimir (A4, tamanho real) |
 | `docs/documents/roteiro-bancada-v0.md` | Roteiro exportado do app, base do manual técnico e do vídeo |
-| `tools` | `gerar_marcador.py`, `gerar_texturas_previa.py` e `gerar_icones_ui.py` |
+| `docs/simulador` | Simulador web da montagem (`index.html`), gerado por `tools/gerar_simulador_web.py` |
+| `tools` | `gerar_marcador.py`, `gerar_texturas_previa.py`, `gerar_icones_ui.py` e `gerar_simulador_web.py` (modelo em `tools/simulador_web/`) |
 
 ---
 
@@ -468,6 +472,26 @@ O APK foi gerado com sucesso em 05/10/2026 (prova de conceito) e em 07/10/2026 (
 
 Sem celular, dá para usar o app no próprio Editor: dê Play na cena `MontAR.unity` e escolha **Demonstração 3D** na tela de início.
 
+### Simulador web (avaliação sem celular e sem peças)
+
+`docs/simulador/index.html` é uma página para quem vai avaliar o projeto sem um celular com ARCore e sem o kit. Ela mostra a mesma bancada virtual do app (tapete, placa genérica e o overlay de cada etapa) e percorre o roteiro do kit escolhido com a mesma regra: a próxima etapa só abre depois do checklist da anterior. A peça fantasma mostra o gesto, o avaliador imagina a peça na mão e confirma o checklist. Ao validar, a peça fica instalada na bancada. No fim aparecem o tempo por etapa e as validações reprovadas. O simulador **não grava CSV** e não faz parte do experimento.
+
+Jeitos de ver a bancada:
+
+- **Na tela**: girar e aproximar com o mouse ou com os dedos, em qualquer computador.
+- **Na sua frente** (celular): a câmera traseira mostra a mesa e a bancada aparece por cima. O giroscópio muda o olhar. Não há rastreamento: a bancada fica presa à direção em que o celular apontava no início (botão **Recentralizar**).
+- **Na mesa (WebXR)**: aparece só em navegadores com WebXR. No Chrome do Android com ARCore, a bancada é posta em tamanho real sobre a mesa detectada. Em óculos (Meta Quest), aparece com um painel dentro da cena, e o gatilho valida a etapa e marca o checklist.
+
+O conteúdo vem do `spec_montagem.json`, do catálogo do `AppBuilder` e das texturas da bancada. Depois de mudar qualquer um deles, gere a página de novo:
+
+```bash
+python tools/gerar_simulador_web.py
+```
+
+Para abrir, basta dar duplo clique em `docs/simulador/index.html` (modo **na tela**; precisa de internet para carregar o three.js). A câmera e o WebXR exigem HTTPS: publique a pasta `docs/` no GitHub Pages (**Settings › Pages**, branch `main`, pasta `/docs`) e abra `…/simulador/` no celular. No computador, a página mostra um código QR com o próprio endereço.
+
+> Testado em 27/10/2026 só no Chrome headless: computador e celular emulado, modos **na tela** e **na sua frente** (com câmera simulada e sem giroscópio), com o kit padrão (9 etapas) e com AM5, 4 pentes, HD SATA, 12V-2x6 e fonte com chave (10 etapas). Giroscópio real, WebXR e Meta Quest ainda não foram testados em aparelho.
+
 ### Marcador da prova de conceito
 
 Imprima `docs/documents/marcadores/MontAR_Marcador_A_15cm_A4.pdf` em **100% (tamanho real)**, sem "ajustar à página", e confira com uma régua: a borda externa da moldura preta deve medir 15 cm. Se o tamanho estiver errado, o overlay aparece em escala errada.
@@ -490,9 +514,9 @@ Imprima `docs/documents/marcadores/MontAR_Marcador_A_15cm_A4.pdf` em **100% (tam
 1. Abra o aplicativo e autorize o acesso à câmera.
 2. Leia a **apresentação** (ou toque em **Pular**). Se houver uma montagem interrompida, o app pergunta se você quer continuar.
 3. Na tela de **peças**, confira o kit: modelo e quantidade de cada peça. Peças opcionais podem ficar de fora, e o roteiro se ajusta.
-4. Na tela de **início**, digite o código do participante (ex.: `P01`), escolha **Câmera (RA)** ou **Demonstração 3D** e toque em **Iniciar montagem**.
-5. Na montagem, aponte a câmera para o marcador A do tapete. A peça fantasma mostra onde e como encaixar.
-6. Execute a etapa com a peça real e toque em **Validar etapa**. Marque os itens que conferem e toque em **Confirmar**. Se algum item ficar desmarcado, a etapa volta para correção.
+4. Na tela de **início**, digite o código do participante (ex.: `P01`), escolha **Kit de verdade** ou **Peças virtuais**, escolha **Câmera (RA)** ou **Demonstração 3D** e toque em **Iniciar montagem**. A escolha das peças fica salva no aparelho.
+5. Na montagem, aponte a câmera para o marcador A do tapete. A peça fantasma mostra onde e como encaixar. Com peças virtuais, a placa-mãe aparece em 3D sobre o marcador (basta o marcador A impresso, sem o tapete).
+6. Execute a etapa com a peça real e toque em **Validar etapa**. Com peças virtuais, toque antes em **Simular encaixe**: a peça desce até o lugar e fica montada. Marque os itens que conferem e toque em **Confirmar**. Se algum item ficar desmarcado, a etapa volta para correção.
 7. Repita até a última etapa e confira o resumo na tela de conclusão.
 
 Para o pesquisador:
@@ -571,15 +595,19 @@ Conclusão (resumo da sessão)  →  Nova montagem / Voltar ao início
 
 ## 21. Interface
 
-Capturas reais do app **no Editor**, no modo demonstração 3D, feitas pelo teste automatizado de 23/10/2026. Não são capturas do celular nem da RA, que ainda não foi testada.
+Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtuais, feitas pelo teste automatizado de 27/10/2026 (interface em vidro). Não são capturas do celular nem da RA, que ainda não foi testada.
 
 | Apresentação | Peças | Início |
 |---|---|---|
 | ![Apresentação](docs/images/tela-apresentacao.png) | ![Seleção de peças](docs/images/tela-pecas.png) | ![Início](docs/images/tela-inicio.png) |
 
-| Montagem (CPU, 3D) | Montagem (RAM, 3D) | Validação | Conclusão |
+| CPU (peça fantasma) | CPU encaixada (simulada) | RAM encaixada | Montagem completa |
 |---|---|---|---|
-| ![Etapa da CPU](docs/images/montagem-3d-cpu.png) | ![Etapa da RAM](docs/images/montagem-3d-ram.png) | ![Checklist](docs/images/tela-validacao.png) | ![Conclusão](docs/images/tela-conclusao.png) |
+| ![Etapa da CPU](docs/images/montagem-3d-cpu.png) | ![CPU encaixada](docs/images/montagem-3d-cpu-encaixada.png) | ![RAM encaixada](docs/images/montagem-3d-ram.png) | ![Verificação final](docs/images/montagem-3d-completa.png) |
+
+| Validação | Conclusão |
+|---|---|
+| ![Checklist](docs/images/tela-validacao.png) | ![Conclusão](docs/images/tela-conclusao.png) |
 
 | Erro da validação | Histórico de montagens |
 |---|---|

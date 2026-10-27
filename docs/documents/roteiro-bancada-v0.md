@@ -1,6 +1,6 @@
 # Roteiro de montagem em bancada (bancada_v0)
 
-> Gerado a partir de `Assets/Data/Roteiro_bancada_v0.asset` e `Assets/Data/Pecas/Catalogo_pecas_v0.asset` em 23/10/2026 (menu **MontAR › App › Exportar roteiro**). Não edite este arquivo à mão: mude as etapas na Unity (ou no `spec_montagem.json`) e exporte de novo.
+> Gerado a partir de `Assets/Data/Roteiro_bancada_v0.asset` e `Assets/Data/Pecas/Catalogo_pecas_v0.asset` em 27/10/2026 (menu **MontAR › App › Exportar roteiro**). Não edite este arquivo à mão: mude as etapas na Unity (ou no `spec_montagem.json`) e exporte de novo.
 
 O app, o **manual técnico** e o **tutorial em vídeo** das condições de controle precisam seguir exatamente estas etapas, na mesma ordem e com o mesmo kit (CLAUDE.md, §2).
 

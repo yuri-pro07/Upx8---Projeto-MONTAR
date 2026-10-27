@@ -403,6 +403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9154114807269784330}
+  - component: {fileID: 5182847133523772374}
   - component: {fileID: 4195274925128956858}
   m_Layer: 0
   m_Name: 'seta_io [seta_horizontal]'
@@ -428,6 +429,20 @@ Transform:
   - {fileID: 5493826719861022241}
   m_Father: {fileID: 6694874180674402225}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5182847133523772374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3869979080628375419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add0c90e2fcff3d439909b9b3e9a8e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MontAR::MontAR.OverlayPart
+  elementId: seta_io
+  role: 4
 --- !u!114 &4195274925128956858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -634,6 +649,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2580723385047265682}
+  - component: {fileID: 3347823296160442153}
   - component: {fileID: 5485913660512993612}
   m_Layer: 0
   m_Name: 'placa_fantasma [caixa]'
@@ -658,6 +674,20 @@ Transform:
   - {fileID: 7134208732942040390}
   m_Father: {fileID: 6694874180674402225}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3347823296160442153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5344219598325942504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add0c90e2fcff3d439909b9b3e9a8e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MontAR::MontAR.OverlayPart
+  elementId: placa_fantasma
+  role: 0
 --- !u!114 &5485913660512993612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -774,6 +804,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3839205255989990512}
+  - component: {fileID: 2918794706225571308}
   m_Layer: 0
   m_Name: 'contorno_placa [contorno_retangular]'
   m_TagString: Untagged
@@ -800,3 +831,17 @@ Transform:
   - {fileID: 5295072418364323038}
   m_Father: {fileID: 6694874180674402225}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2918794706225571308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8331303913616611752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add0c90e2fcff3d439909b9b3e9a8e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MontAR::MontAR.OverlayPart
+  elementId: contorno_placa
+  role: 1

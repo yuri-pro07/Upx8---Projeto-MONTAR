@@ -223,6 +223,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8813948878328687931}
+  - component: {fileID: 4977008979799360318}
   m_Layer: 0
   m_Name: 'contorno_eps [contorno_retangular]'
   m_TagString: Untagged
@@ -249,6 +250,20 @@ Transform:
   - {fileID: 8907908346418583264}
   m_Father: {fileID: 5525604929676983387}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4977008979799360318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3071701976311352894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add0c90e2fcff3d439909b9b3e9a8e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MontAR::MontAR.OverlayPart
+  elementId: contorno_eps
+  role: 1
 --- !u!1 &4773960033921844101
 GameObject:
   m_ObjectHideFlags: 0
@@ -618,6 +633,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6815193104196876428}
+  - component: {fileID: 876338055879705489}
   - component: {fileID: 5385600706519327631}
   m_Layer: 0
   m_Name: 'plugue_eps [caixa]'
@@ -642,6 +658,20 @@ Transform:
   - {fileID: 8978147777606642898}
   m_Father: {fileID: 5525604929676983387}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &876338055879705489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7707481197167071551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add0c90e2fcff3d439909b9b3e9a8e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MontAR::MontAR.OverlayPart
+  elementId: plugue_eps
+  role: 2
 --- !u!114 &5385600706519327631
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -758,6 +788,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2534198199318336335}
+  - component: {fileID: 5880672129838593563}
   - component: {fileID: 2112122098827363178}
   m_Layer: 0
   m_Name: 'seta_eps [seta_para_baixo]'
@@ -783,6 +814,20 @@ Transform:
   - {fileID: 5868565707569623530}
   m_Father: {fileID: 5525604929676983387}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5880672129838593563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8953340201700430956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add0c90e2fcff3d439909b9b3e9a8e72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MontAR::MontAR.OverlayPart
+  elementId: seta_eps
+  role: 4
 --- !u!114 &2112122098827363178
 MonoBehaviour:
   m_ObjectHideFlags: 0

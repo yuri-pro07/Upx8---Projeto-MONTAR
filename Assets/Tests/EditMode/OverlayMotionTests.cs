@@ -51,5 +51,18 @@ namespace MontAR.Tests
         {
             Assert.AreEqual(Vector3.zero, OverlayMotionMath.Offset(OverlayMotionMode.Bob, Travel, 0f, 0f, 3f));
         }
+
+        [Test]
+        public void RoleFromColor_FollowsTheSpecColorConvention()
+        {
+            // Cores usadas no spec_montagem.json.
+            Assert.AreEqual(OverlayPartRole.Piece, OverlayPart.RoleFromColor(new Color(0.1f, 0.85f, 0.4f, 0.35f)));
+            Assert.AreEqual(OverlayPartRole.Target, OverlayPart.RoleFromColor(new Color(1f, 0.9f, 0.1f)));
+            Assert.AreEqual(OverlayPartRole.Target, OverlayPart.RoleFromColor(new Color(1f, 0.8f, 0.1f)));
+            Assert.AreEqual(OverlayPartRole.Lock, OverlayPart.RoleFromColor(new Color(0.95f, 0.15f, 0.15f)));
+            Assert.AreEqual(OverlayPartRole.Gesture, OverlayPart.RoleFromColor(new Color(1f, 0.55f, 0.05f)));
+            Assert.AreEqual(OverlayPartRole.Grip, OverlayPart.RoleFromColor(new Color(0.15f, 0.55f, 1f, 0.9f)));
+            Assert.AreEqual(OverlayPartRole.Other, OverlayPart.RoleFromColor(new Color(0.5f, 0.5f, 0.5f)));
+        }
     }
 }

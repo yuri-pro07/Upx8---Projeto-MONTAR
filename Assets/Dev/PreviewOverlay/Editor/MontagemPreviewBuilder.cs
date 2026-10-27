@@ -77,8 +77,9 @@ namespace MontAR.Dev
             GameObject boardPrefab = BuildBoardPrefab(spec, materials);
 
             var overlayPrefabs = new Dictionary<string, GameObject>();
+            BoardElementSpec pcb = Array.Find(spec.board_elements, e => e.id == "pcb");
             foreach (StepPreviewSpec step in spec.steps)
-                overlayPrefabs[step.step_id] = step.overlay != null && step.overlay.Length > 0 ? BuildOverlayPrefab(step, materials, cone, triangle) : null;
+                overlayPrefabs[step.step_id] = step.overlay != null && step.overlay.Length > 0 ? BuildOverlayPrefab(step, pcb, materials, cone, triangle) : null;
 
             Vector3 markerWorld = MarkerWorld(spec);
             var stepAssets = new List<AssemblyStep>();
@@ -160,13 +161,18 @@ namespace MontAR.Dev
             return prefab;
         }
 
-        private static GameObject BuildOverlayPrefab(StepPreviewSpec step, MaterialCache materials, Mesh cone, Mesh triangle)
+        private static GameObject BuildOverlayPrefab(StepPreviewSpec step, BoardElementSpec pcb, MaterialCache materials, Mesh cone, Mesh triangle)
         {
             var root = new GameObject("Overlay_" + step.step_id);
             foreach (OverlayElementSpec element in step.overlay)
             {
                 GameObject part = BuildShape(element, materials, cone, triangle);
                 part.transform.SetParent(root.transform, false);
+                // Papel pela cor (verde = peça fantasma etc.): as peças virtuais encaixam só a peça.
+                // A placa fantasma da etapa 1 não conta: a placa-mãe virtual já está na bancada e na RA.
+                OverlayPartRole role = OverlayPart.RoleFromColor(ToColor(element.color_rgba, 1f));
+                bool boardGhost = pcb != null && Mathf.Abs(element.size_x_mm - pcb.w_mm) < 1f && Mathf.Abs(element.size_y_mm - pcb.h_mm) < 1f;
+                part.AddComponent<OverlayPart>().Configure(element.id, role == OverlayPartRole.Piece && boardGhost ? OverlayPartRole.Other : role);
                 Vector3 rest = OffsetToLocal(element.offset_x_mm, element.offset_y_mm, element.offset_z_mm);
                 part.transform.localPosition = rest;
                 part.transform.localRotation = Quaternion.Euler(0f, ShapeYaw(element), 0f);

@@ -57,6 +57,11 @@ namespace MontAR
 
         public Vector3 RestLocalPosition => restLocalPosition;
 
+        public OverlayMotionMode Mode => mode;
+
+        /// <summary>Deslocamento local: ponto de partida (InsertLoop) ou amplitude (Bob).</summary>
+        public Vector3 Travel => travel;
+
         /// <summary>Configura o movimento. Usado pelo construtor de prefabs no Editor.</summary>
         public void Configure(OverlayMotionMode motionMode, Vector3 localTravel, float period, float hold, Vector3 restPosition)
         {

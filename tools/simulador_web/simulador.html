@@ -1,0 +1,1909 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador MontAR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Simulador da montagem do MontAR: a bancada virtual na sua frente, etapa por etapa, com a mesma validação do app.">
+<!-- Gerado por tools/gerar_simulador_web.py a partir de tools/simulador_web/simulador.html. Não editar docs/simulador/index.html à mão. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Figtree:wght@400;600;700&display=swap">
+<style>
+/* Layout: bancada 3D em tela cheia; cartão da etapa no topo e folha da instrução embaixo (celular) ou à direita (computador), como no app. */
+:root {
+  /* Cores do app (UiTheme.cs) */
+  --verde: #16A34A;
+  --verde-texto: #15803D;
+  --verde-suave: #DCFCE7;
+  --botao: #15803D;
+  --botao-hover: #166534;
+  --botao-texto: #FFFFFF;
+  --laranja: #F97316;
+  --fundo: #F4F4F5;
+  --superficie: #FFFFFF;
+  --superficie-2: #F4F4F5;
+  --borda: #E4E4E7;
+  --borda-forte: #D4D4D8;
+  --texto: #18181B;
+  --texto-2: #52525B;
+  --texto-3: #71717A;
+  --alerta-fundo: #FFEDD5;
+  --alerta-texto: #9A3412;
+  --perigo: #B91C1C;
+  --perigo-fundo: #FEE2E2;
+  --foco: #2563EB;
+  /* Cartão escuro do topo (SurfaceDark no app): igual nos dois temas */
+  --hud: rgba(24, 24, 27, 0.9);
+  --hud-texto: #FAFAFA;
+  --hud-texto-2: #A1A1AA;
+  --hud-trilho: rgba(255, 255, 255, 0.16);
+  --hud-botao: rgba(255, 255, 255, 0.14);
+  --situacao-guia: #15803D;
+  --situacao-valida: #6D28D9;
+  --situacao-aviso: #B45309;
+  --barra: #22C55E;
+  --video-fundo: #000000;
+  --qr-fundo: #FFFFFF;
+  --palco-topo: #EEF0F3;
+  --palco-base: #C3C8D0;
+  --sombra: 0 12px 32px rgba(24, 24, 27, 0.16);
+  --fonte-titulo: "Archivo", "Segoe UI", system-ui, sans-serif;
+  --fonte-texto: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --verde-texto: #4ADE80;
+    --verde-suave: #11301D;
+    --fundo: #0F0F11;
+    --superficie: #1B1B1F;
+    --superficie-2: #26262B;
+    --borda: #34343A;
+    --borda-forte: #4A4A52;
+    --texto: #F4F4F5;
+    --texto-2: #CACAD2;
+    --texto-3: #A1A1AA;
+    --alerta-fundo: #3A2214;
+    --alerta-texto: #FDBA74;
+    --perigo: #FCA5A5;
+    --perigo-fundo: #3B1717;
+    --foco: #93C5FD;
+    --palco-topo: #2A2D33;
+    --palco-base: #111215;
+    --sombra: 0 12px 32px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --verde-texto: #4ADE80;
+  --verde-suave: #11301D;
+  --fundo: #0F0F11;
+  --superficie: #1B1B1F;
+  --superficie-2: #26262B;
+  --borda: #34343A;
+  --borda-forte: #4A4A52;
+  --texto: #F4F4F5;
+  --texto-2: #CACAD2;
+  --texto-3: #A1A1AA;
+  --alerta-fundo: #3A2214;
+  --alerta-texto: #FDBA74;
+  --perigo: #FCA5A5;
+  --perigo-fundo: #3B1717;
+  --foco: #93C5FD;
+  --palco-topo: #2A2D33;
+  --palco-base: #111215;
+  --sombra: 0 12px 32px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--fundo);
+  color: var(--texto);
+  font: 400 16px/1.45 var(--fonte-texto);
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3 { margin: 0; font-family: var(--fonte-titulo); text-wrap: balance; }
+p, ol, ul, dl, dd { margin: 0; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+.palco {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(130% 95% at 50% 12%, var(--palco-topo) 0%, var(--palco-base) 100%);
+}
+#camera {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--video-fundo);
+}
+#cena {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+#ui { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.cartao, .hud-card, .hud-linha > * { pointer-events: auto; }
+
+/* ---------- painéis de início e de conclusão ---------- */
+.painel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.cartao {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 22px;
+  box-shadow: var(--sombra);
+}
+.painel .cartao {
+  max-height: min(62dvh, 680px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 22px 20px 20px;
+  display: grid;
+  gap: 20px;
+}
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 700 0.76rem/1 var(--fonte-titulo);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--verde-texto);
+}
+.marca svg { flex: none; }
+.titulo { font: 800 clamp(1.75rem, 3.4vw, 2.35rem)/1.05 var(--fonte-titulo); letter-spacing: -0.02em; }
+.lead { color: var(--texto-2); max-width: 60ch; }
+.cabeca { display: grid; gap: 10px; }
+.secao { display: grid; gap: 10px; }
+.secao-titulo {
+  font: 700 0.76rem/1.2 var(--fonte-titulo);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--texto-3);
+}
+.kit { display: grid; gap: 12px; }
+.kit-linha { display: grid; gap: 4px; min-width: 0; }
+.kit-rotulo { font-weight: 700; font-size: 0.92rem; }
+.kit-fixo { color: var(--texto-2); font-size: 0.92rem; }
+.kit-controles { display: flex; gap: 8px; min-width: 0; }
+.kit-controles select:first-child:not(:only-child) { flex: 0 0 auto; width: auto; }
+select {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 36px 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background-color: var(--superficie-2);
+  background-image: linear-gradient(45deg, transparent 50%, var(--texto-3) 50%), linear-gradient(135deg, var(--texto-3) 50%, transparent 50%);
+  background-position: calc(100% - 19px) 52%, calc(100% - 14px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+}
+.roteiro { font-size: 0.92rem; color: var(--texto-2); }
+.roteiro summary { cursor: pointer; font-weight: 700; color: var(--texto); }
+.roteiro ol { margin-top: 8px; padding-left: 1.4em; display: grid; gap: 2px; }
+.modos { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.modos legend { padding: 0; margin-bottom: 10px; }
+.modo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1.5px solid var(--borda);
+  border-radius: 16px;
+  background: var(--superficie);
+  cursor: pointer;
+}
+.modo input { grid-row: span 2; width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--botao); }
+.modo-nome { font-weight: 700; }
+.modo-desc { grid-column: 2; color: var(--texto-3); font-size: 0.88rem; }
+.modo:has(input:checked) { border-color: var(--verde); background: var(--verde-suave); }
+.modo:has(input:disabled) { cursor: default; opacity: 0.62; }
+.nota { font-size: 0.82rem; color: var(--texto-3); max-width: 62ch; }
+.qr { display: flex; gap: 14px; align-items: center; }
+.qr-img { flex: none; width: 92px; height: 92px; padding: 6px; border-radius: 10px; background: var(--qr-fundo); }
+.qr-img svg { display: block; width: 100%; height: 100%; }
+.qr p { font-size: 0.88rem; color: var(--texto-2); }
+
+.botao {
+  min-height: 52px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 16px;
+  font: 700 1.05rem/1 var(--fonte-titulo);
+}
+.botao-primario { background: var(--botao); color: var(--botao-texto); }
+.botao-primario:hover { background: var(--botao-hover); }
+.botao-secundario { background: var(--superficie-2); color: var(--texto); border: 1px solid var(--borda); }
+.botao:disabled { opacity: 0.5; cursor: default; }
+.acoes { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+
+.numeros { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.numeros > div { background: var(--superficie-2); border-radius: 14px; padding: 12px 14px; }
+.numeros dt { font-size: 0.82rem; color: var(--texto-3); }
+.numeros dd { font: 800 1.6rem/1.1 var(--fonte-titulo); font-variant-numeric: tabular-nums; }
+.tempos { list-style: none; padding: 0; display: grid; gap: 2px; font-size: 0.92rem; }
+.tempos li {
+  display: grid;
+  grid-template-columns: 1.6em 1fr auto;
+  gap: 4px 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--borda);
+}
+.tempos .n { color: var(--texto-3); font-variant-numeric: tabular-nums; }
+.tempos .t { min-width: 0; }
+.tempos .d { font-variant-numeric: tabular-nums; font-weight: 700; }
+.tempos .r { grid-column: 2 / 4; color: var(--perigo); font-size: 0.82rem; }
+
+/* ---------- cartão do topo ---------- */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  display: grid;
+  gap: 8px;
+}
+.hud-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-radius: 20px;
+  background: var(--hud);
+  color: var(--hud-texto);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.hud-topo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.hud-sair {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hud-botao);
+  color: var(--hud-texto);
+  display: grid;
+  place-items: center;
+}
+.hud-textos { min-width: 0; }
+.hud-etapa { font: 700 1.3rem/1.15 var(--fonte-titulo); }
+.hud-componente { color: var(--hud-texto-2); font-size: 0.9rem; }
+.progresso { height: 6px; border-radius: 3px; background: var(--hud-trilho); overflow: hidden; }
+.progresso span { display: block; height: 100%; width: calc(var(--feito, 0) * 100%); background: var(--barra); transition: width 0.45s ease; }
+.situacao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--situacao-guia);
+  color: var(--botao-texto);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+.situacao[data-fase="validacao"] { background: var(--situacao-valida); }
+.situacao[data-fase="aviso"] { background: var(--situacao-aviso); }
+.situacao svg { flex: none; }
+.hud-linha { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip {
+  flex: 1 1 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--hud);
+  color: var(--hud-texto-2);
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+.chip svg { flex: none; }
+.chip b { color: var(--hud-texto); }
+.alternador { display: flex; padding: 4px; border-radius: 999px; background: var(--hud); }
+.alternador button, .botao-hud {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hud-texto);
+  font: 700 0.88rem/1 var(--fonte-titulo);
+}
+.alternador button[aria-pressed="true"] { background: var(--botao); color: var(--botao-texto); }
+.botao-hud { min-height: 44px; background: var(--hud); }
+
+/* ---------- folha da etapa ---------- */
+.folha {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.folha .cartao {
+  max-height: 48dvh;
+  padding: 4px 20px 18px;
+  display: flex;
+  flex-direction: column;
+}
+.folha-corpo { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.folha-corpo > .botao, .folha-corpo > .acoes { flex: none; }
+#validacao { padding-top: 14px; }
+.rolagem {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: 6px;
+  margin-right: -6px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.alca {
+  width: 100%;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+}
+.alca::before { content: ""; width: 44px; height: 5px; border-radius: 3px; background: var(--borda-forte); }
+.alca-texto { font-size: 0.78rem; color: var(--texto-3); text-align: center; margin: -8px 0 6px; }
+.etapa-titulo { font: 700 1.35rem/1.2 var(--fonte-titulo); }
+.instrucao { color: var(--texto-2); }
+.alerta { padding: 10px 14px; border-radius: 14px; background: var(--alerta-fundo); color: var(--alerta-texto); }
+.erro { padding: 10px 14px; border-radius: 14px; background: var(--perigo-fundo); color: var(--perigo); font-weight: 700; }
+.cores { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--texto-3); }
+.cores li { display: flex; align-items: center; gap: 6px; }
+.cores i { width: 12px; height: 12px; border-radius: 3px; background: var(--c); }
+.folha[data-recolhida="true"] .so-aberta { display: none; }
+.checklist { list-style: none; padding: 0; display: grid; gap: 8px; }
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--superficie-2);
+  cursor: pointer;
+}
+.item input { flex: none; width: 26px; height: 26px; margin: 0; accent-color: var(--botao); }
+.item span { min-width: 0; }
+.validacao-texto { color: var(--texto-2); font-size: 0.92rem; }
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: var(--toast-base, 24px);
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--hud);
+  color: var(--hud-texto);
+  font-weight: 700;
+  text-align: center;
+  box-shadow: var(--sombra);
+}
+
+@media (min-width: 900px) {
+  .painel {
+    top: 0;
+    right: auto;
+    width: calc(460px + 32px);
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    display: flex;
+  }
+  .painel .cartao { width: 100%; max-height: none; padding: 28px 28px 24px; }
+  .hud { right: auto; width: calc(480px + 32px); padding-top: calc(16px + env(safe-area-inset-top, 0px)); }
+  .folha {
+    left: auto;
+    width: calc(430px + 32px);
+    padding-left: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .folha .cartao { max-height: calc(100dvh - 32px); }
+}
+@media (max-width: 899px) {
+  .qr { display: none; }
+  .hud-card { gap: 8px; padding: 10px 12px 12px; }
+  .hud-sair { width: 40px; height: 40px; }
+  .hud-etapa { font-size: 1.12rem; }
+  .situacao { padding: 8px 10px; font-size: 0.88rem; }
+  .chip { flex-basis: 0; min-width: 0; font-size: 0.78rem; }
+  .hud[data-modo="frente"] .chip { flex-basis: 100%; }
+  .alternador button { padding: 0 11px; font-size: 0.82rem; }
+  .botao-hud { min-height: 44px; font-size: 0.82rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .progresso span { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="palco" id="palco"></div>
+<video id="camera" playsinline muted hidden></video>
+<canvas id="cena" aria-label="Bancada virtual em 3D: tapete, placa-mãe e a peça da etapa"></canvas>
+
+<div id="ui">
+  <section class="painel" id="inicio" aria-labelledby="inicio-titulo">
+    <div class="cartao">
+      <div class="cabeca">
+        <p class="marca">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
+          MontAR · simulador para avaliação
+        </p>
+        <h1 class="titulo" id="inicio-titulo">Monte o PC etapa por etapa, com as peças na sua frente</h1>
+        <p class="lead">É a mesma bancada, as mesmas etapas e a mesma validação do app. A peça fantasma mostra o gesto; você imagina a peça na mão, repete o gesto e confere o checklist. A próxima etapa só abre depois disso.</p>
+      </div>
+
+      <div class="secao">
+        <h2 class="secao-titulo">Kit de peças</h2>
+        <div class="kit" id="kit"></div>
+        <details class="roteiro">
+          <summary id="roteiro-resumo">Roteiro</summary>
+          <ol id="roteiro-lista"></ol>
+        </details>
+      </div>
+
+      <fieldset class="modos">
+        <legend class="secao-titulo">Como ver a bancada</legend>
+        <label class="modo">
+          <input type="radio" name="modo" id="modo-tela" value="tela" checked>
+          <span class="modo-nome">Na tela</span>
+          <span class="modo-desc">Gire, aproxime e afaste com o mouse ou com os dedos. Funciona em qualquer computador.</span>
+        </label>
+        <label class="modo">
+          <input type="radio" name="modo" id="modo-frente" value="frente">
+          <span class="modo-nome">Na sua frente</span>
+          <span class="modo-desc" id="modo-frente-desc">Celular: a câmera mostra a sua mesa e a bancada aparece por cima. Mova o celular para olhar em volta.</span>
+        </label>
+        <label class="modo">
+          <input type="radio" name="modo" id="modo-xr" value="xr" disabled>
+          <span class="modo-nome" id="modo-xr-nome">Na mesa (WebXR)</span>
+          <span class="modo-desc" id="modo-xr-desc">Verificando o aparelho…</span>
+        </label>
+      </fieldset>
+
+      <button class="botao botao-primario" id="btn-comecar" type="button">Começar montagem</button>
+
+      <div class="qr" id="qr" hidden>
+        <div class="qr-img" id="qr-img"></div>
+        <p>Abra no celular para ver a bancada na sua frente, pela câmera. Em Android com ARCore, a bancada fica em cima da mesa de verdade.</p>
+      </div>
+
+      <p class="nota">Simulação para a avaliação do projeto: não há rastreamento de marcador nem peça real, e nada daqui entra nos dados do experimento. A placa é uma ATX genérica com posições aproximadas, porque o kit do laboratório ainda não foi definido.</p>
+    </div>
+  </section>
+
+  <header class="hud" id="hud" hidden>
+    <div class="hud-card">
+      <div class="hud-topo">
+        <button class="hud-sair" id="btn-sair" type="button" aria-label="Sair da montagem">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="hud-textos">
+          <p class="hud-etapa" id="hud-etapa">Etapa 1 de 9</p>
+          <p class="hud-componente" id="hud-componente"></p>
+        </div>
+      </div>
+      <div class="progresso" aria-hidden="true"><span id="progresso"></span></div>
+      <p class="situacao" id="situacao" data-fase="guia">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="7" rx="1.5" stroke-dasharray="3 2.4"/><path d="M12 12v6M8.5 15l3.5 3.5 3.5-3.5M5 21h14"/></svg>
+        <span id="situacao-texto"></span>
+      </p>
+    </div>
+    <div class="hud-linha">
+      <p class="chip" id="chip">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path id="chip-cadeado" d="M8 11V7a4 4 0 0 1 8 0"/></svg>
+        <span id="chip-texto"></span>
+      </p>
+      <div class="alternador" id="alternador" role="group" aria-label="Como ver a bancada">
+        <button type="button" id="ver-frente" aria-pressed="false">Na sua frente</button>
+        <button type="button" id="ver-tela" aria-pressed="true">Na tela</button>
+      </div>
+      <button class="botao-hud" type="button" id="btn-recentrar" hidden>Recentralizar</button>
+      <button class="botao-hud" type="button" id="btn-reposicionar" hidden>Reposicionar</button>
+      <button class="botao-hud" type="button" id="btn-sair-xr" hidden>Sair do WebXR</button>
+    </div>
+  </header>
+
+  <aside class="folha" id="folha" data-recolhida="false" hidden aria-label="Etapa atual">
+    <div class="cartao">
+      <button class="alca" id="alca" type="button" aria-expanded="true" aria-controls="guia" aria-label="Esconder a instrução"></button>
+      <p class="alca-texto" id="alca-texto">Toque na barra para esconder a instrução</p>
+      <div class="folha-corpo" id="guia">
+        <div class="rolagem">
+          <h2 class="etapa-titulo" id="etapa-titulo"></h2>
+          <p class="instrucao so-aberta" id="etapa-instrucao"></p>
+          <p class="alerta so-aberta" id="etapa-alerta"><strong>Atenção:</strong> <span id="etapa-alerta-texto"></span></p>
+          <ul class="cores so-aberta" id="etapa-cores" aria-label="Cores na bancada"></ul>
+          <p class="erro" id="etapa-erro" role="alert" hidden></p>
+        </div>
+        <button class="botao botao-primario" id="btn-validar" type="button">Validar etapa</button>
+      </div>
+      <div class="folha-corpo" id="validacao" hidden>
+        <div class="rolagem">
+          <h2 class="etapa-titulo">Confira antes de avançar</h2>
+          <p class="validacao-texto">Marque só o que você conferiu na peça. Se algo não bate, deixe desmarcado: a etapa volta para você corrigir.</p>
+          <ul class="checklist" id="checklist"></ul>
+        </div>
+        <div class="acoes">
+          <button class="botao botao-secundario" id="btn-voltar" type="button">Voltar</button>
+          <button class="botao botao-primario" id="btn-confirmar" type="button">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="painel" id="fim" hidden aria-labelledby="fim-titulo">
+    <div class="cartao">
+      <div class="cabeca">
+        <p class="marca">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          Montagem concluída
+        </p>
+        <h1 class="titulo" id="fim-titulo">PC montado em <span id="fim-tempo">0:00</span></h1>
+        <p class="lead" id="fim-kit"></p>
+      </div>
+      <dl class="numeros">
+        <div><dt>Etapas validadas</dt><dd id="fim-etapas">0</dd></div>
+        <div><dt>Validações reprovadas</dt><dd id="fim-reprovacoes">0</dd></div>
+      </dl>
+      <div class="secao">
+        <h2 class="secao-titulo">Tempo por etapa</h2>
+        <ol class="tempos" id="fim-lista"></ol>
+      </div>
+      <p class="nota">No app, estes números saem do registro da sessão (CSV com step_started, validation_failed e step_completed) e ficam no histórico do aparelho. Aqui eles valem só para esta simulação e não são gravados.</p>
+      <div class="acoes">
+        <button class="botao botao-secundario" id="btn-trocar" type="button">Trocar kit</button>
+        <button class="botao botao-primario" id="btn-de-novo" type="button">Montar de novo</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="toast" id="toast" role="status" hidden></p>
+</div>
+
+<script id="dados-montagem" type="application/json">__DADOS_MONTAGEM__</script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script type="module">
+// Versões "+esm" do jsDelivr: os addons importam o mesmo módulo do three, sem precisar de importmap.
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/+esm';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js/+esm';
+import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/environments/RoomEnvironment.js/+esm';
+
+// ---------------------------------------------------------------- dados (os mesmos do app)
+
+const DADOS = JSON.parse(document.getElementById('dados-montagem').textContent);
+const SPEC = DADOS.spec;
+const CATALOGO = DADOS.catalogo;
+const MAT = SPEC.mat;
+const PCB = SPEC.board_elements.find(e => e.id === 'pcb');
+const PCB_MM = PCB && PCB.height_mm > 0 ? PCB.height_mm : 1.6;
+const MAT_TOPO = 0.001;
+const FOV_TELA = 40;
+const FOV_CAMERA = 62;
+const $ = id => document.getElementById(id);
+const graus = g => g * Math.PI / 180;
+const limita = THREE.MathUtils.clamp;
+const movimentoReduzido = matchMedia('(prefers-reduced-motion: reduce)');
+
+// ---------------------------------------------------------------- coordenadas
+// Mesmas contas do MontagemPreviewBuilder (Unity). O three.js é destro, então o eixo z troca de sinal:
+// aqui +z aponta para o aluno (borda de baixo do tapete) e a rotação em torno da vertical inverte.
+
+/** Quadro do tapete (mm; origem no canto superior esquerdo; y para o aluno; z para cima) → bancada (m). */
+function tapeteParaBancada(x, y, z) {
+  return new THREE.Vector3((x - MAT.width_mm / 2) / 1000, MAT_TOPO + z / 1000, (y - MAT.height_mm / 2) / 1000);
+}
+
+/** Quadro da placa ou deslocamento do overlay (mm; x direita, y para baixo, z para cima) → metros locais. */
+function mmParaLocal(x, y, z) {
+  return new THREE.Vector3((x || 0) / 1000, (z || 0) / 1000, (y || 0) / 1000);
+}
+
+function alvoDaEtapa(etapa) {
+  return tapeteParaBancada(MAT.board_left_mm + etapa.target_x_mm, MAT.board_top_mm + etapa.target_y_mm, PCB_MM + etapa.target_z_mm);
+}
+
+/** Cores do spec: 0–1 ou 0–255, como o ToColor do construtor. */
+function rgb01(valores) {
+  if (!valores || valores.length < 3) return [0.5, 0.5, 0.5];
+  const k = valores[0] > 1 || valores[1] > 1 || valores[2] > 1 ? 1 / 255 : 1;
+  return [valores[0] * k, valores[1] * k, valores[2] * k];
+}
+
+function converteCor(valores) {
+  const [r, g, b] = rgb01(valores);
+  const alfa = valores && valores.length > 3 ? valores[3] * (valores[3] > 1 ? 1 / 255 : 1) : 1;
+  return { cor: new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace), alfa };
+}
+
+/** Convenção de cores do spec, usada na legenda da etapa e para achar a peça fantasma. */
+const CORES = [
+  { id: 'encaixe', teste: ([r, g, b]) => r > 0.85 && g > 0.7 && b < 0.35, nome: 'onde encaixar', css: '#F2D21A' },
+  { id: 'fantasma', teste: ([r, g, b]) => g > 0.6 && r < 0.4 && b < 0.6, nome: 'peça fantasma', css: '#1AD966' },
+  { id: 'trava', teste: ([r, g]) => r > 0.85 && g < 0.3, nome: 'trava ou o que evitar', css: '#F22626' },
+  { id: 'gesto', teste: ([r, g]) => r > 0.85 && g >= 0.3 && g <= 0.7, nome: 'gesto', css: '#FF8C0D' },
+  { id: 'segurar', teste: ([r, , b]) => b > 0.8 && r < 0.4, nome: 'onde segurar', css: '#268CFF' },
+];
+const tipoDeCor = el => CORES.find(c => c.teste(rgb01(el.color_rgba)));
+
+// ---------------------------------------------------------------- cena
+
+const canvas = $('cena');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0x000000, 0);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const cena = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+cena.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+cena.add(new THREE.HemisphereLight(0xffffff, 0x6b6f78, 0.7));
+
+const camera = new THREE.PerspectiveCamera(FOV_TELA, window.innerWidth / window.innerHeight, 0.01, 30);
+camera.position.set(0, 0.6, 0.55);
+
+const bancada = new THREE.Group();
+cena.add(bancada);
+
+// Mesma direção da luz da prévia (Euler 58°, −32°): vem de cima, da direita e do lado do aluno.
+const sol = new THREE.DirectionalLight(0xffffff, 1.7);
+sol.position.set(0.34, 1.0, 0.54);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+Object.assign(sol.shadow.camera, { left: -0.5, right: 0.5, top: 0.5, bottom: -0.5, near: 0.2, far: 3 });
+sol.shadow.bias = -0.0004;
+sol.shadow.normalBias = 0.0015;
+bancada.add(sol, sol.target);
+
+const carregador = new THREE.TextureLoader();
+function textura(nome) {
+  const t = carregador.load(DADOS.texturas[nome]);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+
+const mesa = new THREE.Mesh(
+  new THREE.BoxGeometry(Math.max(1.4, MAT.width_mm / 1000 + 0.6), 0.03, Math.max(1.0, MAT.height_mm / 1000 + 0.5)),
+  new THREE.MeshStandardMaterial({ color: new THREE.Color().setRGB(0.55, 0.38, 0.24, THREE.SRGBColorSpace), roughness: 0.8 }));
+mesa.position.y = -0.015;
+mesa.receiveShadow = true;
+bancada.add(mesa);
+
+const tapete = new THREE.Mesh(
+  new THREE.PlaneGeometry(MAT.width_mm / 1000, MAT.height_mm / 1000),
+  new THREE.MeshStandardMaterial({ map: textura('tapete'), roughness: 0.95 }));
+tapete.rotation.x = -Math.PI / 2;
+tapete.position.y = MAT_TOPO;
+tapete.receiveShadow = true;
+bancada.add(tapete);
+
+const materiaisPlaca = new Map();
+function materialPlaca(rgb, metalico) {
+  const chave = `${rgb}|${metalico}`;
+  if (!materiaisPlaca.has(chave)) {
+    materiaisPlaca.set(chave, new THREE.MeshStandardMaterial({
+      color: converteCor(rgb).cor,
+      metalness: metalico ? 0.85 : 0,
+      roughness: metalico ? 0.45 : 0.7,
+      envMapIntensity: 0.8,
+    }));
+  }
+  return materiaisPlaca.get(chave);
+}
+
+const placa = new THREE.Group();
+placa.position.copy(tapeteParaBancada(MAT.board_left_mm, MAT.board_top_mm, 0));
+for (const e of SPEC.board_elements) {
+  const ehPcb = e.id === 'pcb';
+  const altura = Math.max(e.height_mm, 0.2);
+  const parte = new THREE.Mesh(
+    new THREE.BoxGeometry(Math.max(e.w_mm, 0.5) / 1000, altura / 1000, Math.max(e.h_mm, 0.5) / 1000),
+    materialPlaca(e.color_rgb, e.metallic));
+  parte.position.copy(mmParaLocal(e.x_mm, e.y_mm, ehPcb ? altura / 2 : PCB_MM + altura / 2));
+  parte.castShadow = true;
+  parte.receiveShadow = true;
+  placa.add(parte);
+}
+if (PCB && DADOS.texturas.serigrafia) {
+  const face = new THREE.Mesh(
+    new THREE.PlaneGeometry(PCB.w_mm / 1000, PCB.h_mm / 1000),
+    new THREE.MeshStandardMaterial({ map: textura('serigrafia'), roughness: 0.65, polygonOffset: true, polygonOffsetFactor: -1 }));
+  face.rotation.x = -Math.PI / 2;
+  face.position.copy(mmParaLocal(PCB.x_mm, PCB.y_mm, PCB_MM + 0.02));
+  face.receiveShadow = true;
+  placa.add(face);
+}
+{
+  const anel = new THREE.CylinderGeometry(0.00375, 0.00375, 0.0001, 24);
+  const furo = new THREE.CylinderGeometry(0.001875, 0.001875, 0.00012, 16);
+  const dourado = materialPlaca([0.78, 0.66, 0.32], true);
+  const preto = materialPlaca([0.05, 0.05, 0.05], false);
+  for (const h of SPEC.mounting_holes || []) {
+    const a = new THREE.Mesh(anel, dourado);
+    a.position.copy(mmParaLocal(h.x_mm, h.y_mm, PCB_MM + 0.05));
+    a.add(new THREE.Mesh(furo, preto));
+    placa.add(a);
+  }
+}
+bancada.add(placa);
+
+const FOCO_PLACA = {
+  local: tapeteParaBancada(MAT.board_left_mm + PCB.x_mm, MAT.board_top_mm + PCB.y_mm, PCB_MM),
+  raio: Math.hypot(PCB.w_mm, PCB.h_mm) / 2000 * 0.9,
+};
+// Início e fim: a placa e o marcador A inteiros no quadro.
+const FOCO_BANCADA = (() => {
+  const topo = MAT.marker_center_y_mm - MAT.marker_size_mm / 2;
+  const base = MAT.board_top_mm + PCB.h_mm;
+  return { local: tapeteParaBancada(MAT.board_left_mm + PCB.x_mm, (topo + base) / 2, 0), raio: (base - topo) / 2000 };
+})();
+
+// ---------------------------------------------------------------- overlays (BuildShape do construtor)
+
+const geo = {
+  caixa: new THREE.BoxGeometry(1, 1, 1),
+  cilindro: new THREE.CylinderGeometry(0.5, 0.5, 1, 32),
+  cone: new THREE.ConeGeometry(0.5, 1, 32).rotateX(Math.PI), // ponta para −Y, como a malha da Unity
+  triangulo: prismaTriangular(),
+};
+
+/** Prisma 1×1×1 com o ângulo reto no canto x−, y+ da placa (inferior esquerdo), como na Unity. */
+function prismaTriangular() {
+  const a = [-0.5, 0.5], b = [0.5, 0.5], c = [-0.5, -0.5];
+  const v = (p, y) => [p[0], y, p[1]];
+  const pos = [];
+  const tri = (...pontos) => pontos.forEach(p => pos.push(...p));
+  tri(v(a, 0.5), v(b, 0.5), v(c, 0.5));
+  tri(v(a, -0.5), v(c, -0.5), v(b, -0.5));
+  for (const [p, q] of [[a, b], [b, c], [c, a]]) {
+    tri(v(p, 0.5), v(p, -0.5), v(q, -0.5));
+    tri(v(p, 0.5), v(q, -0.5), v(q, 0.5));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+const materiaisOverlay = new Map();
+function materialOverlay(rgba) {
+  const { cor, alfa } = converteCor(rgba);
+  const chave = cor.getHexString() + alfa.toFixed(3);
+  if (!materiaisOverlay.has(chave)) {
+    const transparente = alfa < 0.999;
+    materiaisOverlay.set(chave, new THREE.MeshBasicMaterial({
+      color: cor, transparent: transparente, opacity: alfa, depthWrite: !transparente, side: THREE.DoubleSide,
+    }));
+  }
+  return materiaisOverlay.get(chave);
+}
+
+function forma(el, material) {
+  const sx = Math.max(el.size_x_mm, 0.5) / 1000;
+  const sy = Math.max(el.size_y_mm, 0.5) / 1000;
+  const sz = Math.max(el.size_z_mm, 0.3) / 1000;
+  const grupo = new THREE.Group();
+  const poe = (g, x, y, z, ex, ey, ez, giroZ = 0) => {
+    const m = new THREE.Mesh(g, material);
+    m.position.set(x, y, z);
+    m.scale.set(ex, ey, ez);
+    m.rotation.z = giroZ;
+    grupo.add(m);
+  };
+  switch (el.shape) {
+    case 'losango': {
+      const suporte = new THREE.Group();
+      suporte.scale.set(sx, sz, sy);
+      const quadrado = new THREE.Mesh(geo.caixa, material);
+      quadrado.rotation.y = Math.PI / 4;
+      quadrado.scale.set(0.7071, 1, 0.7071);
+      suporte.add(quadrado);
+      grupo.add(suporte);
+      break;
+    }
+    case 'contorno_retangular': {
+      const barra = limita(Math.min(sx, sy) * 0.06, 0.0012, 0.003);
+      poe(geo.caixa, 0, 0, -sy / 2 + barra / 2, sx, sz, barra);
+      poe(geo.caixa, 0, 0, sy / 2 - barra / 2, sx, sz, barra);
+      poe(geo.caixa, -sx / 2 + barra / 2, 0, 0, barra, sz, sy - 2 * barra);
+      poe(geo.caixa, sx / 2 - barra / 2, 0, 0, barra, sz, sy - 2 * barra);
+      break;
+    }
+    case 'seta_para_baixo': {
+      const d = Math.max(sx, sy);
+      const ponta = Math.min(sz * 0.45, d * 1.1);
+      const haste = Math.max(sz - ponta, 0.001);
+      poe(geo.cilindro, 0, sz / 2 - haste / 2, 0, d * 0.38, haste, d * 0.38);
+      poe(geo.cone, 0, -sz / 2 + ponta / 2, 0, d, ponta, d);
+      break;
+    }
+    case 'seta_horizontal': {
+      const comprimento = sx;
+      const d = Math.max(sy, 0.002);
+      const ponta = Math.min(comprimento * 0.4, d * 1.6);
+      const haste = Math.max(comprimento - ponta, 0.001);
+      poe(geo.cilindro, -comprimento / 2 + haste / 2, 0, 0, d * 0.38, haste, d * 0.38, Math.PI / 2);
+      poe(geo.cone, comprimento / 2 - ponta / 2, 0, 0, d, ponta, d, Math.PI / 2); // ponta para +x
+      break;
+    }
+    case 'triangulo':
+      poe(geo.triangulo, 0, 0, 0, sx, sz, sy);
+      break;
+    case 'cilindro':
+      poe(geo.cilindro, 0, 0, 0, sx, sz, sy);
+      break;
+    default:
+      poe(geo.caixa, 0, 0, 0, sx, sz, sy);
+  }
+  return grupo;
+}
+
+/** Igual ao ShapeYaw: positivo gira +x para +y da placa (no three.js, rotação negativa em Y). */
+function giroDaForma(el) {
+  if (el.shape !== 'triangulo' || (Math.abs(el.offset_x_mm) < 1 && Math.abs(el.offset_y_mm) < 1)) return el.rotation_deg_about_up || 0;
+  const esquerda = el.offset_x_mm < 0;
+  const baixo = el.offset_y_mm > 0;
+  if (esquerda && baixo) return 0;
+  if (esquerda) return 90;
+  if (!baixo) return 180;
+  return 270;
+}
+
+function criaOverlay(etapa) {
+  const grupo = new THREE.Group();
+  grupo.position.copy(alvoDaEtapa(etapa));
+  for (const el of etapa.overlay || []) {
+    const parte = forma(el, materialOverlay(el.color_rgba));
+    const repouso = mmParaLocal(el.offset_x_mm, el.offset_y_mm, el.offset_z_mm);
+    parte.position.copy(repouso);
+    parte.rotation.y = -graus(giroDaForma(el));
+    const modo = (el.motion || '').trim().toLowerCase();
+    if (modo === 'insert' || modo === 'bob') {
+      parte.userData.movimento = {
+        modo,
+        curso: mmParaLocal(el.travel_x_mm, el.travel_y_mm, el.travel_z_mm),
+        periodo: el.period_s > 0 ? el.period_s : 2.2,
+        pausa: el.hold_fraction > 0 ? el.hold_fraction : 0.35,
+        repouso,
+      };
+    }
+    grupo.add(parte);
+  }
+  // Foco da câmera: esfera do overlay em repouso, em coordenadas da bancada.
+  grupo.updateMatrixWorld(true);
+  const esfera = new THREE.Box3().setFromObject(grupo).getBoundingSphere(new THREE.Sphere());
+  grupo.userData.foco = { local: esfera.center.clone(), raio: Math.max(esfera.radius, 0.05) };
+  grupo.userData.t0 = performance.now();
+  return grupo;
+}
+
+/** OverlayMotionMath.Offset: Bob oscila; InsertLoop desce do curso até o encaixe e fica parado um tempo. */
+function deslocamento(m, segundos, saida) {
+  saida.set(0, 0, 0);
+  if (m.periodo <= 0) return saida;
+  const fase = ((segundos / m.periodo) % 1 + 1) % 1;
+  if (m.modo === 'bob') return saida.copy(m.curso).multiplyScalar(0.5 - 0.5 * Math.cos(fase * 2 * Math.PI));
+  const andando = 1 - limita(m.pausa, 0, 0.9);
+  if (fase >= andando) return saida;
+  const p = fase / andando;
+  return saida.copy(m.curso).multiplyScalar(1 - p * p * (3 - 2 * p));
+}
+
+// ---------------------------------------------------------------- peças instaladas
+// Quando a etapa é validada, a peça fantasma (verde no spec) fica na bancada como peça de verdade,
+// para o avaliador ver o PC sendo montado. A placa fantasma revela a própria placa.
+
+const pecasInstaladas = new THREE.Group();
+bancada.add(pecasInstaladas);
+// Acabamento só para leitura do conjunto (o spec não tem a aparência real das peças): pelo prefixo do id do elemento.
+const ACABAMENTOS = [
+  { prefixo: /^cpu/, rgb: [0.74, 0.75, 0.78], metalico: true },      // tampa metálica da CPU
+  { prefixo: /^cooler/, rgb: [0.8, 0.82, 0.85], metalico: true },    // aletas de alumínio
+  { prefixo: /^ram/, rgb: [0.13, 0.14, 0.16], metalico: false },     // dissipador do pente
+  { prefixo: /^gpu/, rgb: [0.17, 0.18, 0.2], metalico: false },
+  { prefixo: /^drive/, rgb: [0.6, 0.62, 0.66], metalico: true },     // carcaça do SSD SATA ou HD
+  { prefixo: /^plugue/, rgb: [0.07, 0.07, 0.08], metalico: false },  // plugues dos cabos
+];
+const materialInstalado = el => {
+  const a = ACABAMENTOS.find(x => x.prefixo.test(el.id)) || { rgb: [0.25, 0.27, 0.31], metalico: false };
+  return materialPlaca(a.rgb, a.metalico);
+};
+const materialBorda = new THREE.LineBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.75 });
+const quedas = [];
+
+const ehPecaFantasma = el => tipoDeCor(el)?.id === 'fantasma';
+const ehAPlaca = el => PCB && Math.abs(el.size_x_mm - PCB.w_mm) < 1 && Math.abs(el.size_y_mm - PCB.h_mm) < 1;
+
+function cai(obj, curso, duracao = 650) {
+  const para = obj.position.clone();
+  const de = para.clone().add(curso);
+  obj.position.copy(de);
+  quedas.push({ obj, de, para, t0: performance.now(), duracao: movimentoReduzido.matches ? 1 : duracao });
+}
+
+function mostraPlaca(visivel, animada) {
+  placa.visible = visivel;
+  if (visivel && animada) cai(placa, new THREE.Vector3(0, 0.04, 0), 750);
+}
+
+function instalaPecas(etapa) {
+  const alvo = alvoDaEtapa(etapa);
+  for (const el of etapa.overlay || []) {
+    if (!ehPecaFantasma(el)) continue;
+    if (ehAPlaca(el)) { mostraPlaca(true, true); continue; }
+    const peca = forma(el, materialInstalado(el));
+    peca.traverse(o => {
+      if (!o.isMesh) return;
+      o.castShadow = true;
+      o.receiveShadow = true;
+      o.add(new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 25), materialBorda));
+    });
+    peca.position.copy(alvo).add(mmParaLocal(el.offset_x_mm, el.offset_y_mm, el.offset_z_mm));
+    peca.rotation.y = -graus(giroDaForma(el));
+    pecasInstaladas.add(peca);
+    const curso = mmParaLocal(el.travel_x_mm, el.travel_y_mm, el.travel_z_mm);
+    cai(peca, curso.lengthSq() > 1e-8 ? curso : new THREE.Vector3(0, 0.02, 0));
+  }
+}
+
+function limpaInstaladas() {
+  quedas.length = 0;
+  for (const peca of [...pecasInstaladas.children]) {
+    peca.traverse(o => { if (o.isLineSegments) o.geometry.dispose(); });
+    pecasInstaladas.remove(peca);
+  }
+  placa.position.copy(tapeteParaBancada(MAT.board_left_mm, MAT.board_top_mm, 0));
+}
+
+// ---------------------------------------------------------------- kit e roteiro (StepFilter do app)
+
+const selecao = {};
+for (const p of CATALOGO) selecao[p.id] = { modelo: p.modelos[0] ? p.modelos[0].id : '', qtd: p.padrao };
+
+function etapaEntra(etapa) {
+  if (!etapa.part_id) return true;
+  const s = selecao[etapa.part_id];
+  const qtd = s ? s.qtd : 0;
+  if (qtd < Math.max(1, etapa.part_min_qty || 0)) return false;
+  if ((etapa.part_max_qty || 0) > 0 && qtd > etapa.part_max_qty) return false;
+  return !etapa.model_id || etapa.model_id === (s && s.modelo);
+}
+
+const roteiroDoKit = () => SPEC.steps.filter(etapaEntra);
+
+function descreveKit() {
+  return CATALOGO.filter(p => selecao[p.id].qtd > 0).map(p => {
+    const modelo = p.modelos.find(m => m.id === selecao[p.id].modelo);
+    const nome = modelo ? modelo.nome.split(' · ')[0] : p.nome;
+    return selecao[p.id].qtd > 1 ? `${selecao[p.id].qtd}× ${nome}` : nome;
+  }).join(', ');
+}
+
+function montaKit() {
+  const caixa = $('kit');
+  for (const p of CATALOGO) {
+    const linha = document.createElement('div');
+    linha.className = 'kit-linha';
+    const fixa = p.min >= 1 && p.max <= 1 && p.modelos.length <= 1;
+    const rotulo = document.createElement(fixa ? 'span' : 'label');
+    rotulo.className = 'kit-rotulo';
+    rotulo.textContent = p.nome;
+    linha.append(rotulo);
+    if (fixa) {
+      const valor = document.createElement('span');
+      valor.className = 'kit-fixo';
+      valor.textContent = p.modelos[0] ? p.modelos[0].nome : '';
+      linha.append(valor);
+    } else {
+      const controles = document.createElement('div');
+      controles.className = 'kit-controles';
+      if (p.max > 1) {
+        const qtd = document.createElement('select');
+        qtd.id = `kit-qtd-${p.id}`;
+        qtd.setAttribute('aria-label', `Quantidade de ${p.unidades}`);
+        for (let q = Math.max(p.min, 1); q <= p.max; q++) {
+          const nome = `${q} ${q === 1 ? p.unidade : p.unidades}${q === p.padrao ? ' (recomendado)' : ''}`;
+          qtd.append(new Option(nome, String(q), false, q === p.padrao));
+        }
+        qtd.addEventListener('change', () => { selecao[p.id].qtd = Number(qtd.value); aoMudarKit(); });
+        controles.append(qtd);
+      }
+      const modelo = document.createElement('select');
+      modelo.id = `kit-${p.id}`;
+      rotulo.htmlFor = modelo.id;
+      if (p.min === 0) modelo.append(new Option(`Sem ${p.nome.toLowerCase()}`, ''));
+      for (const m of p.modelos) modelo.append(new Option(m.nome, m.id, false, m.id === selecao[p.id].modelo && selecao[p.id].qtd > 0));
+      modelo.addEventListener('change', () => {
+        if (modelo.value) selecao[p.id] = { modelo: modelo.value, qtd: Math.max(selecao[p.id].qtd, Math.max(p.min, 1)) };
+        else selecao[p.id] = { modelo: '', qtd: 0 };
+        aoMudarKit();
+      });
+      controles.append(modelo);
+      linha.append(controles);
+    }
+    caixa.append(linha);
+  }
+}
+
+function aoMudarKit() {
+  const etapas = roteiroDoKit();
+  $('roteiro-resumo').textContent = `Roteiro do kit: ${etapas.length} etapas`;
+  $('roteiro-lista').replaceChildren(...etapas.map(e => {
+    const li = document.createElement('li');
+    li.textContent = e.title_pt;
+    return li;
+  }));
+  if (estado.tela === 'inicio') trocaOverlay(etapaDeVitrine(etapas));
+}
+
+/** Na tela de início, a bancada mostra a etapa da CPU do kit escolhido (a peça fantasma descendo no soquete). */
+const etapaDeVitrine = etapas => etapas.find(e => e.part_id === 'cpu') || etapas.find(e => (e.overlay || []).length) || null;
+
+// ---------------------------------------------------------------- estado da montagem (StepFlow, simplificado)
+
+const estado = {
+  tela: 'inicio',      // inicio | montagem | fim
+  modo: 'tela',        // tela | frente | xr
+  etapas: [],
+  indice: 0,
+  fase: 'guia',        // guia | validacao
+  marcados: [],
+  erro: '',
+  reprovacoes: 0,
+  registros: [],
+  inicioSessao: 0,
+  inicioEtapa: 0,
+  ocupado: false,
+  foco: FOCO_PLACA,
+  toastXR: null,
+};
+let overlayAtual = null;
+
+function trocaOverlay(etapa) {
+  if (overlayAtual) bancada.remove(overlayAtual);
+  overlayAtual = etapa && (etapa.overlay || []).length ? criaOverlay(etapa) : null;
+  if (overlayAtual) bancada.add(overlayAtual);
+  estado.foco = estado.tela !== 'montagem' ? FOCO_BANCADA : overlayAtual ? overlayAtual.userData.foco : FOCO_PLACA;
+}
+
+function preparaSessao() {
+  estado.etapas = roteiroDoKit();
+  estado.indice = 0;
+  estado.registros = [];
+  estado.tela = 'montagem';
+  limpaInstaladas();
+  mostraPlaca(false);
+  controles.autoRotate = false;
+  estado.inicioSessao = performance.now();
+}
+
+async function comecaMontagem() {
+  const modo = document.querySelector('input[name="modo"]:checked').value;
+  // A câmera, o giroscópio e o WebXR precisam ser pedidos dentro do toque: nada de await antes daqui.
+  const entrada = modo === 'frente' ? entraFrente() : modo === 'xr' ? entraXR() : null;
+  preparaSessao();
+  mostraEtapa(0);
+  if (!entrada) return;
+  if (await entrada) {
+    estado.inicioSessao = estado.inicioEtapa = performance.now(); // não conta o tempo do pedido de permissão
+    return;
+  }
+  aplicaModo('tela');
+  enquadra(false);
+  mostraToast(modo === 'frente' ? 'Sem acesso à câmera: a montagem segue na tela.' : 'O WebXR não abriu: a montagem segue na tela.');
+}
+
+/** "Montar de novo": mesmo kit e mesmo modo, sem pedir a câmera ou o WebXR outra vez. */
+function recomeca() {
+  preparaSessao();
+  if (estado.modo === 'frente') frente.posicionada = false;
+  mostraEtapa(0);
+}
+
+function mostraEtapa(i) {
+  estado.indice = i;
+  estado.fase = 'guia';
+  estado.erro = '';
+  estado.reprovacoes = 0;
+  estado.ocupado = false;
+  estado.inicioEtapa = performance.now();
+  trocaOverlay(estado.etapas[i]);
+  recolheFolha(false);
+  atualizaUI();
+  if (estado.modo === 'tela') requestAnimationFrame(() => enquadra(false));
+}
+
+function abreValidacao() {
+  if (estado.ocupado) return;
+  const etapa = estado.etapas[estado.indice];
+  estado.fase = 'validacao';
+  estado.marcados = (etapa.checklist_pt || []).map(() => false);
+  $('checklist').replaceChildren(...(etapa.checklist_pt || []).map((texto, i) => {
+    const li = document.createElement('li');
+    const rotulo = document.createElement('label');
+    rotulo.className = 'item';
+    const caixa = document.createElement('input');
+    caixa.type = 'checkbox';
+    caixa.id = `item-${i}`;
+    caixa.addEventListener('change', () => { estado.marcados[i] = caixa.checked; atualizaContagem(); desenhaPainelXR(); });
+    const span = document.createElement('span');
+    span.textContent = texto;
+    rotulo.append(caixa, span);
+    li.append(rotulo);
+    return li;
+  }));
+  atualizaUI();
+  const primeiro = $('item-0');
+  if (primeiro && estado.modo !== 'xr') primeiro.focus({ preventScroll: true });
+}
+
+function cancelaValidacao() {
+  estado.fase = 'guia';
+  atualizaUI();
+  $('btn-validar').focus({ preventScroll: true });
+}
+
+function confirmaValidacao() {
+  const etapa = estado.etapas[estado.indice];
+  const faltam = (etapa.checklist_pt || []).filter((_, i) => !estado.marcados[i]);
+  if (faltam.length) {
+    // Como no app: reprovada volta para a guia, com o erro em vermelho citando o que faltou.
+    estado.reprovacoes++;
+    estado.erro = `Faltou conferir: ${faltam.join('; ')}. Corrija na peça e valide de novo.`;
+    estado.fase = 'guia';
+    recolheFolha(false);
+    atualizaUI();
+    $('btn-validar').focus({ preventScroll: true });
+    return;
+  }
+  estado.registros.push({ titulo: etapa.title_pt, ms: performance.now() - estado.inicioEtapa, reprovacoes: estado.reprovacoes });
+  estado.erro = '';
+  estado.fase = 'guia';
+  estado.ocupado = true;
+  const foco = estado.foco; // a vista fica na peça que acabou de encaixar até a próxima etapa
+  trocaOverlay(null);
+  estado.foco = foco;
+  instalaPecas(etapa);
+  mostraToast(`Etapa ${estado.indice + 1} concluída!`);
+  atualizaUI();
+  setTimeout(() => {
+    if (estado.tela !== 'montagem') return;
+    if (estado.indice + 1 < estado.etapas.length) mostraEtapa(estado.indice + 1);
+    else terminaMontagem();
+  }, movimentoReduzido.matches ? 400 : 1100);
+}
+
+function terminaMontagem() {
+  estado.tela = 'fim';
+  estado.ocupado = false;
+  trocaOverlay(null);
+  const total = performance.now() - estado.inicioSessao;
+  $('fim-tempo').textContent = formataTempo(total);
+  $('fim-kit').textContent = `Kit: ${descreveKit()}.`;
+  $('fim-etapas').textContent = String(estado.registros.length);
+  $('fim-reprovacoes').textContent = String(estado.registros.reduce((s, r) => s + r.reprovacoes, 0));
+  $('fim-lista').replaceChildren(...estado.registros.map((r, i) => {
+    const li = document.createElement('li');
+    const n = Object.assign(document.createElement('span'), { className: 'n', textContent: `${i + 1}.` });
+    const t = Object.assign(document.createElement('span'), { className: 't', textContent: r.titulo });
+    const d = Object.assign(document.createElement('span'), { className: 'd', textContent: formataTempo(r.ms) });
+    li.append(n, t, d);
+    if (r.reprovacoes) li.append(Object.assign(document.createElement('span'), {
+      className: 'r', textContent: r.reprovacoes === 1 ? '1 validação reprovada' : `${r.reprovacoes} validações reprovadas`,
+    }));
+    return li;
+  }));
+  atualizaUI();
+  if (estado.modo === 'tela') {
+    controles.autoRotate = !movimentoReduzido.matches;
+    requestAnimationFrame(() => enquadra(false));
+  }
+}
+
+let sairArmado = 0;
+function sairDaMontagem(direto) {
+  if (!direto && performance.now() - sairArmado > 3000) {
+    sairArmado = performance.now();
+    mostraToast('Toque de novo no × para sair da montagem');
+    return;
+  }
+  sairArmado = 0;
+  if (xr.sessao) xr.sessao.end();
+  if (estado.modo === 'frente') saiFrente();
+  estado.tela = 'inicio';
+  estado.ocupado = false;
+  limpaInstaladas();
+  mostraPlaca(true);
+  aplicaModo('tela');
+  trocaOverlay(etapaDeVitrine(roteiroDoKit()));
+  controles.autoRotate = !movimentoReduzido.matches;
+  atualizaUI();
+  requestAnimationFrame(() => enquadra(false));
+}
+
+const formataTempo = ms => {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+
+// ---------------------------------------------------------------- interface
+
+function legendaDe(etapa) {
+  const usadas = new Set(((etapa && etapa.overlay) || []).map(tipoDeCor));
+  return CORES.filter(c => usadas.has(c));
+}
+
+const toqueNaTela = matchMedia('(pointer: coarse)').matches;
+
+function atualizaContagem() {
+  const total = estado.marcados.length;
+  const feitos = estado.marcados.filter(Boolean).length;
+  $('btn-confirmar').textContent = total ? `Confirmar (${feitos}/${total})` : 'Confirmar';
+}
+
+function recolheFolha(recolher) {
+  $('folha').dataset.recolhida = String(recolher);
+  $('alca').setAttribute('aria-expanded', String(!recolher));
+  $('alca').setAttribute('aria-label', recolher ? 'Mostrar a instrução' : 'Esconder a instrução');
+  $('alca-texto').textContent = recolher ? 'Toque na barra para ver a instrução' : 'Toque na barra para esconder a instrução';
+  requestAnimationFrame(atualizaAreaLivre);
+}
+
+function atualizaUI() {
+  const etapa = estado.etapas[estado.indice];
+  const montando = estado.tela === 'montagem';
+  $('inicio').hidden = estado.tela !== 'inicio';
+  $('fim').hidden = estado.tela !== 'fim';
+  $('hud').hidden = !montando;
+  $('folha').hidden = !montando;
+
+  if (montando && etapa) {
+    const validando = estado.fase === 'validacao';
+    $('hud-etapa').textContent = `Etapa ${estado.indice + 1} de ${estado.etapas.length}`;
+    $('hud-componente').textContent = etapa.component_pt || '';
+    $('progresso').style.setProperty('--feito', String((estado.indice + (estado.ocupado ? 1 : 0)) / estado.etapas.length));
+
+    const situacao = $('situacao');
+    let fase = validando ? 'validacao' : 'guia';
+    let texto = validando ? 'Confira antes de avançar'
+      : (etapa.overlay || []).length ? 'Siga a peça fantasma e repita o gesto'
+        : 'Etapa sem peça na bancada: confira o que a instrução pede';
+    if (estado.modo === 'xr' && !xr.posicionada) {
+      fase = 'aviso';
+      texto = xr.fonteHit ? 'Aponte para a mesa e toque na tela para pôr a bancada' : 'Toque na tela para pôr a bancada na sua frente';
+    } else if (estado.modo === 'frente' && !frente.posicionada) {
+      fase = 'aviso';
+      texto = 'Abrindo a câmera…';
+    }
+    situacao.dataset.fase = fase;
+    $('situacao-texto').textContent = texto;
+
+    const travado = validando && estado.modo === 'tela';
+    $('chip-cadeado').setAttribute('d', travado ? 'M8 11V7a4 4 0 0 1 8 0v4' : 'M8 11V7a4 4 0 0 1 8 0');
+    $('chip-texto').innerHTML = '';
+    const curto = window.innerWidth < 900;
+    const [forte, resto] = estado.modo === 'tela'
+      ? (travado ? ['3D travado', curto ? ' na conferência' : ' enquanto você confere a etapa']
+        : ['3D livre:', curto ? ' arraste e pince' : toqueNaTela ? ' arraste para girar · pince para aproximar · toque duplo centraliza' : ' arraste para girar · role para aproximar · clique duplo centraliza'])
+      : estado.modo === 'frente'
+        ? (frente.giroscopio ? ['Mova o celular', curto ? ' · arraste gira' : ' para olhar em volta · arraste para girar a bancada · pince para aproximar']
+          : ['Sem giroscópio:', curto ? ' arraste para olhar' : ' arraste para olhar em volta · role ou pince para aproximar'])
+        : ['Tamanho real:', curto ? ' chegue perto' : ' chegue perto da mesa para ver o encaixe'];
+    $('chip-texto').append(Object.assign(document.createElement('b'), { textContent: forte }), resto);
+
+    $('hud').dataset.modo = estado.modo;
+    $('alternador').hidden = estado.modo === 'xr';
+    $('ver-tela').setAttribute('aria-pressed', String(estado.modo === 'tela'));
+    $('ver-frente').setAttribute('aria-pressed', String(estado.modo === 'frente'));
+    $('btn-recentrar').hidden = estado.modo !== 'frente';
+    $('btn-reposicionar').hidden = !(estado.modo === 'xr' && xr.posicionada && xr.tipo === 'immersive-ar');
+    $('btn-sair-xr').hidden = estado.modo !== 'xr';
+
+    $('guia').hidden = validando;
+    $('alca').hidden = validando;
+    $('alca-texto').hidden = validando;
+    $('validacao').hidden = !validando;
+    $('etapa-titulo').textContent = etapa.title_pt;
+    $('etapa-instrucao').textContent = etapa.instruction_pt || '';
+    $('etapa-alerta').hidden = !etapa.common_error_alert_pt;
+    $('etapa-alerta-texto').textContent = etapa.common_error_alert_pt || '';
+    $('etapa-erro').hidden = !estado.erro;
+    $('etapa-erro').textContent = estado.erro;
+    $('etapa-cores').replaceChildren(...legendaDe(etapa).map(c => {
+      const li = document.createElement('li');
+      const amostra = document.createElement('i');
+      amostra.style.setProperty('--c', c.css);
+      li.append(amostra, c.nome);
+      return li;
+    }));
+    $('btn-validar').disabled = estado.ocupado;
+    $('btn-confirmar').disabled = estado.ocupado;
+    estado.marcados.forEach((m, i) => { const caixa = $(`item-${i}`); if (caixa) caixa.checked = m; });
+    atualizaContagem();
+  }
+
+  controles.enabled = estado.modo === 'tela' && !(montando && estado.fase === 'validacao');
+  desenhaPainelXR();
+  requestAnimationFrame(() => { atualizaAreaLivre(); posicionaToast(); });
+}
+
+let toastTimer = 0;
+function mostraToast(mensagem) {
+  const toast = $('toast');
+  toast.textContent = mensagem;
+  toast.hidden = false;
+  posicionaToast();
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; desenhaPainelXR(); }, 2600);
+  estado.toastXR = { mensagem, ate: performance.now() + 2600 };
+  desenhaPainelXR();
+}
+
+function posicionaToast() {
+  const folha = $('folha');
+  let base = 24;
+  if (!folha.hidden && window.innerWidth < 900) {
+    base = window.innerHeight - folha.querySelector('.cartao').getBoundingClientRect().top + 12;
+  }
+  $('toast').style.setProperty('--toast-base', `${Math.round(base)}px`);
+}
+
+// ---------------------------------------------------------------- modo "na tela": órbita com a peça no espaço livre
+
+const controles = new OrbitControls(camera, canvas);
+Object.assign(controles, {
+  enableDamping: true, dampingFactor: 0.08, minDistance: 0.06, maxDistance: 1.8,
+  maxPolarAngle: graus(84), screenSpacePanning: true, autoRotate: !movimentoReduzido.matches, autoRotateSpeed: 0.5,
+});
+const transicao = { ativa: false };
+controles.addEventListener('start', () => { transicao.ativa = false; });
+canvas.addEventListener('dblclick', () => { if (estado.modo === 'tela') enquadra(false); });
+
+/** Retângulo da tela que não está coberto pelos cartões (a peça fica centralizada nele, como no DemoStage). */
+function areaLivre() {
+  const w = window.innerWidth, h = window.innerHeight;
+  const a = { left: 0, top: 0, right: w, bottom: h };
+  if (!$('hud').hidden) a.top = Math.max(a.top, $('hud').getBoundingClientRect().bottom);
+  for (const id of ['inicio', 'folha', 'fim']) {
+    const painel = $(id);
+    if (painel.hidden) continue;
+    const r = painel.querySelector('.cartao').getBoundingClientRect();
+    if (!r.width) continue;
+    if (r.width < w * 0.62 && r.left > w * 0.4) a.right = Math.min(a.right, r.left);
+    else if (r.width < w * 0.62 && r.right < w * 0.6) a.left = Math.max(a.left, r.right);
+    else a.bottom = Math.min(a.bottom, r.top);
+  }
+  if (a.bottom - a.top < h * 0.22) a.bottom = Math.min(h, a.top + h * 0.22);
+  if (a.right - a.left < w * 0.3) a.left = Math.max(0, a.right - w * 0.3);
+  return a;
+}
+
+function atualizaAreaLivre() {
+  const w = window.innerWidth, h = window.innerHeight;
+  if (estado.modo === 'xr') {
+    camera.clearViewOffset();
+    camera.fov = FOV_TELA;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    return areaLivre();
+  }
+  const a = areaLivre();
+  const cx = (a.left + a.right) / 2, cy = (a.top + a.bottom) / 2;
+  const dx = Math.abs(cx - w / 2), dy = Math.abs(cy - h / 2);
+  const W = w + 2 * dx, H = h + 2 * dy;
+  // Imagem maior e janela deslocada: o centro da projeção cai no meio da área livre, sem mudar a escala.
+  // No modo "na sua frente" também: sem rastreamento, a bancada não precisa casar com a ótica da câmera.
+  const fovBase = estado.modo === 'frente' ? FOV_CAMERA : FOV_TELA;
+  camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(graus(fovBase) / 2) * H / h));
+  camera.aspect = W / H;
+  camera.setViewOffset(W, H, cx < w / 2 ? 2 * dx : 0, cy < h / 2 ? 2 * dy : 0, w, h);
+  camera.updateProjectionMatrix();
+  return a;
+}
+
+function enquadra(imediato) {
+  const a = atualizaAreaLivre();
+  const h = window.innerHeight;
+  const tan = Math.tan(graus(FOV_TELA) / 2);
+  const angulo = Math.atan(tan * Math.min(Math.max(a.bottom - a.top, 60), Math.max(a.right - a.left, 60)) / h);
+  const { local, raio } = estado.foco;
+  const contexto = estado.tela === 'montagem' ? 1.45 : 1; // na etapa, sobra um pouco da placa em volta da peça
+  const distancia = limita(raio / Math.sin(angulo) * contexto, 0.1, 1.7);
+  const direcao = new THREE.Vector3(0.12, 0.8, 0.6).normalize(); // do lado do aluno, olhando para baixo (~53°)
+  const destino = local.clone().addScaledVector(direcao, distancia);
+  if (imediato || movimentoReduzido.matches) {
+    transicao.ativa = false;
+    camera.position.copy(destino);
+    controles.target.copy(local);
+    controles.update();
+    return;
+  }
+  Object.assign(transicao, {
+    ativa: true, t0: performance.now(), duracao: 950,
+    deCamera: camera.position.clone(), deAlvo: controles.target.clone(), paraCamera: destino, paraAlvo: local.clone(),
+  });
+}
+
+function atualizaTransicao(agora) {
+  if (!transicao.ativa) return;
+  const p = Math.min((agora - transicao.t0) / transicao.duracao, 1);
+  const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  camera.position.lerpVectors(transicao.deCamera, transicao.paraCamera, e);
+  controles.target.lerpVectors(transicao.deAlvo, transicao.paraAlvo, e);
+  if (p >= 1) transicao.ativa = false;
+}
+
+function aplicaModo(modo) {
+  estado.modo = modo;
+  const imersivo = modo === 'xr';
+  mesa.visible = modo === 'tela' || (imersivo && xr.tipo === 'immersive-vr');
+  cena.background = imersivo && xr.tipo === 'immersive-vr' ? new THREE.Color(0x202329) : null; // óculos VR: sala escura
+  $('palco').hidden = modo !== 'tela';
+  if (modo === 'tela') {
+    bancada.position.set(0, 0, 0);
+    bancada.rotation.set(0, 0, 0);
+    bancada.visible = true;
+  }
+  atualizaUI();
+}
+
+// ---------------------------------------------------------------- modo "na sua frente": câmera do celular + giroscópio
+// Não há rastreamento: a bancada fica presa à direção em que o celular apontava, 30–50 cm à frente e abaixo,
+// como se estivesse na mesa. Mover o celular muda o olhar (giroscópio); a posição não é medida.
+
+const frente = {
+  stream: null, orientacao: null, giroscopio: false, posicionada: false, t0: 0,
+  direcao: new THREE.Vector3(0, 0, -1), yawBase: 0, giro: 0, zoom: 1, olharYaw: 0, olharPitch: -0.7,
+  foco: new THREE.Vector3(), raio: 0.05,
+};
+
+window.addEventListener('deviceorientation', e => {
+  if (e.alpha == null) return;
+  frente.orientacao = { a: e.alpha, b: e.beta, g: e.gamma };
+  frente.giroscopio = true;
+});
+
+async function entraFrente() {
+  const pedeGiro = typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'
+    ? DeviceOrientationEvent.requestPermission().catch(() => 'denied') : Promise.resolve('granted');
+  let stream;
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('getUserMedia indisponível');
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    });
+  } catch (erro) {
+    console.warn('[MontAR] câmera indisponível:', erro);
+    await pedeGiro;
+    return false;
+  }
+  await pedeGiro;
+  frente.stream = stream;
+  const video = $('camera');
+  video.srcObject = stream;
+  video.hidden = false;
+  try { await video.play(); } catch (erro) { console.warn('[MontAR] vídeo não tocou:', erro); }
+  frente.posicionada = false;
+  frente.t0 = performance.now();
+  frente.giro = 0;
+  frente.zoom = 1;
+  bancada.visible = false;
+  controles.autoRotate = false;
+  aplicaModo('frente');
+  return true;
+}
+
+function saiFrente() {
+  if (frente.stream) frente.stream.getTracks().forEach(t => t.stop());
+  frente.stream = null;
+  const video = $('camera');
+  video.srcObject = null;
+  video.hidden = true;
+}
+
+const eixoZ = new THREE.Vector3(0, 0, 1);
+const eulerCelular = new THREE.Euler();
+const qTela = new THREE.Quaternion();
+const qCamera = new THREE.Quaternion(-Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // câmera olha pelas costas do celular
+
+function orientaPeloCelular() {
+  const o = frente.orientacao;
+  const anguloTela = graus(screen.orientation ? screen.orientation.angle : (window.orientation || 0));
+  eulerCelular.set(graus(o.b), graus(o.a), -graus(o.g), 'YXZ');
+  camera.quaternion.setFromEuler(eulerCelular).multiply(qCamera).multiply(qTela.setFromAxisAngle(eixoZ, -anguloTela));
+}
+
+function posicionaNaFrente() {
+  const adiante = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).setY(0);
+  if (adiante.lengthSq() < 0.04) adiante.set(0, 1, 0).applyQuaternion(camera.quaternion).setY(0); // celular deitado: o topo aponta para a frente
+  if (adiante.lengthSq() < 1e-6) adiante.set(0, 0, -1);
+  frente.direcao.copy(adiante.normalize());
+  frente.yawBase = Math.atan2(-frente.direcao.x, -frente.direcao.z); // lado do aluno virado para a câmera
+  frente.giro = 0;
+  frente.foco.copy(estado.foco.local);
+  frente.raio = estado.foco.raio;
+  frente.posicionada = true;
+  bancada.visible = true;
+  atualizaUI();
+}
+
+const eixoY = new THREE.Vector3(0, 1, 0);
+function atualizaFrente(dt) {
+  camera.position.set(0, 0, 0);
+  if (frente.giroscopio && frente.orientacao) orientaPeloCelular();
+  else camera.rotation.set(frente.olharPitch, frente.olharYaw, 0, 'YXZ');
+  if (!frente.posicionada) {
+    if (frente.giroscopio || performance.now() - frente.t0 > 1200) posicionaNaFrente();
+    return;
+  }
+  const suave = movimentoReduzido.matches ? 1 : 1 - Math.exp(-dt * 5); // ~0,6 s para a próxima peça, em qualquer taxa de quadros
+  frente.foco.lerp(estado.foco.local, suave);
+  frente.raio += (estado.foco.raio - frente.raio) * suave;
+  const distancia = (0.26 + frente.raio * 1.3) * frente.zoom;
+  const yaw = frente.yawBase + frente.giro;
+  bancada.rotation.set(0, yaw, 0);
+  bancada.position.copy(frente.direcao).multiplyScalar(distancia).setY(-distancia * 0.78)
+    .sub(frente.foco.clone().applyAxisAngle(eixoY, yaw));
+}
+
+const ponteiros = new Map();
+const distanciaEntre = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+canvas.addEventListener('pointerdown', e => {
+  if (estado.modo !== 'frente') return;
+  canvas.setPointerCapture(e.pointerId);
+  ponteiros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+});
+canvas.addEventListener('pointermove', e => {
+  if (estado.modo !== 'frente' || !ponteiros.has(e.pointerId)) return;
+  const antes = ponteiros.get(e.pointerId);
+  if (ponteiros.size >= 2) {
+    const [a0, b0] = [...ponteiros.values()];
+    ponteiros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const [a1, b1] = [...ponteiros.values()];
+    const d0 = distanciaEntre(a0, b0), d1 = distanciaEntre(a1, b1);
+    if (d0 > 0 && d1 > 0) frente.zoom = limita(frente.zoom * d0 / d1, 0.45, 2.2);
+    return;
+  }
+  const dx = e.clientX - antes.x, dy = e.clientY - antes.y;
+  if (frente.giroscopio) frente.giro += dx * 0.008;
+  else {
+    frente.olharYaw -= dx * 0.004;
+    frente.olharPitch = limita(frente.olharPitch - dy * 0.004, -1.5, 0.6);
+  }
+  ponteiros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+});
+for (const tipo of ['pointerup', 'pointercancel']) canvas.addEventListener(tipo, e => ponteiros.delete(e.pointerId));
+canvas.addEventListener('wheel', e => {
+  if (estado.modo !== 'frente') return;
+  e.preventDefault();
+  frente.zoom = limita(frente.zoom * Math.exp(e.deltaY * 0.001), 0.45, 2.2);
+}, { passive: false });
+
+// ---------------------------------------------------------------- modo WebXR: a bancada na mesa de verdade (ou num óculos)
+
+const xr = { suporteAR: false, suporteVR: false, sessao: null, tipo: '', fonteHit: null, posicionada: false, comDom: false };
+const reticulo = new THREE.Mesh(
+  new THREE.RingGeometry(0.05, 0.066, 48).rotateX(-Math.PI / 2),
+  new THREE.MeshBasicMaterial({ color: 0x22c55e }));
+reticulo.matrixAutoUpdate = false;
+reticulo.visible = false;
+cena.add(reticulo);
+
+async function verificaXR() {
+  if (navigator.xr) {
+    try { xr.suporteAR = await navigator.xr.isSessionSupported('immersive-ar'); } catch { xr.suporteAR = false; }
+    try { xr.suporteVR = await navigator.xr.isSessionSupported('immersive-vr'); } catch { xr.suporteVR = false; }
+  }
+  const opcao = $('modo-xr');
+  if (xr.suporteAR) {
+    $('modo-xr-desc').textContent = 'A bancada fica em cima da mesa de verdade, em tamanho real. Aponte para a mesa e toque para posicionar.';
+  } else if (xr.suporteVR) {
+    $('modo-xr-nome').textContent = 'Óculos VR (WebXR)';
+    $('modo-xr-desc').textContent = 'A bancada aparece numa mesa virtual na sua frente. O gatilho valida a etapa e marca o checklist.';
+  } else {
+    $('modo-xr-desc').textContent = 'Este navegador não tem WebXR. Funciona no Chrome do Android com ARCore e no navegador do Meta Quest.';
+    return;
+  }
+  opcao.disabled = false;
+  if (xr.suporteAR) opcao.checked = true;
+}
+
+async function entraXR() {
+  const tipo = xr.suporteAR ? 'immersive-ar' : 'immersive-vr';
+  const opcoes = tipo === 'immersive-ar'
+    ? { optionalFeatures: ['hit-test', 'dom-overlay'], domOverlay: { root: $('ui') } }
+    : { optionalFeatures: [] };
+  let sessao;
+  try {
+    sessao = await navigator.xr.requestSession(tipo, opcoes);
+  } catch (erro) {
+    console.warn('[MontAR] WebXR não abriu:', erro);
+    return false;
+  }
+  xr.sessao = sessao;
+  xr.tipo = tipo;
+  xr.posicionada = false;
+  xr.comDom = Boolean(sessao.domOverlayState);
+  renderer.xr.enabled = true;
+  renderer.xr.setReferenceSpaceType('local');
+  await renderer.xr.setSession(sessao);
+  sessao.addEventListener('select', aoSelecionarXR);
+  sessao.addEventListener('end', aoSairXR);
+  xr.fonteHit = null;
+  if (tipo === 'immersive-ar' && sessao.requestHitTestSource) {
+    try {
+      const visor = await sessao.requestReferenceSpace('viewer');
+      xr.fonteHit = await sessao.requestHitTestSource({ space: visor });
+    } catch (erro) {
+      console.warn('[MontAR] sem hit-test:', erro);
+    }
+  }
+  bancada.visible = false;
+  controles.autoRotate = false;
+  painelXR.malha.visible = !xr.comDom;
+  aplicaModo('xr');
+  return true;
+}
+
+function atualizaXR(quadroXR) {
+  if (!xr.sessao || xr.posicionada) return;
+  if (xr.tipo === 'immersive-vr') { posicionaXR(); return; }
+  if (!xr.fonteHit) return;
+  const resultados = quadroXR.getHitTestResults(xr.fonteHit);
+  const pose = resultados.length ? resultados[0].getPose(renderer.xr.getReferenceSpace()) : null;
+  reticulo.visible = Boolean(pose);
+  if (pose) reticulo.matrix.fromArray(pose.transform.matrix);
+}
+
+function posicionaXR() {
+  const olho = renderer.xr.getCamera();
+  const posOlho = new THREE.Vector3().setFromMatrixPosition(olho.matrixWorld);
+  const adiante = new THREE.Vector3(0, 0, -1).applyQuaternion(new THREE.Quaternion().setFromRotationMatrix(olho.matrixWorld)).setY(0);
+  if (adiante.lengthSq() < 1e-4) adiante.set(0, 0, -1);
+  adiante.normalize();
+  const ponto = reticulo.visible
+    ? new THREE.Vector3().setFromMatrixPosition(reticulo.matrix)
+    : posOlho.clone().addScaledVector(adiante, 0.55).add(new THREE.Vector3(0, -0.42, 0));
+  bancada.position.copy(ponto);
+  bancada.rotation.set(0, Math.atan2(posOlho.x - ponto.x, posOlho.z - ponto.z), 0); // lado do aluno virado para você
+  bancada.visible = true;
+  reticulo.visible = false;
+  xr.posicionada = true;
+  atualizaUI();
+}
+
+/** Toque na tela (Android) ou gatilho (óculos). Sem a interface por cima, cada toque avança um passo da etapa. */
+function aoSelecionarXR() {
+  if (!xr.posicionada) { posicionaXR(); return; }
+  if (xr.comDom || estado.tela !== 'montagem' || estado.ocupado) return;
+  if (estado.fase === 'guia') { abreValidacao(); return; }
+  const proximo = estado.marcados.indexOf(false);
+  if (proximo >= 0) estado.marcados[proximo] = true;
+  if (!estado.marcados.includes(false)) confirmaValidacao();
+  else atualizaUI();
+}
+
+function aoSairXR() {
+  xr.sessao = null;
+  xr.fonteHit = null;
+  xr.posicionada = false;
+  reticulo.visible = false;
+  painelXR.malha.visible = false;
+  aplicaModo('tela');
+  if (estado.tela === 'fim') controles.autoRotate = !movimentoReduzido.matches;
+  requestAnimationFrame(() => enquadra(true));
+}
+
+// Toques nos cartões da interface (dom-overlay) não contam como "select" na cena.
+$('ui').addEventListener('beforexrselect', e => { if (e.target !== $('ui')) e.preventDefault(); });
+
+// Painel dentro da cena, para óculos sem a interface da página por cima.
+const painelXR = (() => {
+  const tela = document.createElement('canvas');
+  tela.width = 1024;
+  tela.height = 640;
+  const mapa = new THREE.CanvasTexture(tela);
+  mapa.colorSpace = THREE.SRGBColorSpace;
+  const malha = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.25), new THREE.MeshBasicMaterial({ map: mapa, transparent: true }));
+  malha.position.set(0, 0.2, -MAT.height_mm / 2000 - 0.03);
+  malha.rotation.x = -0.12;
+  malha.visible = false;
+  bancada.add(malha);
+  return { tela, mapa, malha };
+})();
+
+function quebraLinhas(c, texto, largura) {
+  const linhas = [];
+  let linha = '';
+  for (const palavra of String(texto).split(/\s+/)) {
+    const teste = linha ? `${linha} ${palavra}` : palavra;
+    if (linha && c.measureText(teste).width > largura) { linhas.push(linha); linha = palavra; } else linha = teste;
+  }
+  if (linha) linhas.push(linha);
+  return linhas;
+}
+
+function desenhaPainelXR() {
+  if (!painelXR.malha.visible) return;
+  const c = painelXR.tela.getContext('2d');
+  const W = 1024, H = 640, m = 48;
+  c.clearRect(0, 0, W, H);
+  c.fillStyle = 'rgba(24, 24, 27, 0.94)';
+  c.beginPath();
+  if (c.roundRect) c.roundRect(0, 0, W, H, 40); else c.rect(0, 0, W, H);
+  c.fill();
+  let y = m;
+  const escreve = (texto, fonte, cor, maxLinhas, entrelinha) => {
+    c.font = fonte;
+    c.fillStyle = cor;
+    for (const l of quebraLinhas(c, texto, W - 2 * m).slice(0, maxLinhas)) { y += entrelinha; c.fillText(l, m, y); }
+  };
+  const titulo = '700 50px Archivo, sans-serif';
+  const corpo = '400 30px Figtree, sans-serif';
+  const etapa = estado.etapas[estado.indice];
+  let rodape = '';
+  if (!xr.posicionada) {
+    escreve('Aperte o gatilho para pôr a bancada na sua frente', titulo, '#FAFAFA', 3, 62);
+  } else if (estado.tela === 'fim') {
+    escreve('Montagem concluída', titulo, '#FAFAFA', 1, 62);
+    escreve(`Tempo: ${$('fim-tempo').textContent}. Saia do modo imersivo para ver o resumo.`, corpo, '#D4D4D8', 3, 40);
+  } else if (etapa) {
+    escreve(`Etapa ${estado.indice + 1} de ${estado.etapas.length} · ${etapa.component_pt || ''}`, corpo, '#A1A1AA', 1, 36);
+    y += 8;
+    escreve(etapa.title_pt, titulo, '#FAFAFA', 2, 58);
+    y += 12;
+    if (estado.fase === 'guia') {
+      escreve(etapa.instruction_pt || '', corpo, '#D4D4D8', 6, 38);
+      rodape = 'Gatilho: validar etapa';
+    } else {
+      (etapa.checklist_pt || []).forEach((item, i) => {
+        y += 14;
+        const topo = y + 6;
+        c.strokeStyle = '#A1A1AA';
+        c.lineWidth = 4;
+        c.strokeRect(m, topo, 34, 34);
+        if (estado.marcados[i]) { c.fillStyle = '#22C55E'; c.fillRect(m + 6, topo + 6, 22, 22); }
+        c.font = corpo;
+        c.fillStyle = '#FAFAFA';
+        quebraLinhas(c, item, W - 2 * m - 56).slice(0, 2).forEach((l, k) => c.fillText(l, m + 56, topo + 28 + k * 36));
+        y = topo + 34 + 36 * (Math.min(2, quebraLinhas(c, item, W - 2 * m - 56).length) - 1);
+      });
+      rodape = 'Gatilho: marcar o próximo item';
+    }
+  }
+  if (estado.toastXR && performance.now() < estado.toastXR.ate) rodape = estado.toastXR.mensagem;
+  if (rodape) {
+    c.font = '700 32px Archivo, sans-serif';
+    c.fillStyle = '#22C55E';
+    c.fillText(rodape, m, H - m + 8);
+  }
+  painelXR.mapa.needsUpdate = true;
+}
+
+// ---------------------------------------------------------------- laço de quadros
+
+const temp = new THREE.Vector3();
+let ultimoQuadro = performance.now();
+function quadro(tempo, quadroXR) {
+  const agora = performance.now();
+  const dt = Math.min((agora - ultimoQuadro) / 1000, 0.25);
+  ultimoQuadro = agora;
+  if (overlayAtual) {
+    const segundos = (agora - overlayAtual.userData.t0) / 1000;
+    for (const parte of overlayAtual.children) {
+      const m = parte.userData.movimento;
+      if (m) parte.position.copy(m.repouso).add(deslocamento(m, segundos, temp));
+    }
+  }
+  for (let i = quedas.length - 1; i >= 0; i--) {
+    const q = quedas[i];
+    const p = Math.min((agora - q.t0) / q.duracao, 1);
+    q.obj.position.lerpVectors(q.de, q.para, 1 - Math.pow(1 - p, 3));
+    if (p >= 1) quedas.splice(i, 1);
+  }
+  if (estado.modo === 'frente') atualizaFrente(dt);
+  else if (estado.modo === 'tela') { atualizaTransicao(agora); controles.update(); }
+  if (quadroXR) atualizaXR(quadroXR);
+  renderer.render(cena, camera);
+}
+
+function redimensiona() {
+  if (renderer.xr.isPresenting) return;
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+  atualizaUI();
+}
+
+// ---------------------------------------------------------------- ligações
+
+$('btn-comecar').addEventListener('click', comecaMontagem);
+$('btn-validar').addEventListener('click', abreValidacao);
+$('btn-voltar').addEventListener('click', cancelaValidacao);
+$('btn-confirmar').addEventListener('click', confirmaValidacao);
+$('btn-sair').addEventListener('click', () => sairDaMontagem(false));
+$('alca').addEventListener('click', () => recolheFolha($('folha').dataset.recolhida !== 'true'));
+$('btn-de-novo').addEventListener('click', recomeca);
+$('btn-trocar').addEventListener('click', () => sairDaMontagem(true));
+$('ver-tela').addEventListener('click', () => {
+  if (estado.modo === 'tela') return;
+  saiFrente();
+  aplicaModo('tela');
+  enquadra(true);
+});
+$('ver-frente').addEventListener('click', async () => {
+  if (estado.modo === 'frente') return;
+  if (!(await entraFrente())) mostraToast('Sem acesso à câmera. Abra a página no celular e permita a câmera.');
+});
+$('btn-recentrar').addEventListener('click', () => { frente.posicionada = false; frente.t0 = 0; });
+$('btn-reposicionar').addEventListener('click', () => { xr.posicionada = false; bancada.visible = false; atualizaUI(); });
+$('btn-sair-xr').addEventListener('click', () => { if (xr.sessao) xr.sessao.end(); });
+window.addEventListener('resize', redimensiona);
+new ResizeObserver(() => { atualizaAreaLivre(); posicionaToast(); }).observe($('ui'));
+for (const id of ['inicio', 'folha', 'fim', 'hud']) new ResizeObserver(() => atualizaAreaLivre()).observe($(id));
+
+function mostraQr() {
+  const naWeb = /^https?:$/.test(location.protocol) && !/^(localhost|127\.)/.test(location.hostname);
+  if (!naWeb || window.top !== window || typeof window.qrcode !== 'function') return;
+  const qr = window.qrcode(0, 'M');
+  qr.addData(location.href.split('#')[0]);
+  qr.make();
+  $('qr-img').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true, alt: 'Código QR desta página' });
+  $('qr').hidden = false;
+}
+
+// Celular: "na sua frente" já vem marcado; com WebXR de RA, a mesa de verdade (verificaXR).
+if (toqueNaTela) $('modo-frente').checked = true;
+else $('modo-frente-desc').textContent = 'Feito para o celular: a câmera mostra a sua mesa e a bancada aparece por cima. No computador, usa a webcam.';
+if (window.top !== window) {
+  $('modo-frente-desc').textContent += ' Dentro de outra página a câmera costuma ser bloqueada: abra o simulador pelo endereço próprio dele.';
+}
+
+montaKit();
+aoMudarKit();
+redimensiona();
+atualizaUI();
+enquadra(true);
+renderer.setAnimationLoop(quadro);
+verificaXR();
+mostraQr();
+window.__montar = { estado, selecao, abreValidacao, confirmaValidacao }; // para os testes automáticos
+</script>
+</body>
+</html>

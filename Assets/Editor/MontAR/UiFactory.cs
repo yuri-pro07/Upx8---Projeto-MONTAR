@@ -5,7 +5,12 @@ using UnityEngine.UI;
 
 namespace MontAR.EditorTools
 {
-    /// <summary>Blocos de construção da interface (uGUI + TextMeshPro) usados pelo <see cref="AppBuilder"/>.</summary>
+    /// <summary>
+    /// Blocos de construção da interface (uGUI + TextMeshPro) usados pelo <see cref="AppBuilder"/>, no estilo
+    /// vidro: cartões de vidro fosco (shader MontAR/UI Glass, com o fundo desfocado atrás), contorno claro e
+    /// reflexo no alto, preenchimentos translúcidos para o que fica dentro dos cartões e o botão principal
+    /// verde com brilho.
+    /// </summary>
     public static class UiFactory
     {
         public const string SpritesFolder = "Assets/Textures/UI/";
@@ -15,11 +20,28 @@ namespace MontAR.EditorTools
             Primary,
             Secondary,
             Ghost,
-            Dark
+            Dark,
+            /// <summary>Opção de um seletor (a tela pinta a opção escolhida em tempo de execução).</summary>
+            Segment
         }
+
+        /// <summary>Fonte de todos os textos (Plus Jakarta Sans). Null usa a padrão do TextMeshPro.</summary>
+        public static TMP_FontAsset Font;
+
+        /// <summary>Vidro dos cartões.</summary>
+        public static Material GlassMaterial;
+
+        /// <summary>Vidro mais denso, para painéis com texto longo por cima da câmera.</summary>
+        public static Material GlassDenseMaterial;
 
         public static Sprite Rounded => LoadSprite("ui_arredondado");
         public static Sprite Circle => LoadSprite("ui_circulo");
+        public static Sprite Outline => LoadSprite("ui_contorno");
+        public static Sprite Ring => LoadSprite("ui_anel");
+        public static Sprite Sheen => LoadSprite("ui_brilho");
+        public static Sprite Gradient => LoadSprite("ui_gradiente");
+        public static Sprite Glow => LoadSprite("ui_sombra");
+        public static Sprite Halo => LoadSprite("ui_halo");
 
         public static Sprite LoadSprite(string name)
         {
@@ -88,10 +110,53 @@ namespace MontAR.EditorTools
             return image;
         }
 
-        /// <summary>Cartão arredondado. <paramref name="radius"/> em unidades da tela de referência (1080 de largura).</summary>
+        /// <summary>Escala do 9-slice (borda de 48 px) para um raio de canto em unidades da tela de referência (1080).</summary>
+        public static float CornerScale(float radius) => 48f / Mathf.Max(1f, radius);
+
+        /// <summary>Retângulo arredondado simples (barras, pontos, chips de cor sólida).</summary>
         public static Image Card(GameObject go, Color color, float radius = 32f)
         {
-            return Img(go, color, Rounded, 48f / Mathf.Max(1f, radius));
+            return Img(go, color, Rounded, CornerScale(radius));
+        }
+
+        /// <summary>
+        /// Cartão de vidro fosco: o fundo desfocado tingido com <paramref name="tint"/>, contorno claro e
+        /// reflexo no alto. <paramref name="dense"/>: vidro mais fechado (texto longo sobre a câmera).
+        /// </summary>
+        public static Image Glass(GameObject go, float radius = 44f, bool dense = false, Color? tint = null)
+        {
+            Image image = Img(go, tint ?? UiTheme.GlassTint, Rounded, CornerScale(radius));
+            image.material = dense ? GlassDenseMaterial : GlassMaterial;
+            Decorate(go.transform, radius, UiTheme.GlassBorder, UiTheme.GlassHighlight);
+            return image;
+        }
+
+        /// <summary>Preenchimento translúcido (por dentro de um cartão de vidro), com contorno opcional.</summary>
+        public static Image Fill(GameObject go, Color color, float radius, Color? border = null)
+        {
+            Image image = Img(go, color, Rounded, CornerScale(radius));
+            if (border.HasValue)
+                Decorate(go.transform, radius, border.Value, null);
+            return image;
+        }
+
+        /// <summary>
+        /// Contorno (e reflexo, se vier) como filhos esticados, fora do layout e atrás do conteúdo.
+        /// <paramref name="round"/>: contorno em anel, para círculos.
+        /// </summary>
+        public static void Decorate(Transform target, float radius, Color border, Color? sheen, bool round = false)
+        {
+            Decoration(target, "Contorno", round ? Ring : Outline, border, radius);
+            if (sheen.HasValue && !round)
+                Decoration(target, "Reflexo", Sheen, sheen.Value, radius);
+        }
+
+        private static void Decoration(Transform target, string name, Sprite sprite, Color color, float radius)
+        {
+            RectTransform rect = Stretch(Node(name, target));
+            rect.SetAsFirstSibling();
+            Img(rect.gameObject, color, sprite, CornerScale(radius)).raycastTarget = false;
+            rect.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
         }
 
         public static VerticalLayoutGroup VLayout(GameObject go, RectOffset padding, float spacing, TextAnchor alignment = TextAnchor.UpperLeft,
@@ -165,6 +230,8 @@ namespace MontAR.EditorTools
         {
             RectTransform rect = Node(name, parent);
             var label = rect.gameObject.AddComponent<TextMeshProUGUI>();
+            if (Font != null)
+                label.font = Font;
             label.text = text;
             label.fontSize = size;
             label.color = color;
@@ -177,48 +244,75 @@ namespace MontAR.EditorTools
             return label;
         }
 
+        /// <summary>Título em ExtraBold, um pouco mais apertado.</summary>
+        public static TextMeshProUGUI Title(Transform parent, string name, string text, float size,
+            TextAlignmentOptions alignment = TextAlignmentOptions.TopLeft)
+        {
+            TextMeshProUGUI label = Label(parent, name, text, size, UiTheme.TextPrimary, FontStyles.Normal, alignment);
+            label.fontWeight = FontWeight.Heavy;
+            label.characterSpacing = -1.5f;
+            return label;
+        }
+
         // ------------------------------------------------------------ botões
 
         public static Button MakeButton(Transform parent, string name, string text, ButtonStyle style, out TextMeshProUGUI label,
             float height = 128f, float fontSize = 40f)
         {
             RectTransform rect = Node(name, parent);
-            Color background;
+            float radius = Mathf.Min(48f, height * 0.5f);
+            Image fill;
             Color foreground;
+            Image glow = null;
             switch (style)
             {
                 case ButtonStyle.Primary:
-                    background = UiTheme.Primary;
-                    foreground = UiTheme.TextOnDark;
+                {
+                    // Brilho verde que sai para fora do botão (um pouco para baixo) e o degradê verde por cima.
+                    RectTransform glowRect = Stretch(Node("Brilho", rect), -44f, -30f, -44f, -60f);
+                    glow = Img(glowRect.gameObject, UiTheme.PrimaryGlow, Glow);
+                    glow.raycastTarget = false;
+                    RectTransform fillRect = Stretch(Node("Fundo", rect));
+                    fill = Img(fillRect.gameObject, UiTheme.Primary, Gradient, CornerScale(radius));
+                    Decorate(fillRect, radius, new Color(1f, 1f, 1f, 0.3f), new Color(1f, 1f, 1f, 0.22f));
+                    foreground = UiTheme.TextOnPrimary;
                     break;
+                }
                 case ButtonStyle.Secondary:
-                    background = UiTheme.Border;
+                case ButtonStyle.Dark:
+                    fill = Img(rect.gameObject, UiTheme.GlassFillStrong, Rounded, CornerScale(radius));
+                    Decorate(rect, radius, UiTheme.GlassBorder, null);
                     foreground = UiTheme.TextPrimary;
                     break;
-                case ButtonStyle.Dark:
-                    background = new Color(1f, 1f, 1f, 0.12f);
-                    foreground = UiTheme.TextOnDark;
+                case ButtonStyle.Segment:
+                    fill = Img(rect.gameObject, Color.clear, Rounded, CornerScale(radius));
+                    foreground = UiTheme.TextSecondary;
                     break;
                 default:
-                    background = new Color(1f, 1f, 1f, 0f);
-                    foreground = UiTheme.Primary;
+                    fill = Img(rect.gameObject, new Color(1f, 1f, 1f, 0f), Rounded, CornerScale(radius));
+                    foreground = UiTheme.TextAccent;
                     break;
             }
 
-            Image image = Img(rect.gameObject, background, Rounded, 48f / Mathf.Min(48f, height * 0.5f));
             var button = rect.gameObject.AddComponent<Button>();
-            button.targetGraphic = image;
+            button.targetGraphic = fill;
             ColorBlock colors = button.colors;
             colors.normalColor = Color.white;
             colors.highlightedColor = new Color(0.96f, 0.96f, 0.96f, 1f);
-            colors.pressedColor = new Color(0.82f, 0.82f, 0.82f, 1f);
+            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
             colors.selectedColor = Color.white;
-            colors.disabledColor = new Color(0.75f, 0.75f, 0.75f, 0.5f);
+            colors.disabledColor = new Color(0.7f, 0.7f, 0.7f, 0.45f);
             colors.fadeDuration = 0.08f;
             button.colors = colors;
             var navigation = button.navigation;
             navigation.mode = Navigation.Mode.None;
             button.navigation = navigation;
+
+            if (glow != null)
+            {
+                var glowComponent = rect.gameObject.AddComponent<ButtonGlow>();
+                AppBuilder.Bind(glowComponent, ("selectable", button), ("glow", glow), ("alpha", UiTheme.PrimaryGlow.a));
+            }
 
             label = Label(rect, "Texto", text, fontSize, foreground, FontStyles.Bold, TextAlignmentOptions.Center);
             Stretch(label.rectTransform, 24f, 0f, 24f, 0f);
@@ -229,17 +323,37 @@ namespace MontAR.EditorTools
             return button;
         }
 
-        /// <summary>Botão quadrado/redondo só com texto curto ou ícone (ex.: ×, +, –).</summary>
+        /// <summary>Botão com ícone à esquerda do texto (os dois centralizados).</summary>
+        public static Button IconTextButton(Transform parent, string name, string text, Sprite icon, ButtonStyle style,
+            out TextMeshProUGUI label, out Image iconImage, float height = 128f, float fontSize = 36f)
+        {
+            Button button = MakeButton(parent, name, text, style, out label, height, fontSize);
+            RectTransform row = Stretch(Node("Conteúdo", button.transform), 20f, 0f, 20f, 0f);
+            HLayout(row.gameObject, null, 14f, TextAnchor.MiddleCenter, true, true);
+
+            RectTransform iconRect = Node("Ícone", row);
+            Layout(iconRect.gameObject, preferredHeight: 50f, preferredWidth: 50f, minHeight: 50f, minWidth: 50f);
+            iconImage = Img(iconRect.gameObject, label.color, icon);
+            iconImage.preserveAspect = true;
+            iconImage.raycastTarget = false;
+
+            label.rectTransform.SetParent(row, false);
+            label.overflowMode = TextOverflowModes.Overflow;
+            return button;
+        }
+
+        /// <summary>Botão redondo com texto curto ou ícone (ex.: ×, +, –), em vidro translúcido com anel.</summary>
         public static Button IconButton(Transform parent, string name, string glyph, Sprite icon, Color background, Color foreground,
             float size, float glyphSize, out TextMeshProUGUI label)
         {
             RectTransform rect = Node(name, parent);
             rect.sizeDelta = new Vector2(size, size);
             Image image = Img(rect.gameObject, background, Circle);
+            Decorate(rect, size * 0.5f, UiTheme.GlassBorder, null, true);
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             ColorBlock colors = button.colors;
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            colors.pressedColor = new Color(0.75f, 0.75f, 0.75f, 1f);
             colors.disabledColor = new Color(0.75f, 0.75f, 0.75f, 0.35f);
             button.colors = colors;
             var navigation = button.navigation;
@@ -251,7 +365,7 @@ namespace MontAR.EditorTools
             {
                 RectTransform iconRect = Node("Ícone", rect);
                 Img(iconRect.gameObject, foreground, icon).raycastTarget = false;
-                Stretch(iconRect, size * 0.22f, size * 0.22f, size * 0.22f, size * 0.22f);
+                Stretch(iconRect, size * 0.24f, size * 0.24f, size * 0.24f, size * 0.24f);
             }
             else
             {
@@ -264,13 +378,41 @@ namespace MontAR.EditorTools
             return button;
         }
 
-        /// <summary>Ícone dentro de um círculo colorido.</summary>
+        /// <summary>Ícone dentro de um círculo colorido translúcido.</summary>
         public static Image Badge(Transform parent, string name, Sprite icon, Color circle, Color iconColor, float size, float iconFraction = 0.62f)
         {
             RectTransform rect = Node(name, parent);
             rect.sizeDelta = new Vector2(size, size);
             Img(rect.gameObject, circle, Circle).raycastTarget = false;
+            Decorate(rect, size * 0.5f, new Color(iconColor.r, iconColor.g, iconColor.b, 0.35f), null, true);
             Layout(rect.gameObject, preferredHeight: size, preferredWidth: size, minHeight: size, minWidth: size);
+
+            RectTransform iconRect = Node("Ícone", rect);
+            float inset = size * (1f - iconFraction) * 0.5f;
+            Stretch(iconRect, inset, inset, inset, inset);
+            Image image = Img(iconRect.gameObject, iconColor, icon);
+            image.raycastTarget = false;
+            image.preserveAspect = true;
+            return image;
+        }
+
+        /// <summary>Selo grande: disco de vidro com anel claro, halo colorido atrás e o ícone no meio.</summary>
+        public static Image GlassBadge(Transform parent, string name, Sprite icon, float size, Color glow, Color iconColor, float iconFraction = 0.5f)
+        {
+            RectTransform rect = Node(name, parent);
+            rect.sizeDelta = new Vector2(size, size);
+            Layout(rect.gameObject, preferredHeight: size, preferredWidth: size, minHeight: size, minWidth: size);
+
+            RectTransform halo = Node("Halo", rect);
+            halo.anchorMin = halo.anchorMax = new Vector2(0.5f, 0.5f);
+            halo.sizeDelta = Vector2.one * size * 2f;
+            Img(halo.gameObject, glow, Halo).raycastTarget = false;
+
+            RectTransform disc = Stretch(Node("Vidro", rect));
+            Image discImage = Img(disc.gameObject, UiTheme.GlassTint, Circle);
+            discImage.material = GlassMaterial;
+            discImage.raycastTarget = false;
+            Decorate(disc, size * 0.5f, UiTheme.GlassBorderStrong, null, true);
 
             RectTransform iconRect = Node("Ícone", rect);
             float inset = size * (1f - iconFraction) * 0.5f;
@@ -285,20 +427,15 @@ namespace MontAR.EditorTools
 
         public static TMP_InputField TextInput(Transform parent, string name, string placeholder, out TextMeshProUGUI text)
         {
-            // O próprio campo é a borda; o fundo branco é um filho 3 px para dentro (filhos desenham por cima).
             RectTransform rect = Node(name, parent);
-            Image background = Card(rect.gameObject, UiTheme.Border, 26f);
+            Image background = Fill(rect.gameObject, UiTheme.GlassFill, 28f, UiTheme.GlassBorder);
             Layout(rect.gameObject, preferredHeight: 124f, minHeight: 124f);
-
-            RectTransform fill = Node("Fundo", rect);
-            Stretch(fill, 3f, 3f, 3f, 3f);
-            Card(fill.gameObject, UiTheme.Surface, 24f).raycastTarget = false;
 
             RectTransform area = Node("Área do texto", rect);
             Stretch(area, 36f, 12f, 36f, 12f);
             area.gameObject.AddComponent<RectMask2D>();
 
-            TextMeshProUGUI hint = Label(area, "Placeholder", placeholder, 44f, UiTheme.Disabled, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
+            TextMeshProUGUI hint = Label(area, "Placeholder", placeholder, 44f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
             Stretch(hint.rectTransform);
             hint.textWrappingMode = TextWrappingModes.NoWrap;
             text = Label(area, "Texto", string.Empty, 44f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
@@ -317,7 +454,7 @@ namespace MontAR.EditorTools
             input.caretWidth = 4;
             input.customCaretColor = true;
             input.caretColor = UiTheme.Primary;
-            input.selectionColor = new Color(UiTheme.Primary.r, UiTheme.Primary.g, UiTheme.Primary.b, 0.3f);
+            input.selectionColor = new Color(UiTheme.Primary.r, UiTheme.Primary.g, UiTheme.Primary.b, 0.35f);
             var navigation = input.navigation;
             navigation.mode = Navigation.Mode.None;
             input.navigation = navigation;
@@ -327,23 +464,20 @@ namespace MontAR.EditorTools
         public static Toggle Checkbox(Transform parent, string name, out TextMeshProUGUI label, out GameObject checkMark)
         {
             RectTransform row = Node(name, parent);
-            Image rowBackground = Card(row.gameObject, UiTheme.SurfaceMuted, 24f);
-            HLayout(row.gameObject, Pad(28, 28, 22, 22), 28f, TextAnchor.MiddleLeft);
+            Image rowBackground = Fill(row.gameObject, UiTheme.GlassFill, 28f, UiTheme.GlassBorder);
+            HLayout(row.gameObject, Pad(28, 28, 24, 24), 28f, TextAnchor.MiddleLeft);
 
             RectTransform box = Node("Caixa", row);
-            Img(box.gameObject, UiTheme.Disabled, Rounded, 48f / 16f).raycastTarget = false;
+            Fill(box.gameObject, new Color(1f, 1f, 1f, 0.04f), 18f, new Color(1f, 1f, 1f, 0.5f)).raycastTarget = false;
             Layout(box.gameObject, preferredHeight: 68f, preferredWidth: 68f, minHeight: 68f, minWidth: 68f);
-            RectTransform boxFill = Node("Fundo", box);
-            Stretch(boxFill, 4f, 4f, 4f, 4f);
-            Img(boxFill.gameObject, UiTheme.Surface, Rounded, 48f / 12f).raycastTarget = false;
 
             RectTransform mark = Node("Marcado", box);
             Stretch(mark);
-            Image markImage = Img(mark.gameObject, UiTheme.Primary, Rounded, 48f / 16f);
+            Image markImage = Img(mark.gameObject, UiTheme.Primary, Gradient, CornerScale(18f));
             markImage.raycastTarget = false;
             RectTransform check = Node("Check", mark);
-            Stretch(check, 10f, 10f, 10f, 10f);
-            Img(check.gameObject, Color.white, LoadSprite("ui_check")).raycastTarget = false;
+            Stretch(check, 12f, 12f, 12f, 12f);
+            Img(check.gameObject, UiTheme.TextOnPrimary, LoadSprite("ui_check")).raycastTarget = false;
 
             label = Label(row, "Texto", "Item", 36f, UiTheme.TextPrimary, FontStyles.Normal, TextAlignmentOptions.MidlineLeft);
             Layout(label.gameObject, flexibleWidth: 1f);

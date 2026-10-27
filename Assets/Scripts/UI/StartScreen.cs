@@ -24,13 +24,30 @@ namespace MontAR
         [SerializeField] private Image modeDemoBackground;
         [SerializeField] private TMP_Text modeDemoLabel;
         [SerializeField] private TMP_Text modeNote;
+        [Header("Peças reais ou virtuais")]
+        [SerializeField] private Button partsRealButton;
+        [SerializeField] private Image partsRealBackground;
+        [SerializeField] private TMP_Text partsRealLabel;
+        [SerializeField] private Button partsVirtualButton;
+        [SerializeField] private Image partsVirtualBackground;
+        [SerializeField] private TMP_Text partsVirtualLabel;
+        [SerializeField] private TMP_Text partsNote;
         [SerializeField] private TMP_Text stepsHeader;
         [SerializeField] private TMP_Text stepsList;
         [SerializeField] private Button startButton;
         [SerializeField] private Button backButton;
 
+        private const string SimulatedPartsKey = "montar.pecas_virtuais";
+
         private GuidanceMode mode;
         private bool arAvailable;
+        private bool simulatedParts = true;
+
+        /// <summary>Peças virtuais (sem o kit): a escolha fica salva no aparelho. Padrão: ligada.</summary>
+        public static bool SavedSimulatedParts => PlayerPrefs.GetInt(SimulatedPartsKey, 1) == 1;
+
+        /// <summary>Montagem com peças virtuais escolhida nesta tela.</summary>
+        public bool SimulatedParts => simulatedParts;
 
         /// <summary>Código já validado, nome da montagem (pode ser vazio) e modo escolhido.</summary>
         public event Action<string, string, GuidanceMode> StartRequested;
@@ -42,6 +59,10 @@ namespace MontAR
             backButton.onClick.AddListener(() => Back?.Invoke());
             modeArButton.onClick.AddListener(() => SetMode(GuidanceMode.AugmentedReality));
             modeDemoButton.onClick.AddListener(() => SetMode(GuidanceMode.Demo3D));
+            if (partsRealButton != null)
+                partsRealButton.onClick.AddListener(() => SetSimulatedParts(false));
+            if (partsVirtualButton != null)
+                partsVirtualButton.onClick.AddListener(() => SetSimulatedParts(true));
             participantInput.characterLimit = ParticipantCode.MaxLength;
             // Maiúsculas enquanto digita e só os caracteres aceitos no código (o resto é ignorado).
             participantInput.onValidateInput = (text, index, c) =>
@@ -74,7 +95,24 @@ namespace MontAR
             }
             stepsList.text = text.ToString();
 
+            SetSimulatedParts(SavedSimulatedParts);
             SetMode(arAvailable ? preferredMode : GuidanceMode.Demo3D);
+        }
+
+        private void SetSimulatedParts(bool value)
+        {
+            simulatedParts = value;
+            PlayerPrefs.SetInt(SimulatedPartsKey, value ? 1 : 0);
+            if (partsRealBackground == null)
+                return;
+
+            partsRealBackground.color = value ? Color.clear : UiTheme.Primary;
+            partsRealLabel.color = value ? UiTheme.TextSecondary : UiTheme.TextOnDark;
+            partsVirtualBackground.color = value ? UiTheme.Primary : Color.clear;
+            partsVirtualLabel.color = value ? UiTheme.TextOnDark : UiTheme.TextSecondary;
+            partsNote.text = value
+                ? "Sem o kit: a placa-mãe e as peças aparecem em 3D (na RA, sobre o marcador A). Em cada etapa, <b>Simular encaixe</b> mostra a peça entrando no lugar, e ela fica montada."
+                : "Com o kit de verdade: a peça fantasma aparece sobre a placa real e você encaixa a peça com as mãos.";
         }
 
         /// <summary>Atualiza a disponibilidade da RA (o ARCore pode responder depois que a tela abriu).</summary>
@@ -91,10 +129,10 @@ namespace MontAR
             mode = newMode;
 
             bool ar = mode == GuidanceMode.AugmentedReality;
-            modeArBackground.color = ar ? UiTheme.Primary : UiTheme.Surface;
-            modeArLabel.color = ar ? UiTheme.TextOnDark : (arAvailable ? UiTheme.TextPrimary : UiTheme.Disabled);
-            modeDemoBackground.color = ar ? UiTheme.Surface : UiTheme.Primary;
-            modeDemoLabel.color = ar ? UiTheme.TextPrimary : UiTheme.TextOnDark;
+            modeArBackground.color = ar ? UiTheme.Primary : Color.clear;
+            modeArLabel.color = ar ? UiTheme.TextOnDark : (arAvailable ? UiTheme.TextSecondary : UiTheme.Disabled);
+            modeDemoBackground.color = ar ? Color.clear : UiTheme.Primary;
+            modeDemoLabel.color = ar ? UiTheme.TextSecondary : UiTheme.TextOnDark;
             modeArButton.interactable = arAvailable;
 
             modeNote.text = !arAvailable

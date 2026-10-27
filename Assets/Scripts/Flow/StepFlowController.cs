@@ -21,6 +21,8 @@ namespace MontAR
         [SerializeField] private SessionMetricsLogger metricsLogger;
 
         private readonly List<AssemblyStep> activeSteps = new List<AssemblyStep>();
+        private readonly HashSet<int> fittedSteps = new HashSet<int>();
+        private bool simulatedParts;
         private StepFlow flow;
         private ProgressStore progressStore;
         private SessionProgress progress;
@@ -57,6 +59,19 @@ namespace MontAR
 
         /// <summary>Validação visual da etapa atual, ou null se for checklist.</summary>
         public ReferenceSeenValidator CurrentVisualValidator => currentValidator as ReferenceSeenValidator;
+
+        /// <summary>Montagem com peças virtuais (sem o kit): a placa e as peças são 3D e o encaixe é simulado.</summary>
+        public bool SimulatedParts => simulatedParts;
+
+        /// <summary>A etapa atual tem peça para encaixar (há uma peça fantasma no overlay)?</summary>
+        public bool CurrentStepHasPiece => VirtualAssembly.HasPiece(CurrentStep);
+
+        /// <summary>A peça da etapa atual já foi encaixada (simulada)?</summary>
+        public bool IsCurrentStepFitted => flow != null && flow.IsRunning && fittedSteps.Contains(flow.CurrentIndex);
+
+        /// <summary>Dá para simular o encaixe agora: peças virtuais, etapa em Guia, com peça e ainda não encaixada.</summary>
+        public bool CanSimulateFit => simulatedParts && flow != null && flow.IsRunning && flow.Phase == StepPhase.Guiding
+            && !fittedSteps.Contains(flow.CurrentIndex) && CurrentStepHasPiece;
 
         private void Awake()
         {
@@ -131,8 +146,27 @@ namespace MontAR
                 contentManager.Clear();
             if (demoStage != null)
                 demoStage.Clear();
+            ClearFitted();
             flow = null;
             currentValidator = null;
+        }
+
+        /// <summary>Liga ou desliga as peças virtuais. Vale a partir da próxima sessão (iniciar ou retomar).</summary>
+        public void SetSimulatedParts(bool value)
+        {
+            simulatedParts = value;
+        }
+
+        /// <summary>
+        /// Botão "Simular encaixe": a peça da etapa desce até o lugar e fica montada na placa virtual
+        /// (na RA e na bancada 3D). Não valida a etapa: o checklist continua obrigatório.
+        /// </summary>
+        public bool SimulateFit()
+        {
+            if (!CanSimulateFit)
+                return false;
+            Fit(flow.CurrentIndex, true);
+            return true;
         }
 
         /// <summary>Troca entre RA e demonstração 3D. Vale para a sessão atual e para as próximas.</summary>
@@ -204,8 +238,39 @@ namespace MontAR
                 imageTracking.ReferenceLost += OnReferenceLost;
             }
 
+            // Peças virtuais: as etapas já validadas (retomada) começam com a peça encaixada.
+            ClearFitted();
+            if (contentManager != null)
+                contentManager.SetSimulated(simulatedParts);
+            if (simulatedParts)
+            {
+                for (int i = 0; i < fromIndex; i++)
+                    Fit(i, false);
+            }
+
             progressStore.Save(progress);
-            flow.Start(fromIndex, $"mode={mode.ToCsvName()};kit={kit.Describe()}");
+            string parts = simulatedParts ? ";pecas=virtuais" : string.Empty;
+            flow.Start(fromIndex, $"mode={mode.ToCsvName()};kit={kit.Describe()}{parts}");
+        }
+
+        private void Fit(int stepIndex, bool animate)
+        {
+            if (!fittedSteps.Add(stepIndex))
+                return;
+            AssemblyStep step = activeSteps[stepIndex];
+            if (contentManager != null)
+                contentManager.InstallStep(step, animate);
+            if (demoStage != null)
+                demoStage.InstallStep(step, animate);
+        }
+
+        private void ClearFitted()
+        {
+            fittedSteps.Clear();
+            if (contentManager != null)
+                contentManager.ClearInstalled();
+            if (demoStage != null)
+                demoStage.ClearInstalled();
         }
 
         private void Detach()
@@ -258,6 +323,9 @@ namespace MontAR
                 case FlowEventType.StepCompleted:
                     progress.completedSteps = flow.CompletedCount;
                     progressStore.Save(progress);
+                    // Validou sem simular: a peça entra na placa virtual do mesmo jeito.
+                    if (simulatedParts)
+                        Fit(flowEvent.StepIndex, true);
                     break;
 
                 case FlowEventType.SessionCompleted:

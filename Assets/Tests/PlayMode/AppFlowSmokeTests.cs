@@ -149,6 +149,7 @@ namespace MontAR.Tests
             code.text = "T01";
             Find<TMP_InputField>("Campo do nome").text = "  Bancada   de teste ";
             Click("Modo 3D");
+            Click("Peças virtuais");
             yield return null;
             yield return Capture("04_inicio");
             Click("Botão Iniciar");
@@ -176,6 +177,20 @@ namespace MontAR.Tests
                     yield return new WaitForSecondsRealtime(0.4f);
                     yield return Capture($"{05 + captured:00}_etapa_{flow.Flow.CurrentIndex + 1}_{step.StepId}");
                     captured++;
+                }
+
+                // Peças virtuais: o encaixe simulado deixa a peça montada (o checklist continua obrigatório).
+                if (flow.CanSimulateFit)
+                {
+                    Click("Botão Simular encaixe");
+                    yield return null;
+                    Assert.IsTrue(flow.IsCurrentStepFitted, "Simular encaixe deixa a peça da etapa montada");
+                    Assert.AreEqual(StepPhase.Guiding, flow.Flow.Phase, "simular não valida a etapa");
+                    if (step.StepId == "cpu_soquete" || step.StepId == "ram_slots")
+                    {
+                        yield return new WaitForSecondsRealtime(1.2f);
+                        yield return Capture($"{05 + captured - 1:00}b_etapa_{flow.Flow.CurrentIndex + 1}_{step.StepId}_encaixada");
+                    }
                 }
 
                 Click("Botão Validar");
@@ -223,6 +238,7 @@ namespace MontAR.Tests
             string csv = File.ReadAllText(createdCsv);
             StringAssert.Contains("session_started", csv);
             StringAssert.Contains("mode=demo_3d;kit=placa_mae:", csv);
+            StringAssert.Contains(";pecas=virtuais", csv, "sessão com peças virtuais fica marcada no CSV");
             StringAssert.Contains("validation_failed", csv);
             StringAssert.Contains("session_completed", csv);
             Assert.AreEqual(9, csv.Split('\n').Count(line => line.Contains(",step_completed,")));

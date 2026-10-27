@@ -199,6 +199,7 @@ namespace MontAR
         {
             lastParticipantCode = participantCode;
             preferredMode = mode;
+            flowController.SetSimulatedParts(startScreen.SimulatedParts);
             WithCameraFor(mode, () => BeginAssembly(() => flowController.StartNewSession(participantCode, selection, label)));
         }
 
@@ -206,6 +207,7 @@ namespace MontAR
         {
             selection = PartSelection.FromEntries(saved.parts);
             lastParticipantCode = saved.participantCode;
+            flowController.SetSimulatedParts(StartScreen.SavedSimulatedParts);
             WithCameraFor(arAvailable ? preferredMode : GuidanceMode.Demo3D, () => BeginAssembly(() => flowController.ResumeSession(saved)));
         }
 

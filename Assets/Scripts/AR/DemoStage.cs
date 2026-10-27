@@ -16,10 +16,12 @@ namespace MontAR
         [Tooltip("Centro da placa virtual, enquadrado nas etapas sem overlay.")]
         [SerializeField] private Transform boardCenter;
         [SerializeField] private Camera stageCamera;
-        [Tooltip("Fundo da câmera com a bancada à mostra.")]
-        [SerializeField] private Color stageBackground = new Color(0.17f, 0.18f, 0.2f);
-        [Tooltip("Fundo da câmera nos menus (bancada escondida), atrás das telas.")]
-        [SerializeField] private Color menuBackground = new Color(0.957f, 0.957f, 0.961f);
+        [Tooltip("Peças virtuais encaixadas (filho do marcador virtual). A bancada já tem a placa-mãe.")]
+        [SerializeField] private VirtualAssembly assembly;
+        [Tooltip("Fundo da câmera com a bancada à mostra (atrás do fundo aurora).")]
+        [SerializeField] private Color stageBackground = new Color(0.02f, 0.03f, 0.06f);
+        [Tooltip("Fundo da câmera nos menus (bancada escondida), atrás do fundo aurora.")]
+        [SerializeField] private Color menuBackground = new Color(0.02f, 0.03f, 0.06f);
 
         [Header("Câmera orbital")]
         [SerializeField] private float defaultYaw = 0f;
@@ -91,6 +93,22 @@ namespace MontAR
             DestroyOverlay();
             CurrentStep = null;
             ResetView();
+        }
+
+        /// <summary>Peças virtuais: deixa a peça da etapa encaixada na placa (animada se a bancada estiver à mostra).</summary>
+        public void InstallStep(AssemblyStep step, bool animate)
+        {
+            if (assembly == null)
+                return;
+            assembly.Install(step, animate && IsVisible);
+            if (step != null && step == CurrentStep)
+                VirtualAssembly.SetGhostVisible(overlay, false);
+        }
+
+        public void ClearInstalled()
+        {
+            if (assembly != null)
+                assembly.Clear();
         }
 
         /// <summary>

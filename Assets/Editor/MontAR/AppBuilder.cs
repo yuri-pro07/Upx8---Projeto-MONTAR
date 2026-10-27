@@ -74,6 +74,8 @@ namespace MontAR.EditorTools
 
             ConfigureUiSprites();
             ConfigurePlayer();
+            ConfigureGlass();
+            UiFactory.Font = FontBuilder.EnsureFonts();
             PartCatalog catalog = BuildCatalog(false);
             var procedure = AssetDatabase.LoadAssetAtPath<AssemblyProcedure>(MontagemPreviewBuilder.ProcedurePath);
             if (procedure == null)
@@ -92,6 +94,12 @@ namespace MontAR.EditorTools
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
         }
 
+        // Bordas do 9-slice (px) dos sprites que esticam; os demais são simples.
+        private static readonly Dictionary<string, float> SliceBorders = new Dictionary<string, float>
+        {
+            { "ui_arredondado", 48f }, { "ui_contorno", 48f }, { "ui_brilho", 48f }, { "ui_gradiente", 48f }, { "ui_sombra", 88f },
+        };
+
         private static void ConfigureUiSprites()
         {
             foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { SpritesFolder.TrimEnd('/') }))
@@ -100,21 +108,25 @@ namespace MontAR.EditorTools
                 if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
                     continue;
 
-                bool rounded = Path.GetFileNameWithoutExtension(path) == "ui_arredondado";
-                var border = rounded ? new Vector4(48f, 48f, 48f, 48f) : Vector4.zero;
+                string name = Path.GetFileNameWithoutExtension(path);
+                var border = SliceBorders.TryGetValue(name, out float slice) ? new Vector4(slice, slice, slice, slice) : Vector4.zero;
+                bool background = name.StartsWith("fundo_");
+                int maxSize = background ? 2048 : importer.maxTextureSize;
                 bool changed = importer.textureType != TextureImporterType.Sprite
                     || importer.spriteBorder != border
                     || importer.mipmapEnabled
-                    || !importer.alphaIsTransparency;
+                    || importer.alphaIsTransparency == background
+                    || importer.maxTextureSize != maxSize;
                 if (!changed)
                     continue;
 
                 importer.textureType = TextureImporterType.Sprite;
                 importer.spriteImportMode = SpriteImportMode.Single;
                 importer.mipmapEnabled = false;
-                importer.alphaIsTransparency = true;
+                importer.alphaIsTransparency = !background;
                 importer.filterMode = FilterMode.Bilinear;
                 importer.wrapMode = TextureWrapMode.Clamp;
+                importer.maxTextureSize = maxSize;
                 var settings = new TextureImporterSettings();
                 importer.ReadTextureSettings(settings);
                 settings.spriteMeshType = SpriteMeshType.FullRect;
@@ -122,6 +134,78 @@ namespace MontAR.EditorTools
                 importer.SetTextureSettings(settings);
                 importer.SaveAndReimport();
             }
+        }
+
+        // ------------------------------------------------------------ vidro
+
+        public const string GlassShaderPath = "Assets/Shaders/UIGlass.shader";
+        public const string GlassBlurShaderPath = "Assets/Shaders/GlassBlur.shader";
+        public const string GlassMaterialPath = "Assets/Materials/UI/Vidro.mat";
+        public const string GlassDenseMaterialPath = "Assets/Materials/UI/Vidro_denso.mat";
+        private static readonly string[] RendererPaths = { "Assets/Settings/Mobile_Renderer.asset", "Assets/Settings/PC_Renderer.asset" };
+
+        /// <summary>
+        /// Materiais do vidro da interface e o desfoque da câmera (GlassBlurFeature) nos renderers do URP.
+        /// O desfoque vai para o asset do renderer por código (o Inspector faz o mesmo ao clicar em Add Renderer Feature).
+        /// </summary>
+        private static void ConfigureGlass()
+        {
+            var glassShader = AssetDatabase.LoadAssetAtPath<Shader>(GlassShaderPath);
+            var blurShader = AssetDatabase.LoadAssetAtPath<Shader>(GlassBlurShaderPath);
+            if (glassShader == null || blurShader == null)
+                throw new InvalidOperationException("Shaders do vidro não encontrados em Assets/Shaders.");
+
+            EnsureFolder(Path.GetDirectoryName(GlassMaterialPath));
+            UiFactory.GlassMaterial = GlassMaterial(GlassMaterialPath, glassShader, 0.66f);
+            UiFactory.GlassDenseMaterial = GlassMaterial(GlassDenseMaterialPath, glassShader, 0.8f);
+
+            foreach (string rendererPath in RendererPaths)
+            {
+                var data = AssetDatabase.LoadAssetAtPath<UniversalRendererData>(rendererPath);
+                if (data == null)
+                    continue;
+
+                GlassBlurFeature feature = data.rendererFeatures.Find(f => f is GlassBlurFeature) as GlassBlurFeature;
+                if (feature == null)
+                {
+                    feature = ScriptableObject.CreateInstance<GlassBlurFeature>();
+                    feature.name = "MontAR Glass Blur";
+                    AssetDatabase.AddObjectToAsset(feature, data);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.TryGetGUIDAndLocalFileIdentifier(feature, out string _, out long localId);
+
+                    var so = new SerializedObject(data);
+                    SerializedProperty features = so.FindProperty("m_RendererFeatures");
+                    SerializedProperty map = so.FindProperty("m_RendererFeatureMap");
+                    features.arraySize++;
+                    features.GetArrayElementAtIndex(features.arraySize - 1).objectReferenceValue = feature;
+                    map.arraySize++;
+                    map.GetArrayElementAtIndex(map.arraySize - 1).longValue = localId;
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                Bind(feature, ("blurShader", blurShader));
+                feature.SetActive(true);
+                EditorUtility.SetDirty(feature);
+                EditorUtility.SetDirty(data);
+            }
+            AssetDatabase.SaveAssets();
+        }
+
+        private static Material GlassMaterial(string path, Shader shader, float tintStrength)
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, path);
+            }
+            material.shader = shader;
+            material.SetFloat("_TintStrength", tintStrength);
+            material.SetFloat("_Saturation", 1.45f);
+            material.SetFloat("_Brightness", 0.95f);
+            EditorUtility.SetDirty(material);
+            return material;
         }
 
         // ------------------------------------------------------------ catálogo
@@ -294,13 +378,14 @@ namespace MontAR.EditorTools
             Object.DestroyImmediate(root);
         }
 
-        /// <summary>Tela de fundo inteiro com o conteúdo dentro da área segura.</summary>
-        private static RectTransform ScreenRoot<T>(Transform parent, string name, Color? background, out T screen) where T : UiScreen
+        /// <summary>
+        /// Tela de fundo inteiro, transparente: atrás dela aparece o fundo aurora (menus e bancada 3D) ou a
+        /// câmera (RA). O conteúdo fica dentro da área segura.
+        /// </summary>
+        private static RectTransform ScreenRoot<T>(Transform parent, string name, out T screen) where T : UiScreen
         {
             RectTransform root = Stretch(Node(name, parent));
             root.gameObject.AddComponent<CanvasGroup>();
-            if (background.HasValue)
-                Img(root.gameObject, background.Value);
             screen = root.gameObject.AddComponent<T>();
 
             RectTransform safe = Stretch(Node("Área segura", root));
@@ -310,8 +395,8 @@ namespace MontAR.EditorTools
 
         private static WelcomeScreen BuildWelcome(Transform parent)
         {
-            RectTransform content = ScreenRoot(parent, "Tela 1 - Apresentação", UiTheme.Background, out WelcomeScreen screen);
-            VLayout(content.gameObject, Pad(64, 64, 36, 40), 0f, TextAnchor.UpperCenter);
+            RectTransform content = ScreenRoot(parent, "Tela 1 - Apresentação", out WelcomeScreen screen);
+            VLayout(content.gameObject, Pad(56, 56, 36, 44), 0f, TextAnchor.UpperCenter);
 
             // Topo: "‹ Voltar" no canto esquerdo (longe do Próximo, que ocupa a base) e "Pular" no direito.
             RectTransform top = Node("Topo", content);
@@ -323,7 +408,7 @@ namespace MontAR.EditorTools
             Stretch((RectTransform)back.transform);
             backLabel.alignment = TextAlignmentOptions.MidlineLeft;
             backLabel.rectTransform.offsetMin = Vector2.zero;
-            TextMeshProUGUI logo = Label(top, "Logo", "Mont<color=#16A34A>AR</color>", 60f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.Center);
+            TextMeshProUGUI logo = Title(top, "Logo", "Mont<color=#4ADE80>AR</color>", 60f, TextAlignmentOptions.Center);
             Layout(logo.gameObject, flexibleWidth: 1f);
             Button skip = MakeButton(top, "Botão Pular", "Pular", ButtonStyle.Ghost, out TextMeshProUGUI skipLabel, 88f, 36f);
             skipLabel.alignment = TextAlignmentOptions.MidlineRight;
@@ -333,11 +418,15 @@ namespace MontAR.EditorTools
             Spacer(content, 1f);
             RectTransform iconRow = Node("Linha do ícone", content);
             HLayout(iconRow.gameObject, null, 0f, TextAnchor.MiddleCenter);
-            Image icon = Badge(iconRow, "Ícone da página", LoadSprite("icone_cubo"), UiTheme.PrimarySoft, UiTheme.Primary, 380f, 0.55f);
-            Spacer(content, 0f, 64f);
-            TextMeshProUGUI title = Label(content, "Título", "Bem-vindo ao MontAR", 68f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.Top);
-            Spacer(content, 0f, 28f);
-            TextMeshProUGUI body = Label(content, "Texto", "", 40f, UiTheme.TextSecondary, FontStyles.Normal, TextAlignmentOptions.Top);
+            Image icon = GlassBadge(iconRow, "Ícone da página", LoadSprite("icone_cubo"), 340f, UiTheme.PrimaryGlow, UiTheme.TextAccent, 0.5f);
+            Spacer(content, 0f, 72f);
+
+            // Título e texto num cartão de vidro: leem bem sobre qualquer parte do fundo.
+            RectTransform card = Node("Cartão", content);
+            Glass(card.gameObject, 52f);
+            VLayout(card.gameObject, Pad(56, 56, 52, 58), 22f, TextAnchor.UpperCenter);
+            TextMeshProUGUI title = Title(card, "Título", "Bem-vindo ao MontAR", 66f, TextAlignmentOptions.Top);
+            TextMeshProUGUI body = Label(card, "Texto", "", 38f, UiTheme.TextSecondary, FontStyles.Normal, TextAlignmentOptions.Top);
             body.lineSpacing = 10f;
             Spacer(content, 1.2f);
 
@@ -346,11 +435,11 @@ namespace MontAR.EditorTools
             Layout(dots.gameObject, preferredHeight: 30f);
             RectTransform dot = Node("Ponto", dots);
             dot.sizeDelta = new Vector2(18f, 18f);
-            Image dotImage = Card(dot.gameObject, UiTheme.Border, 9f);
+            Image dotImage = Card(dot.gameObject, UiTheme.GlassBorderStrong, 9f);
             dotImage.raycastTarget = false;
             Spacer(content, 0f, 44f);
 
-            Button next = MakeButton(content, "Botão Próximo", "Próximo", ButtonStyle.Primary, out TextMeshProUGUI nextLabel, 132f);
+            Button next = MakeButton(content, "Botão Próximo", "Próximo", ButtonStyle.Primary, out TextMeshProUGUI nextLabel, 136f, 42f);
 
             Spacer(content, 0f, 28f);
             TextMeshProUGUI version = Label(content, "Versão (toque longo: diagnóstico)", "versão", 26f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
@@ -366,12 +455,12 @@ namespace MontAR.EditorTools
             SerializedProperty pages = so.FindProperty("pages");
             var content5 = new[]
             {
-                ("Bem-vindo ao MontAR", "Monte um computador de verdade com a instrução em 3D em cima da peça real. O app guia uma etapa por vez e só libera a próxima depois que você confirma a anterior.", "icone_cubo"),
+                ("Bem-vindo ao MontAR", "Monte um computador com a instrução em 3D em cima da peça. O app guia uma etapa por vez e só libera a próxima depois que você confirma a anterior.", "icone_cubo"),
                 ("1. Aponta", "Aponte a câmera do celular para o marcador A do tapete de montagem. É por ele que o app sabe onde fica cada encaixe da placa-mãe.", "icone_aponta"),
-                ("2. Guia", "Uma peça fantasma em 3D mostra onde e em que sentido encaixar. Faça o mesmo movimento com a peça de verdade. Sem câmera? Toque em 3D e veja tudo numa bancada virtual.", "icone_guia"),
+                ("2. Guia", "Uma peça fantasma em 3D mostra onde e em que sentido encaixar. Faça o mesmo movimento com a peça. Sem o kit? Toque em Simular encaixe e veja a peça entrar no lugar.", "icone_guia"),
                 ("3. Validação", "Terminou a etapa? Toque em Validar e confira a lista. Se algo não bate, a etapa volta para você corrigir antes de seguir.", "icone_valida"),
                 ("4. Registra", "Cada etapa validada fica salva. Se o app fechar, a montagem continua de onde parou.", "icone_registra"),
-                ("Antes de começar", "Tapete impresso sobre a mesa, com o marcador A à vista. Peças separadas ao lado e a fonte fora da tomada. Luz boa e o celular na mão.", "icone_camera"),
+                ("Antes de começar", "Marcador A impresso sobre a mesa, à vista. Com o kit: peças separadas ao lado e a fonte fora da tomada. Sem o kit: escolha Peças virtuais na tela de início.", "icone_camera"),
             };
             pages.arraySize = content5.Length;
             for (int i = 0; i < content5.Length; i++)
@@ -394,7 +483,7 @@ namespace MontAR.EditorTools
         private static RectTransform Header(Transform content, string title, string subtitle, out Button back, string actionText, out Button action)
         {
             RectTransform header = Node("Cabeçalho", content);
-            VLayout(header.gameObject, Pad(56, 56, 20, 24), 10f);
+            VLayout(header.gameObject, Pad(56, 56, 20, 28), 12f);
             RectTransform backRow = Node("Linha do voltar", header);
             HLayout(backRow.gameObject, null, 0f, TextAnchor.MiddleLeft);
             Layout(backRow.gameObject, preferredHeight: 88f);
@@ -411,32 +500,51 @@ namespace MontAR.EditorTools
                 actionLabel.rectTransform.offsetMax = new Vector2(0f, 0f);
                 Layout(action.gameObject, preferredHeight: 88f, preferredWidth: 360f);
             }
-            Label(header, "Título", title, 62f, UiTheme.TextPrimary, FontStyles.Bold);
+            Title(header, "Título", title, 64f);
             TextMeshProUGUI sub = Label(header, "Subtítulo", subtitle, 34f, UiTheme.TextSecondary);
             sub.lineSpacing = 8f;
             return header;
         }
 
+        /// <summary>Rodapé: cartão de vidro flutuante com os botões (devolve o cartão).</summary>
         private static RectTransform Footer(Transform content)
         {
-            RectTransform footer = Node("Rodapé", content);
-            Img(footer.gameObject, UiTheme.Surface);
-            VLayout(footer.gameObject, Pad(56, 56, 24, 36), 14f);
-            return footer;
+            RectTransform outer = Node("Rodapé", content);
+            VLayout(outer.gameObject, Pad(24, 24, 12, 28), 0f);
+            RectTransform card = Node("Cartão do rodapé", outer);
+            Glass(card.gameObject, 52f, true);
+            VLayout(card.gameObject, Pad(40, 40, 32, 36), 18f);
+            return card;
+        }
+
+        /// <summary>Seletor de duas opções numa trilha escura; a tela pinta a opção escolhida.</summary>
+        private static RectTransform Segmented(Transform parent, string name, string leftName, string leftText, string rightName, string rightText,
+            out Button left, out TextMeshProUGUI leftLabel, out Button right, out TextMeshProUGUI rightLabel, float height = 124f, float fontSize = 34f)
+        {
+            RectTransform segmented = Node(name, parent);
+            Fill(segmented.gameObject, new Color(0f, 0f, 0f, 0.28f), Mathf.Min(48f, height * 0.5f), UiTheme.GlassBorder);
+            HLayout(segmented.gameObject, Pad(8), 8f, TextAnchor.MiddleCenter);
+            Layout(segmented.gameObject, preferredHeight: height);
+            float inner = height - 16f;
+            left = MakeButton(segmented, leftName, leftText, ButtonStyle.Segment, out leftLabel, inner, fontSize);
+            Layout(left.gameObject, preferredHeight: inner, flexibleWidth: 1f, preferredWidth: 0f);
+            right = MakeButton(segmented, rightName, rightText, ButtonStyle.Segment, out rightLabel, inner, fontSize);
+            Layout(right.gameObject, preferredHeight: inner, flexibleWidth: 1f, preferredWidth: 0f);
+            return segmented;
         }
 
         private static PartsScreen BuildParts(Transform parent)
         {
-            RectTransform content = ScreenRoot(parent, "Tela 2 - Peças", UiTheme.Background, out PartsScreen screen);
+            RectTransform content = ScreenRoot(parent, "Tela 2 - Peças", out PartsScreen screen);
             VLayout(content.gameObject, null, 0f);
             Header(content, "Escolha as peças", "Use ‹ › para trocar o modelo (ex.: Intel ou AMD). O roteiro se ajusta ao que você marcar.", out Button back,
                 "Histórico ›", out Button history);
 
-            RectTransform list = Scroll(content, "Lista de peças", Pad(40, 40, 8, 40), 22f, out ScrollRect scroll);
+            RectTransform list = Scroll(content, "Lista de peças", Pad(32, 32, 8, 40), 20f, out ScrollRect scroll);
             PartRowView row = BuildPartRow(list);
 
             RectTransform footer = Footer(content);
-            TextMeshProUGUI summary = Label(footer, "Resumo", "O roteiro terá 9 etapas", 34f, UiTheme.TextSecondary, FontStyles.Normal, TextAlignmentOptions.Center);
+            TextMeshProUGUI summary = Label(footer, "Resumo", "O roteiro terá 9 etapas", 32f, UiTheme.TextSecondary, FontStyles.Normal, TextAlignmentOptions.Center);
             Button next = MakeButton(footer, "Botão Continuar", "Continuar", ButtonStyle.Primary, out _, 132f);
 
             Bind(screen, ("listContainer", list), ("rowTemplate", row), ("summaryLabel", summary), ("continueButton", next),
@@ -447,14 +555,14 @@ namespace MontAR.EditorTools
         private static PartRowView BuildPartRow(Transform parent)
         {
             RectTransform row = Node("Peça (modelo)", parent);
-            Card(row.gameObject, UiTheme.Surface, 36f);
+            Glass(row.gameObject, 40f);
             HLayout(row.gameObject, Pad(32, 28, 32, 32), 20f, TextAnchor.MiddleLeft);
 
             RectTransform dimmed = Node("Peça", row);
             HLayout(dimmed.gameObject, null, 28f, TextAnchor.MiddleLeft);
             Layout(dimmed.gameObject, flexibleWidth: 1f);
             CanvasGroup group = dimmed.gameObject.AddComponent<CanvasGroup>();
-            Image icon = Badge(dimmed, "Ícone", null, UiTheme.PrimarySoft, UiTheme.Primary, 124f, 0.64f);
+            Image icon = Badge(dimmed, "Ícone", null, UiTheme.PrimarySoft, UiTheme.TextAccent, 120f, 0.62f);
 
             RectTransform texts = Node("Textos", dimmed);
             VLayout(texts.gameObject, null, 6f);
@@ -462,22 +570,23 @@ namespace MontAR.EditorTools
             TextMeshProUGUI name = Label(texts, "Nome", "Peça", 40f, UiTheme.TextPrimary, FontStyles.Bold);
             RectTransform modelRow = Node("Modelo", texts);
             HLayout(modelRow.gameObject, null, 8f, TextAnchor.MiddleLeft);
-            Button previous = IconButton(modelRow, "Modelo anterior", "‹", null, UiTheme.SurfaceMuted, UiTheme.TextPrimary, 56f, 40f, out _);
-            TextMeshProUGUI model = Label(modelRow, "Nome do modelo", "Modelo", 30f, UiTheme.Primary, FontStyles.Bold);
+            Button previous = IconButton(modelRow, "Modelo anterior", "‹", null, UiTheme.GlassFill, UiTheme.TextPrimary, 56f, 40f, out _);
+            TextMeshProUGUI model = Label(modelRow, "Nome do modelo", "Modelo", 30f, UiTheme.TextAccent, FontStyles.Bold);
             Layout(model.gameObject, flexibleWidth: 1f);
-            Button nextModel = IconButton(modelRow, "Próximo modelo", "›", null, UiTheme.SurfaceMuted, UiTheme.TextPrimary, 56f, 40f, out _);
+            Button nextModel = IconButton(modelRow, "Próximo modelo", "›", null, UiTheme.GlassFill, UiTheme.TextPrimary, 56f, 40f, out _);
             TextMeshProUGUI modelDetail = Label(texts, "Detalhe do modelo", "", 26f, UiTheme.TextSecondary);
             modelDetail.lineSpacing = 2f;
             TextMeshProUGUI description = Label(texts, "Descrição", "", 28f, UiTheme.TextMuted);
-            TextMeshProUGUI requirement = Label(texts, "Obrigatória ou opcional", "obrigatória", 24f, UiTheme.TextMuted, FontStyles.Bold | FontStyles.UpperCase);
+            TextMeshProUGUI requirement = Label(texts, "Obrigatória ou opcional", "obrigatória", 22f, UiTheme.TextMuted, FontStyles.Bold | FontStyles.UpperCase);
+            requirement.characterSpacing = 4f;
 
             RectTransform stepper = Node("Quantidade", row);
             VLayout(stepper.gameObject, null, 10f, TextAnchor.MiddleCenter, true, false);
             Layout(stepper.gameObject, preferredWidth: 200f, minWidth: 200f, flexibleWidth: 0f);
             RectTransform buttons = Node("Botões", stepper);
             HLayout(buttons.gameObject, null, 18f, TextAnchor.MiddleCenter);
-            Button minus = IconButton(buttons, "Menos", "–", null, UiTheme.SurfaceMuted, UiTheme.TextPrimary, 84f, 48f, out _);
-            Button plus = IconButton(buttons, "Mais", "+", null, UiTheme.SurfaceMuted, UiTheme.TextPrimary, 84f, 48f, out _);
+            Button minus = IconButton(buttons, "Menos", "–", null, UiTheme.GlassFillStrong, UiTheme.TextPrimary, 84f, 48f, out _);
+            Button plus = IconButton(buttons, "Mais", "+", null, UiTheme.GlassFillStrong, UiTheme.TextPrimary, 84f, 48f, out _);
             CanvasGroup buttonsGroup = buttons.gameObject.AddComponent<CanvasGroup>();
             TextMeshProUGUI quantity = Label(stepper, "Quantidade escolhida", "1 unidade", 28f, UiTheme.TextSecondary, FontStyles.Bold, TextAlignmentOptions.Center);
 
@@ -491,7 +600,7 @@ namespace MontAR.EditorTools
         private static RectTransform CardSection(Transform parent, string name, string title, out TextMeshProUGUI titleLabel)
         {
             RectTransform card = Node(name, parent);
-            Card(card.gameObject, UiTheme.Surface, 36f);
+            Glass(card.gameObject, 40f);
             VLayout(card.gameObject, Pad(40, 40, 36, 40), 18f);
             titleLabel = Label(card, "Título", title, 38f, UiTheme.TextPrimary, FontStyles.Bold);
             return card;
@@ -499,31 +608,31 @@ namespace MontAR.EditorTools
 
         private static StartScreen BuildStart(Transform parent)
         {
-            RectTransform content = ScreenRoot(parent, "Tela 3 - Início", UiTheme.Background, out StartScreen screen);
+            RectTransform content = ScreenRoot(parent, "Tela 3 - Início", out StartScreen screen);
             VLayout(content.gameObject, null, 0f);
             Header(content, "Tudo pronto?", "Informe o código do participante e escolha como ver a instrução.", out Button back);
 
-            RectTransform scrollContent = Scroll(content, "Opções", Pad(40, 40, 8, 40), 24f, out _);
+            RectTransform scrollContent = Scroll(content, "Opções", Pad(32, 32, 8, 40), 22f, out _);
 
             RectTransform participant = CardSection(scrollContent, "Participante", "Código do participante", out _);
             TMP_InputField input = TextInput(participant, "Campo do código", "P01", out _);
             Label(participant, "Dica", "Código anônimo, como P01. Nunca use nome ou RA.", 28f, UiTheme.TextMuted);
-            TextMeshProUGUI error = Label(participant, "Erro", "", 28f, UiTheme.Danger, FontStyles.Bold);
+            TextMeshProUGUI error = Label(participant, "Erro", "", 28f, UiTheme.DangerText, FontStyles.Bold);
             error.gameObject.SetActive(false);
 
             RectTransform labelCard = CardSection(scrollContent, "Nome da montagem", "Nome da montagem (opcional)", out _);
             TMP_InputField labelInput = TextInput(labelCard, "Campo do nome", "Ex.: Bancada 3 · HP", out _);
             Label(labelCard, "Dica", "Ajuda a achar a montagem no histórico. Não use o nome do participante.", 28f, UiTheme.TextMuted);
 
+            RectTransform partsCard = CardSection(scrollContent, "Peças", "Peças da montagem", out _);
+            Segmented(partsCard, "Escolha das peças", "Peças reais", "Kit de verdade", "Peças virtuais", "Peças virtuais",
+                out Button partsReal, out TextMeshProUGUI partsRealLabel, out Button partsVirtual, out TextMeshProUGUI partsVirtualLabel);
+            TextMeshProUGUI partsNote = Label(partsCard, "Explicação das peças", "", 30f, UiTheme.TextSecondary);
+            partsNote.lineSpacing = 6f;
+
             RectTransform modeCard = CardSection(scrollContent, "Modo", "Como ver a instrução", out _);
-            RectTransform segmented = Node("Escolha do modo", modeCard);
-            Card(segmented.gameObject, UiTheme.SurfaceMuted, 34f);
-            HLayout(segmented.gameObject, Pad(8), 8f, TextAnchor.MiddleCenter);
-            Layout(segmented.gameObject, preferredHeight: 124f);
-            Button ar = MakeButton(segmented, "Modo RA", "Câmera (RA)", ButtonStyle.Primary, out TextMeshProUGUI arLabel, 108f, 34f);
-            Layout(ar.gameObject, preferredHeight: 108f, flexibleWidth: 1f);
-            Button demo = MakeButton(segmented, "Modo 3D", "Demonstração 3D", ButtonStyle.Secondary, out TextMeshProUGUI demoLabel, 108f, 34f);
-            Layout(demo.gameObject, preferredHeight: 108f, flexibleWidth: 1f);
+            Segmented(modeCard, "Escolha do modo", "Modo RA", "Câmera (RA)", "Modo 3D", "Demonstração 3D",
+                out Button ar, out TextMeshProUGUI arLabel, out Button demo, out TextMeshProUGUI demoLabel);
             TextMeshProUGUI note = Label(modeCard, "Explicação do modo", "", 30f, UiTheme.TextSecondary);
             note.lineSpacing = 6f;
 
@@ -537,6 +646,9 @@ namespace MontAR.EditorTools
             Bind(screen, ("participantInput", input), ("participantError", error), ("labelInput", labelInput),
                 ("modeArButton", ar), ("modeArBackground", ar.targetGraphic), ("modeArLabel", arLabel),
                 ("modeDemoButton", demo), ("modeDemoBackground", demo.targetGraphic), ("modeDemoLabel", demoLabel),
+                ("partsRealButton", partsReal), ("partsRealBackground", partsReal.targetGraphic), ("partsRealLabel", partsRealLabel),
+                ("partsVirtualButton", partsVirtual), ("partsVirtualBackground", partsVirtual.targetGraphic), ("partsVirtualLabel", partsVirtualLabel),
+                ("partsNote", partsNote),
                 ("modeNote", note), ("stepsHeader", stepsHeader), ("stepsList", steps), ("startButton", startButton), ("backButton", back));
             return screen;
         }
@@ -560,18 +672,18 @@ namespace MontAR.EditorTools
             VLayout(topArea.gameObject, null, 16f);
             FitHeight(topArea.gameObject);
 
-            // Cartão: etapa, componente, progresso, sair, botão discreto do observador e a situação da etapa.
+            // Cartão de vidro: etapa, componente, progresso, sair, botão discreto do observador e a situação da etapa.
             RectTransform top = Node("Topo", topArea);
-            Card(top.gameObject, UiTheme.SurfaceDark, 40f);
+            Glass(top.gameObject, 44f, true);
             VLayout(top.gameObject, Pad(30, 30, 26, 26), 18f);
             RectTransform row = Node("Linha", top);
             HLayout(row.gameObject, null, 24f, TextAnchor.MiddleLeft);
             Layout(row.gameObject, preferredHeight: 118f);
-            Button exit = IconButton(row, "Botão Sair", "×", null, new Color(1f, 1f, 1f, 0.12f), UiTheme.TextOnDark, 92f, 60f, out _);
+            Button exit = IconButton(row, "Botão Sair", "×", null, new Color(1f, 1f, 1f, 0.1f), UiTheme.TextOnDark, 92f, 56f, out _);
             RectTransform texts = Node("Textos", row);
             VLayout(texts.gameObject, null, 2f, TextAnchor.MiddleLeft);
             Layout(texts.gameObject, flexibleWidth: 1f);
-            TextMeshProUGUI counter = Label(texts, "Etapa", "Etapa 1 de 9", 46f, UiTheme.TextOnDark, FontStyles.Bold);
+            TextMeshProUGUI counter = Title(texts, "Etapa", "Etapa 1 de 9", 46f);
             TextMeshProUGUI component = Label(texts, "Componente", "Componente", 30f, UiTheme.TextOnDarkMuted);
             component.textWrappingMode = TextWrappingModes.NoWrap;
             component.overflowMode = TextOverflowModes.Ellipsis;
@@ -582,7 +694,8 @@ namespace MontAR.EditorTools
             Layout(observerGroup.gameObject, preferredWidth: 120f, minWidth: 120f);
             RectTransform observer = Node("Observador (toque longo)", observerGroup);
             Layout(observer.gameObject, preferredHeight: 64f, preferredWidth: 64f, minHeight: 64f, minWidth: 64f);
-            Img(observer.gameObject, new Color(1f, 1f, 1f, 0.14f), Circle);
+            Img(observer.gameObject, new Color(1f, 1f, 1f, 0.1f), Circle);
+            Decorate(observer, 32f, UiTheme.GlassBorder, null, true);
             RectTransform fill = Stretch(Node("Progresso", observer));
             Image fillImage = Img(fill.gameObject, UiTheme.Primary, Circle);
             fillImage.type = Image.Type.Filled;
@@ -601,14 +714,14 @@ namespace MontAR.EditorTools
 
             RectTransform bar = Node("Barra de progresso", top);
             Layout(bar.gameObject, preferredHeight: 14f);
-            Card(bar.gameObject, new Color(1f, 1f, 1f, 0.16f), 7f);
+            Card(bar.gameObject, new Color(1f, 1f, 1f, 0.12f), 7f);
             RectTransform barFill = Stretch(Node("Preenchimento", bar));
-            Image progress = Img(barFill.gameObject, UiTheme.Primary, Rounded, 48f / 7f);
+            Image progress = Img(barFill.gameObject, UiTheme.Primary, Rounded, CornerScale(7f));
             progress.type = Image.Type.Filled;
             progress.fillMethod = Image.FillMethod.Horizontal;
             progress.fillAmount = 0.1f;
 
-            // Situação da etapa dentro do cartão do topo, com ícone (antes era um cartão solto sobre a cena).
+            // Situação da etapa dentro do cartão do topo, com ícone. A cor vem da tela (âmbar, verde, azul).
             RectTransform chip = Node("Situação da etapa", top);
             Image chipImage = Card(chip.gameObject, UiTheme.StatusLocating, 30f);
             chipImage.raycastTarget = false;
@@ -622,12 +735,12 @@ namespace MontAR.EditorTools
             TextMeshProUGUI statusLabel = Label(chip, "Texto", "Aponte a câmera para o marcador A", 30f, UiTheme.TextOnDark, FontStyles.Bold, TextAlignmentOptions.MidlineLeft);
             Layout(statusLabel.gameObject, flexibleWidth: 1f);
 
-            // Linha do modo: aviso do 3D (com cadeado) à esquerda e a troca Câmera/3D à direita.
+            // Linha do modo: aviso do 3D (com cadeado) à esquerda e a troca Câmera/3D à direita, os dois em vidro.
             RectTransform status = Node("Modo e 3D", topArea);
             HLayout(status.gameObject, null, 14f, TextAnchor.MiddleRight);
             Layout(status.gameObject, preferredHeight: 84f, minHeight: 84f);
             RectTransform hint = Node("Aviso do 3D (cadeado)", status);
-            Image hintBackground = Card(hint.gameObject, new Color(0f, 0f, 0f, 0.5f), 42f);
+            Image hintBackground = Glass(hint.gameObject, 42f);
             hintBackground.raycastTarget = false;
             HLayout(hint.gameObject, Pad(22, 22, 8, 8), 14f, TextAnchor.MiddleLeft);
             Layout(hint.gameObject, preferredHeight: 84f, flexibleWidth: 1f, minWidth: 0f, preferredWidth: 0f);
@@ -643,19 +756,17 @@ namespace MontAR.EditorTools
             lockLabel.fontSizeMax = 24f;
 
             RectTransform modes = Node("Modo", status);
-            Card(modes.gameObject, UiTheme.SurfaceDark, 42f);
+            Glass(modes.gameObject, 42f);
             HLayout(modes.gameObject, Pad(6), 6f, TextAnchor.MiddleCenter);
             Layout(modes.gameObject, preferredHeight: 84f, preferredWidth: 360f, flexibleWidth: 0f, minWidth: 360f);
-            Button ar = MakeButton(modes, "Modo RA", "Câmera", ButtonStyle.Ghost, out TextMeshProUGUI arLabel, 72f, 28f);
+            Button ar = MakeButton(modes, "Modo RA", "Câmera", ButtonStyle.Segment, out TextMeshProUGUI arLabel, 72f, 28f);
             Layout(ar.gameObject, preferredHeight: 72f, flexibleWidth: 1f);
-            Button demo = MakeButton(modes, "Modo 3D", "3D", ButtonStyle.Ghost, out TextMeshProUGUI demoLabel, 72f, 28f);
+            Button demo = MakeButton(modes, "Modo 3D", "3D", ButtonStyle.Segment, out TextMeshProUGUI demoLabel, 72f, 28f);
             Layout(demo.gameObject, preferredHeight: 72f, flexibleWidth: 1f);
-            arLabel.color = UiTheme.TextOnDark;
-            demoLabel.color = UiTheme.TextOnDark;
 
-            // Painel da etapa (Guia). Arrastar para cima/baixo mostra ou esconde a instrução.
+            // Painel da etapa (Guia), em vidro denso. Arrastar para cima/baixo mostra ou esconde a instrução.
             RectTransform sheet = BottomBand(Node("Painel da etapa", safe), 24f, 24f, 24f);
-            Card(sheet.gameObject, UiTheme.Surface, 44f);
+            Glass(sheet.gameObject, 52f, true);
             VLayout(sheet.gameObject, Pad(44, 44, 10, 40), 18f);
             FitHeight(sheet.gameObject);
             var sheetDrag = sheet.gameObject.AddComponent<SheetDragHandler>();
@@ -671,44 +782,52 @@ namespace MontAR.EditorTools
             Layout(handle.gameObject, preferredHeight: 74f);
             RectTransform grabber = Node("Puxador", handle);
             grabber.sizeDelta = new Vector2(110f, 10f);
-            Card(grabber.gameObject, UiTheme.Border, 5f).raycastTarget = false;
+            Card(grabber.gameObject, new Color(1f, 1f, 1f, 0.32f), 5f).raycastTarget = false;
             Layout(grabber.gameObject, preferredHeight: 10f, preferredWidth: 110f);
             TextMeshProUGUI collapseLabel = Label(handle, "Texto", "Arraste para baixo para esconder a instrução", 24f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
             Layout(collapseLabel.gameObject, preferredHeight: 34f);
 
-            TextMeshProUGUI title = Label(sheet, "Título", "Título da etapa", 46f, UiTheme.TextPrimary, FontStyles.Bold);
+            TextMeshProUGUI title = Title(sheet, "Título", "Título da etapa", 46f);
             RectTransform details = Node("Detalhes", sheet);
             VLayout(details.gameObject, null, 20f);
             TextMeshProUGUI instruction = Label(details, "Instrução", "", 34f, UiTheme.TextSecondary);
             instruction.lineSpacing = 8f;
             RectTransform alert = Node("Alerta", details);
-            Card(alert.gameObject, UiTheme.AlertBackground, 28f);
+            Fill(alert.gameObject, UiTheme.AlertBackground, 28f, UiTheme.AlertBorder);
             VLayout(alert.gameObject, Pad(30, 30, 24, 26), 0f);
             TextMeshProUGUI alertLabel = Label(alert, "Texto", "", 31f, UiTheme.AlertText);
             alertLabel.lineSpacing = 6f;
 
-            // Erro da validação: vermelho, grande e logo acima do botão. Fica fora dos detalhes (não some ao esconder).
+            // Erro da validação: vermelho e logo acima do botão. Fica fora dos detalhes (não some ao esconder).
             RectTransform errorBox = Node("Erro da validação", sheet);
-            Card(errorBox.gameObject, UiTheme.Danger, 28f);
+            Fill(errorBox.gameObject, UiTheme.Danger, 28f, UiTheme.DangerBorder);
             HLayout(errorBox.gameObject, Pad(28, 28, 24, 26), 20f, TextAnchor.UpperLeft);
             RectTransform errorIconRect = Node("Ícone", errorBox);
             Layout(errorIconRect.gameObject, preferredHeight: 52f, preferredWidth: 52f, minHeight: 52f, minWidth: 52f);
-            Image errorIcon = Img(errorIconRect.gameObject, Color.white, LoadSprite("icone_alerta"));
+            Image errorIcon = Img(errorIconRect.gameObject, UiTheme.DangerText, LoadSprite("icone_alerta"));
             errorIcon.preserveAspect = true;
             errorIcon.raycastTarget = false;
-            TextMeshProUGUI errorLabel = Label(errorBox, "Texto", "", 34f, Color.white);
+            TextMeshProUGUI errorLabel = Label(errorBox, "Texto", "", 34f, UiTheme.DangerText);
             errorLabel.lineSpacing = 6f;
             Layout(errorLabel.gameObject, flexibleWidth: 1f);
             errorBox.gameObject.SetActive(false);
 
-            Button validate = MakeButton(sheet, "Botão Validar", "Validar etapa", ButtonStyle.Primary, out TextMeshProUGUI validateLabel, 128f);
+            // Botões: "Simular encaixe" (só com peças virtuais) ao lado do "Validar etapa".
+            RectTransform actionsRow = Node("Botões da etapa", sheet);
+            HLayout(actionsRow.gameObject, null, 20f, TextAnchor.MiddleCenter);
+            Layout(actionsRow.gameObject, preferredHeight: 128f);
+            Button simulate = IconTextButton(actionsRow, "Botão Simular encaixe", "Simular encaixe", LoadSprite("icone_encaixe"), ButtonStyle.Secondary,
+                out TextMeshProUGUI simulateLabel, out Image simulateIcon, 128f, 34f);
+            Layout(simulate.gameObject, preferredHeight: 128f, minHeight: 128f, flexibleWidth: 1f, preferredWidth: 0f);
+            Button validate = MakeButton(actionsRow, "Botão Validar", "Validar etapa", ButtonStyle.Primary, out TextMeshProUGUI validateLabel, 128f, 38f);
+            Layout(validate.gameObject, preferredHeight: 128f, minHeight: 128f, flexibleWidth: 1f, preferredWidth: 0f);
 
             // Painel da validação (Valida).
             RectTransform validation = BottomBand(Node("Painel da validação", safe), 24f, 24f, 24f);
-            Card(validation.gameObject, UiTheme.Surface, 44f);
+            Glass(validation.gameObject, 52f, true);
             VLayout(validation.gameObject, Pad(44, 44, 40, 40), 22f);
             FitHeight(validation.gameObject);
-            Label(validation, "Título", "Confira antes de avançar", 46f, UiTheme.TextPrimary, FontStyles.Bold);
+            Title(validation, "Título", "Confira antes de avançar", 46f);
             TextMeshProUGUI validationHint = Label(validation, "Dica", "", 30f, UiTheme.TextSecondary);
             validationHint.lineSpacing = 6f;
             RectTransform checklist = Node("Checklist", validation);
@@ -740,6 +859,8 @@ namespace MontAR.EditorTools
                 ("detailsGroup", details.gameObject), ("instructionLabel", instruction), ("alertBox", alert.gameObject), ("alertLabel", alertLabel),
                 ("errorBox", errorBox.gameObject), ("errorLabel", errorLabel),
                 ("validateButton", validate), ("validateLabel", validateLabel),
+                ("simulateButton", simulate), ("simulateLabel", simulateLabel), ("simulateIcon", simulateIcon),
+                ("fitSprite", LoadSprite("icone_encaixe")), ("fittedSprite", LoadSprite("ui_check")),
                 ("validationSheet", validation.gameObject), ("validationHint", validationHint), ("checklistContainer", checklist),
                 ("checklistTemplate", item), ("confirmButton", confirm), ("confirmLabel", confirmLabel), ("cancelButton", cancel),
                 ("orbitSurface", orbit.gameObject), ("toast", notice));
@@ -748,19 +869,20 @@ namespace MontAR.EditorTools
 
         private static CompletionScreen BuildCompletion(Transform parent)
         {
-            RectTransform content = ScreenRoot(parent, "Tela 5 - Conclusão", UiTheme.Background, out CompletionScreen screen);
+            RectTransform content = ScreenRoot(parent, "Tela 5 - Conclusão", out CompletionScreen screen);
             VLayout(content.gameObject, null, 0f);
 
-            RectTransform scroll = Scroll(content, "Resumo", Pad(56, 56, 48, 32), 24f, out _);
+            RectTransform scroll = Scroll(content, "Resumo", Pad(40, 40, 64, 32), 24f, out _);
             RectTransform badgeRow = Node("Linha do ícone", scroll);
             HLayout(badgeRow.gameObject, null, 0f, TextAnchor.MiddleCenter);
-            Badge(badgeRow, "Concluído", LoadSprite("ui_check"), UiTheme.Primary, Color.white, 200f, 0.56f);
-            Label(scroll, "Título", "Montagem concluída!", 62f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.Top);
+            Layout(badgeRow.gameObject, preferredHeight: 230f);
+            GlassBadge(badgeRow, "Concluído", LoadSprite("ui_check"), 200f, UiTheme.PrimaryGlow, UiTheme.TextAccent, 0.5f);
+            Title(scroll, "Título", "Montagem concluída!", 62f, TextAlignmentOptions.Top);
             TextMeshProUGUI subtitle = Label(scroll, "Subtítulo", "", 34f, UiTheme.TextSecondary, FontStyles.Normal, TextAlignmentOptions.Top);
 
             RectTransform grid = Node("Números", scroll);
             var gridLayout = grid.gameObject.AddComponent<GridLayoutGroup>();
-            gridLayout.cellSize = new Vector2(472f, 196f);
+            gridLayout.cellSize = new Vector2(488f, 196f);
             gridLayout.spacing = new Vector2(24f, 24f);
             gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             gridLayout.constraintCount = 2;
@@ -788,11 +910,11 @@ namespace MontAR.EditorTools
 
         private static HistoryScreen BuildHistory(Transform parent)
         {
-            RectTransform content = ScreenRoot(parent, "Tela 6 - Histórico", UiTheme.Background, out HistoryScreen screen);
+            RectTransform content = ScreenRoot(parent, "Tela 6 - Histórico", out HistoryScreen screen);
             VLayout(content.gameObject, null, 0f);
             Header(content, "Histórico de montagens", "Cada montagem concluída neste aparelho: nome, tempo, erros apontados e etapas.", out Button back);
 
-            RectTransform list = Scroll(content, "Lista de montagens", Pad(40, 40, 8, 40), 22f, out ScrollRect scroll);
+            RectTransform list = Scroll(content, "Lista de montagens", Pad(32, 32, 8, 40), 20f, out ScrollRect scroll);
             TextMeshProUGUI empty = Label(list, "Vazio", "Nenhuma montagem concluída ainda. Quando você terminar uma, ela aparece aqui.", 32f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
             HistoryEntryView entry = BuildHistoryEntry(list);
 
@@ -808,19 +930,21 @@ namespace MontAR.EditorTools
         private static HistoryEntryView BuildHistoryEntry(Transform parent)
         {
             RectTransform card = Node("Montagem (modelo)", parent);
-            Card(card.gameObject, UiTheme.Surface, 36f);
+            Glass(card.gameObject, 40f);
             VLayout(card.gameObject, Pad(40, 40, 32, 28), 14f);
 
             RectTransform badgeRow = Node("Linha do selo", card);
             HLayout(badgeRow.gameObject, null, 0f, TextAnchor.MiddleLeft);
             RectTransform badge = Node("Recém-concluída", badgeRow);
-            Card(badge.gameObject, UiTheme.PrimarySoft, 22f).raycastTarget = false;
+            Fill(badge.gameObject, UiTheme.PrimarySoft, 22f, new Color(UiTheme.Primary.r, UiTheme.Primary.g, UiTheme.Primary.b, 0.4f)).raycastTarget = false;
             HLayout(badge.gameObject, Pad(18, 18, 6, 6), 0f, TextAnchor.MiddleCenter);
-            Label(badge, "Texto", "RECÉM-CONCLUÍDA", 22f, UiTheme.Primary, FontStyles.Bold, TextAlignmentOptions.Center).textWrappingMode = TextWrappingModes.NoWrap;
+            TextMeshProUGUI badgeLabel = Label(badge, "Texto", "RECÉM-CONCLUÍDA", 22f, UiTheme.TextAccent, FontStyles.Bold, TextAlignmentOptions.Center);
+            badgeLabel.textWrappingMode = TextWrappingModes.NoWrap;
+            badgeLabel.characterSpacing = 4f;
 
             RectTransform head = Node("Cabeçalho", card);
             HLayout(head.gameObject, null, 24f, TextAnchor.MiddleLeft);
-            Badge(head, "Ícone", LoadSprite("icone_historico"), UiTheme.PrimarySoft, UiTheme.Primary, 96f, 0.6f);
+            Badge(head, "Ícone", LoadSprite("icone_historico"), UiTheme.PrimarySoft, UiTheme.TextAccent, 96f, 0.6f);
             RectTransform texts = Node("Textos", head);
             VLayout(texts.gameObject, null, 4f);
             Layout(texts.gameObject, flexibleWidth: 1f);
@@ -843,9 +967,9 @@ namespace MontAR.EditorTools
         private static TextMeshProUGUI Stat(Transform grid, string label)
         {
             RectTransform card = Node(label, grid);
-            Card(card.gameObject, UiTheme.Surface, 36f);
+            Glass(card.gameObject, 40f);
             VLayout(card.gameObject, Pad(24, 24, 30, 24), 4f, TextAnchor.MiddleCenter);
-            TextMeshProUGUI value = Label(card, "Valor", "0", 64f, UiTheme.TextPrimary, FontStyles.Bold, TextAlignmentOptions.Center);
+            TextMeshProUGUI value = Title(card, "Valor", "0", 64f, TextAlignmentOptions.Center);
             Label(card, "Rótulo", label, 27f, UiTheme.TextMuted, FontStyles.Normal, TextAlignmentOptions.Center);
             return value;
         }
@@ -853,8 +977,8 @@ namespace MontAR.EditorTools
         private static Toast BuildToast(Transform parent) => BuildToastBand(parent, "Aviso", true);
 
         /// <summary>
-        /// Aviso curto. <paramref name="atTop"/>: faixa fixa no alto (menus). Senão, presa à base e
-        /// reposicionada pela tela da montagem logo acima do painel da etapa.
+        /// Aviso curto em pílula de vidro. <paramref name="atTop"/>: faixa fixa no alto (menus). Senão, presa à
+        /// base e reposicionada pela tela da montagem logo acima do painel da etapa.
         /// </summary>
         private static Toast BuildToastBand(Transform parent, string name, bool atTop)
         {
@@ -872,8 +996,8 @@ namespace MontAR.EditorTools
                 band.offsetMax = new Vector2(-64f, 720f);
             }
             band.gameObject.AddComponent<CanvasGroup>();
-            Card(band.gameObject, new Color(0.09f, 0.09f, 0.1f, 0.92f), 36f).raycastTarget = false;
-            VLayout(band.gameObject, Pad(36, 36, 22, 22), 0f, TextAnchor.MiddleCenter);
+            Glass(band.gameObject, 48f, true).raycastTarget = false;
+            VLayout(band.gameObject, Pad(40, 40, 24, 24), 0f, TextAnchor.MiddleCenter);
             FitHeight(band.gameObject);
             TextMeshProUGUI label = Label(band, "Texto", "Aviso", 32f, UiTheme.TextOnDark, FontStyles.Bold, TextAlignmentOptions.Center);
             var toast = band.gameObject.AddComponent<Toast>();
@@ -890,11 +1014,11 @@ namespace MontAR.EditorTools
             RectTransform card = Node("Cartão", root);
             card.anchorMin = card.anchorMax = new Vector2(0.5f, 0.5f);
             card.pivot = new Vector2(0.5f, 0.5f);
-            card.sizeDelta = new Vector2(940f, 400f);
-            Card(card.gameObject, UiTheme.Surface, 44f);
+            card.sizeDelta = new Vector2(960f, 400f);
+            Glass(card.gameObject, 52f, true);
             VLayout(card.gameObject, Pad(52, 52, 52, 44), 26f);
             FitHeight(card.gameObject);
-            TextMeshProUGUI title = Label(card, "Título", "Título", 48f, UiTheme.TextPrimary, FontStyles.Bold);
+            TextMeshProUGUI title = Title(card, "Título", "Título", 48f);
             TextMeshProUGUI message = Label(card, "Mensagem", "", 34f, UiTheme.TextSecondary);
             message.lineSpacing = 8f;
             RectTransform buttons = Node("Botões", card);
@@ -951,7 +1075,13 @@ namespace MontAR.EditorTools
             var flow = GetOrAdd<StepFlowController>(montar);
             var app = GetOrAdd<AppController>(montar);
 
-            Bind(content, ("previewStep", (Object)null));
+            // Peças virtuais na RA: a placa genérica presa ao marcador A, na mesma posição do tapete.
+            MontagemPreviewSpec spec = MontagemPreviewBuilder.LoadSpec();
+            var boardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(MontagemPreviewBuilder.BoardPrefabPath);
+            Vector3 boardOffset = MontagemPreviewBuilder.MatToWorld(spec.mat, spec.mat.board_left_mm, spec.mat.board_top_mm, 0f)
+                - MontagemPreviewBuilder.MarkerWorld(spec);
+            Bind(content, ("previewStep", (Object)null), ("assemblyReferenceName", MontagemPreviewBuilder.MarkerName),
+                ("virtualBoardPrefab", boardPrefab), ("virtualBoardOffset", boardOffset), ("installedMaterial", InstalledMaterial()));
             if (hud != null)
                 hud.enabled = false;
 
@@ -1005,7 +1135,7 @@ namespace MontAR.EditorTools
             desk.transform.SetParent(bench.transform, false);
             desk.transform.localPosition = new Vector3(0f, -0.015f, 0f);
             desk.transform.localScale = new Vector3(Mathf.Max(1.4f, mat.width_mm / 1000f + 0.6f), 0.03f, Mathf.Max(1.0f, mat.height_mm / 1000f + 0.5f));
-            desk.GetComponent<MeshRenderer>().sharedMaterial = materials.Lit(new Color(0.55f, 0.38f, 0.24f), false);
+            desk.GetComponent<MeshRenderer>().sharedMaterial = materials.Lit(new Color(0.3f, 0.22f, 0.16f), false);
 
             GameObject matQuad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             matQuad.name = "Tapete de montagem";
@@ -1025,6 +1155,12 @@ namespace MontAR.EditorTools
             marker.transform.SetParent(bench.transform, false);
             marker.transform.localPosition = MontagemPreviewBuilder.MarkerWorld(spec);
 
+            // Peças virtuais encaixadas: no marcador virtual, como o overlay (a bancada já tem a placa-mãe).
+            var installed = new GameObject("Peças encaixadas (virtuais)");
+            installed.transform.SetParent(marker.transform, false);
+            var assembly = installed.AddComponent<VirtualAssembly>();
+            Bind(assembly, ("installedMaterial", InstalledMaterial()));
+
             BoardElementSpec pcb = Array.Find(spec.board_elements, e => e.id == "pcb");
             var center = new GameObject("Centro da placa");
             center.transform.SetParent(bench.transform, false);
@@ -1043,9 +1179,34 @@ namespace MontAR.EditorTools
             cameraData.renderPostProcessing = false;
             cameraData.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
 
-            Bind(stage, ("stageRoot", bench), ("markerAnchor", marker.transform), ("boardCenter", center.transform), ("stageCamera", camera));
+            // Fundo aurora atrás dos menus e da bancada. É desenhado pela própria câmera (Canvas em Screen
+            // Space - Camera), então entra no desfoque do vidro. Maior que a tela: a bancada desloca a projeção.
+            var backdrop = new GameObject("Fundo aurora", typeof(RectTransform));
+            backdrop.layer = LayerMask.NameToLayer("UI");
+            backdrop.transform.SetParent(cameraObject.transform, false);
+            var backdropCanvas = backdrop.AddComponent<Canvas>();
+            backdropCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            backdropCanvas.worldCamera = camera;
+            backdropCanvas.planeDistance = 15f;
+            backdropCanvas.sortingOrder = -100;
+            RectTransform backdropImage = Stretch(Node("Imagem", backdrop.transform));
+            backdropImage.localScale = Vector3.one * 1.3f;
+            Image aurora = Img(backdropImage.gameObject, Color.white, LoadSprite("fundo_aurora"));
+            aurora.raycastTarget = false;
+            var fitter = backdropImage.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 1080f / 1920f;
+
+            Bind(stage, ("stageRoot", bench), ("markerAnchor", marker.transform), ("boardCenter", center.transform), ("stageCamera", camera),
+                ("assembly", assembly));
             bench.SetActive(false);
             return stage;
+        }
+
+        /// <summary>Material de base das peças virtuais encaixadas (a cor de cada peça muda em tempo de execução).</summary>
+        private static Material InstalledMaterial()
+        {
+            return new MontagemPreviewBuilder.MaterialCache().Lit(new Color(0.25f, 0.27f, 0.31f), false);
         }
 
         // ------------------------------------------------------------ utilitários
@@ -1085,6 +1246,9 @@ namespace MontAR.EditorTools
                         break;
                     case Color color:
                         property.colorValue = color;
+                        break;
+                    case Vector3 vector:
+                        property.vector3Value = vector;
                         break;
                     default:
                         property.objectReferenceValue = value as Object;

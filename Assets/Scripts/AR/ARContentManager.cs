@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -17,8 +18,19 @@ namespace MontAR
         [Tooltip("Etapa exibida ao iniciar, para testar o rastreamento sem o fluxo completo (prova de conceito).")]
         [SerializeField] private AssemblyStep previewStep;
 
+        [Header("Peças virtuais (montagem sem o kit)")]
+        [Tooltip("Marcador em que a placa-mãe virtual e as peças encaixadas ficam presas.")]
+        [SerializeField] private string assemblyReferenceName = "MontAR_Marcador_A";
+        [SerializeField] private GameObject virtualBoardPrefab;
+        [Tooltip("Posição da placa-mãe virtual em relação ao marcador (a mesma do tapete).")]
+        [SerializeField] private Vector3 virtualBoardOffset;
+        [SerializeField] private Material installedMaterial;
+
+        private readonly List<AssemblyStep> installedSteps = new List<AssemblyStep>();
         private AssemblyStep currentStep;
         private GameObject currentOverlay;
+        private VirtualAssembly assembly;
+        private bool simulated;
 
         public AssemblyStep CurrentStep => currentStep;
 
@@ -30,12 +42,49 @@ namespace MontAR
 
             if (step != null && imageTracking.TryGetTracked(step.ReferenceImageName, out ARTrackedImage image))
                 Attach(image);
+            if (simulated && imageTracking.TryGetTracked(assemblyReferenceName, out ARTrackedImage marker))
+                EnsureAssembly(marker);
         }
 
         public void Clear()
         {
             currentStep = null;
             DestroyOverlay();
+        }
+
+        /// <summary>
+        /// Peças virtuais: a placa-mãe virtual aparece sobre o marcador e as peças encaixadas ficam nela.
+        /// Desligado, a RA só mostra a peça fantasma sobre o computador real.
+        /// </summary>
+        public void SetSimulated(bool value)
+        {
+            simulated = value;
+            if (!simulated)
+            {
+                DestroyAssembly();
+                return;
+            }
+            if (imageTracking != null && imageTracking.TryGetTracked(assemblyReferenceName, out ARTrackedImage marker))
+                EnsureAssembly(marker);
+        }
+
+        /// <summary>Deixa a peça da etapa encaixada na placa virtual (animada se o marcador estiver à vista).</summary>
+        public void InstallStep(AssemblyStep step, bool animate)
+        {
+            if (step == null || installedSteps.Contains(step))
+                return;
+            installedSteps.Add(step);
+            if (assembly != null)
+                assembly.Install(step, animate);
+            if (step == currentStep)
+                VirtualAssembly.SetGhostVisible(currentOverlay, false);
+        }
+
+        public void ClearInstalled()
+        {
+            installedSteps.Clear();
+            if (assembly != null)
+                assembly.Clear();
         }
 
         private void OnEnable()
@@ -66,6 +115,9 @@ namespace MontAR
 
         private void OnReferenceTracked(ARTrackedImage image)
         {
+            if (simulated && image.referenceImage.name == assemblyReferenceName)
+                EnsureAssembly(image);
+
             if (currentStep == null || image.referenceImage.name != currentStep.ReferenceImageName)
                 return;
 
@@ -100,7 +152,32 @@ namespace MontAR
 
             currentOverlay = Instantiate(prefab, image.transform);
             currentOverlay.transform.SetLocalPositionAndRotation(currentStep.OverlayPositionOffset, currentStep.OverlayRotationOffset);
+            if (installedSteps.Contains(currentStep))
+                VirtualAssembly.SetGhostVisible(currentOverlay, false);
             Debug.Log($"[MontAR] Overlay da etapa '{currentStep.StepId}' posicionado sobre '{image.referenceImage.name}'.");
+        }
+
+        /// <summary>Cria (ou move) a placa virtual e as peças encaixadas para o marcador rastreado.</summary>
+        private void EnsureAssembly(ARTrackedImage image)
+        {
+            if (assembly != null && assembly.transform.parent == image.transform)
+                return;
+
+            DestroyAssembly();
+            var root = new GameObject("Montagem virtual");
+            root.transform.SetParent(image.transform, false);
+            assembly = root.AddComponent<VirtualAssembly>();
+            assembly.Configure(installedMaterial, virtualBoardPrefab, virtualBoardOffset);
+            assembly.SetBoardVisible(true);
+            foreach (AssemblyStep step in installedSteps)
+                assembly.Install(step, false);
+        }
+
+        private void DestroyAssembly()
+        {
+            if (assembly != null)
+                Destroy(assembly.gameObject);
+            assembly = null;
         }
 
         private void DestroyOverlay()

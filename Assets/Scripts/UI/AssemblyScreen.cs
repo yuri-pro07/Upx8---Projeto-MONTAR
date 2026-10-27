@@ -64,6 +64,14 @@ namespace MontAR
         [SerializeField] private Button validateButton;
         [SerializeField] private TMP_Text validateLabel;
 
+        [Header("Peças virtuais")]
+        [Tooltip("Mostra a peça descendo até o lugar e a deixa montada (só com peças virtuais).")]
+        [SerializeField] private Button simulateButton;
+        [SerializeField] private TMP_Text simulateLabel;
+        [SerializeField] private Image simulateIcon;
+        [SerializeField] private Sprite fitSprite;
+        [SerializeField] private Sprite fittedSprite;
+
         [Header("Validação")]
         [SerializeField] private GameObject validationSheet;
         [SerializeField] private TMP_Text validationHint;
@@ -116,6 +124,15 @@ namespace MontAR
                     controller.RequestValidation();
                 Refresh();
             });
+            if (simulateButton != null)
+            {
+                simulateButton.onClick.AddListener(() =>
+                {
+                    if (controller != null && controller.SimulateFit())
+                        toast.Show("Peça encaixada! Confira e toque em Validar etapa.", 2.2f);
+                    Refresh();
+                });
+            }
             confirmButton.onClick.AddListener(() =>
             {
                 if (controller == null)
@@ -231,8 +248,18 @@ namespace MontAR
             errorLabel.text = hasError ? validationError : string.Empty;
 
             bool locating = flow.Phase == StepPhase.Locating;
+            bool simulate = simulateButton != null && controller.SimulatedParts && controller.CurrentStepHasPiece;
             validateButton.interactable = flow.Phase == StepPhase.Guiding;
-            validateLabel.text = locating ? "Aponte para o marcador A" : hasError ? "Validar de novo" : "Validar etapa";
+            validateLabel.text = locating ? (simulate ? "Validar etapa" : "Aponte para o marcador A") : hasError ? "Validar de novo" : "Validar etapa";
+            if (simulateButton != null)
+            {
+                simulateButton.gameObject.SetActive(simulate);
+                bool fitted = controller.IsCurrentStepFitted;
+                simulateButton.interactable = controller.CanSimulateFit;
+                simulateLabel.text = fitted ? "Encaixada" : locating ? "Aponte o marcador" : "Simular encaixe";
+                if (simulateIcon != null)
+                    simulateIcon.sprite = fitted ? fittedSprite : fitSprite;
+            }
 
             orbitSurface.SetActive(demo && !validating);
 
@@ -288,9 +315,9 @@ namespace MontAR
         private void RefreshMode(bool demo)
         {
             modeArBackground.color = demo ? Color.clear : UiTheme.Primary;
-            modeArLabel.color = demo ? (arAvailable ? UiTheme.TextOnDark : UiTheme.TextOnDarkMuted) : UiTheme.TextOnDark;
+            modeArLabel.color = demo ? (arAvailable ? UiTheme.TextSecondary : UiTheme.Disabled) : UiTheme.TextOnDark;
             modeDemoBackground.color = demo ? UiTheme.Primary : Color.clear;
-            modeDemoLabel.color = UiTheme.TextOnDark;
+            modeDemoLabel.color = demo ? UiTheme.TextOnDark : UiTheme.TextSecondary;
             modeArButton.interactable = arAvailable;
         }
 
@@ -302,21 +329,34 @@ namespace MontAR
             if (validating)
                 return;
 
+            bool simulate = controller.SimulatedParts && controller.CurrentStepHasPiece;
             if (flow.Phase == StepPhase.Locating)
             {
-                SetStatus(UiTheme.StatusLocating, locatingSprite, "Aponte a câmera para o marcador A do tapete");
+                SetStatus(UiTheme.StatusLocating, locatingSprite, controller.SimulatedParts
+                    ? "Aponte a câmera para o marcador A: a placa virtual aparece sobre ele"
+                    : "Aponte a câmera para o marcador A do tapete");
+            }
+            else if (simulate && controller.IsCurrentStepFitted)
+            {
+                SetStatus(UiTheme.StatusGuiding, fittedSprite, "Peça encaixada: confira e valide a etapa");
             }
             else if (demo)
             {
-                SetStatus(UiTheme.StatusDemo, demoSprite, step.OverlayPrefab != null
-                    ? "Demonstração 3D: veja na bancada virtual onde e como encaixar"
-                    : "Demonstração 3D: esta etapa não tem peça para mostrar; siga a instrução");
+                SetStatus(UiTheme.StatusDemo, demoSprite, simulate
+                    ? "Veja onde a peça entra e toque em Simular encaixe"
+                    : step.OverlayPrefab != null
+                        ? "Demonstração 3D: veja na bancada virtual onde e como encaixar"
+                        : controller.SimulatedParts
+                            ? "Confira a montagem na bancada e siga a instrução"
+                            : "Demonstração 3D: esta etapa não tem peça para mostrar; siga a instrução");
             }
             else
             {
-                SetStatus(UiTheme.StatusGuiding, guidingSprite, string.IsNullOrEmpty(step.ReferenceImageName)
-                    ? "Siga a instrução abaixo"
-                    : "Faça o mesmo movimento da peça fantasma sobre a placa");
+                SetStatus(UiTheme.StatusGuiding, guidingSprite, simulate
+                    ? "Siga a peça fantasma e toque em Simular encaixe"
+                    : string.IsNullOrEmpty(step.ReferenceImageName)
+                        ? "Siga a instrução abaixo"
+                        : "Faça o mesmo movimento da peça fantasma sobre a placa");
             }
         }
 
@@ -335,8 +375,9 @@ namespace MontAR
                 return;
 
             lockIcon.sprite = validating ? lockedSprite : unlockedSprite;
-            lockIcon.color = validating ? UiTheme.StatusLocating : UiTheme.TextOnDark;
-            viewHintBackground.color = validating ? new Color(0.09f, 0.09f, 0.1f, 0.92f) : new Color(0f, 0f, 0f, 0.5f);
+            lockIcon.color = validating ? UiTheme.Hex(0xFBBF24) : UiTheme.TextOnDark;
+            // O aviso é vidro: a cor é o tom do vidro (âmbar escuro quando o 3D trava).
+            viewHintBackground.color = validating ? UiTheme.Hex(0x3B2506) : UiTheme.GlassTint;
             lockLabel.text = validating
                 ? "<b>3D travado</b> enquanto você confere a etapa"
                 : "<b>3D livre:</b> arraste para girar · pinça aproxima · toque duplo centraliza";

@@ -1,0 +1,8 @@
+stateDiagram-v2
+    [*] --> Localizando: step_started<br/>(modo RA, etapa com marcador)
+    [*] --> Guiando: step_started<br/>(modo 3D ou etapa sem marcador)
+    Localizando --> Guiando: reference_detected
+    Guiando --> Validando: Validar etapa<br/>(validation_started)
+    Validando --> Guiando: item desmarcado (validation_failed)<br/>ou cancelar (validation_cancelled)
+    Validando --> Concluída: todos os itens marcados<br/>(validation_passed)
+    Concluída --> [*]: step_completed<br/>libera a próxima etapa

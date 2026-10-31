@@ -1,0 +1,21 @@
+flowchart TD
+    A[Abrir o app] --> P{Há montagem interrompida?}
+    P -- Sim, continuar --> F
+    P -- Não --> W[Apresentação]
+    W --> K1[Seleção de peças]
+    K1 --> B[Código do participante,<br/>kit real ou peças virtuais,<br/>Câmera RA ou Demonstração 3D]
+    B --> F[Mostrar instrução e alerta da etapa]
+    F --> M{Modo}
+    M -- RA --> G[Localizar o marcador do tapete]
+    G --> H{Marcador reconhecido?}
+    H -- Não --> G
+    H -- Sim --> I[Peça fantasma sobre a placa]
+    M -- 3D --> I3[Peça fantasma na bancada virtual]
+    I --> J[Usuário executa a etapa<br/>ou toca em Simular encaixe]
+    I3 --> J
+    J --> K{Checklist confirmado?}
+    K -- Não --> F
+    K -- Sim --> L{Última etapa?}
+    L -- Não --> N2[Liberar a próxima etapa] --> F
+    L -- Sim --> N[Conclusão e CSV da sessão]
+    N --> O[Histórico de montagens]

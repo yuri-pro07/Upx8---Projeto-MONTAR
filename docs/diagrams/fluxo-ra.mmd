@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor U as Usuário
+    participant App as AppController
+    participant S as ARSession
+    participant AC as ARCore
+    participant M as ARTrackedImageManager
+    participant T as ImageTrackingController
+    participant F as StepFlowController + StepFlow
+    participant O as ARContentManager
+
+    App->>S: CheckAvailability() ao abrir o app
+    S-->>App: Ready (sem ARCore: só Demonstração 3D)
+    U->>App: Iniciar montagem no modo Câmera (RA)
+    App->>U: explica o uso da câmera e pede a permissão do Android
+    U-->>App: permite (se negar, segue na Demonstração 3D)
+    App->>S: enabled = true
+    S->>AC: liga a câmera e o rastreamento
+    F->>F: step_started, fase Localizando
+    loop a cada quadro
+        AC->>M: pose das imagens da biblioteca
+        M->>T: trackablesChanged (added, updated, removed)
+    end
+    T->>F: ReferenceTracked(MontAR_Marcador_A), estado Tracking
+    F->>F: reference_detected, fase Guiando
+    F->>O: mostrar o overlay da etapa
+    O->>O: Instantiate(overlay, transform da imagem) + offset da etapa
+    Note over O: o overlay é filho do ARTrackedImage<br/>e acompanha a pose do marcador a cada quadro
+    U->>F: Validar etapa, marca o checklist, Confirmar
+    F->>F: validation_passed, step_completed, libera a próxima etapa
+    T-->>F: ReferenceLost (Limited ou None): o overlay fica e a fase não regride

@@ -1,0 +1,23 @@
+flowchart LR
+    ALUNO((Aluno))
+    OBS((Pesquisador<br/>ou professor))
+    subgraph APP[MontAR]
+        UC0([Escolher as peças do kit])
+        UC1([Iniciar sessão com código anônimo])
+        UC2([Seguir a instrução em RA ou em 3D])
+        UC3([Simular encaixe com peças virtuais])
+        UC4([Validar a etapa pelo checklist])
+        UC5([Retomar montagem interrompida])
+        UC6([Ver o histórico de montagens])
+        UC7([Registrar intervenção])
+        UC8([Exportar o CSV da sessão])
+    end
+    ALUNO --- UC0
+    ALUNO --- UC1
+    ALUNO --- UC2
+    ALUNO --- UC3
+    ALUNO --- UC4
+    ALUNO --- UC5
+    ALUNO --- UC6
+    OBS --- UC7
+    OBS --- UC8

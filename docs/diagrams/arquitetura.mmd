@@ -1,0 +1,23 @@
+flowchart LR
+    USER((Usuário))
+    PESQ((Pesquisador))
+
+    subgraph CEL[Celular Android]
+        direction LR
+        CAM[Câmera e sensores] --> ARCORE[ARCore<br/>Google ARCore XR Plugin 6.6.2]
+        ARCORE --> ARF[AR Foundation 6.6.2<br/>ARSession, XR Origin,<br/>ARTrackedImageManager]
+        LIB[(Biblioteca de imagens<br/>MontAR_ReferenceImages<br/>marcador A, 15 cm)] --> ARF
+        ARF --> TRK[ImageTrackingController]
+        TRK --> CTRL[StepFlowController]
+        DATA[(Roteiro e catálogo<br/>AssemblyProcedure, PartCatalog)] --> CTRL
+        CTRL <--> FLOW[StepFlow<br/>máquina de estados em C#]
+        FLOW --> VAL[ChecklistValidator<br/>ReferenceSeenValidator]
+        CTRL --> ARC[ARContentManager<br/>overlay e VirtualAssembly<br/>presos ao marcador]
+        CTRL --> DEMO[DemoStage<br/>bancada 3D sem câmera]
+        CTRL --> LOG[SessionMetricsLogger<br/>CSV por sessão]
+        CTRL --> SAVE[ProgressStore e<br/>AssemblyHistoryStore<br/>JSON no aparelho]
+        UI[AppController e 6 telas<br/>uGUI + TextMeshPro] <--> CTRL
+    end
+
+    USER <--> UI
+    LOG -. adb pull .-> PESQ

@@ -124,3 +124,9 @@ Thumbs.db
 
 # Python (scripts em tools/)
 __pycache__/
+
+# Arquivos de trabalho da equipe na raiz (rascunhos do artigo, modelos e materiais da disciplina).
+# As versões oficiais ficam em docs/documents/.
+/*.docx
+/*.pdf
+/*.xlsx

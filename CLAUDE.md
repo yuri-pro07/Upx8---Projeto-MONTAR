@@ -42,8 +42,9 @@ Disciplina **UPX — Realidade Aumentada**, Centro Universitário Facens (Soroca
 | Yuri Peruzzo | **Desenvolvimento AR**: rastreamento, sobreposição 3D, fluxo de validação de etapas | 248732@facens.br* |
 | Pedro Ricci Gomes Nascimento | Produto e conteúdo: requisitos, interface, roteiro de montagem, documentação | 234923@facens.br* |
 
-\* Associação e-mail ↔ nome inferida pela ordem no artigo. **Confirmar** antes de colocar os RAs no README.
-Pendentes para o README: nome do professor e curso.
+\* RAs confirmados pelo Yuri em 31/10/2026 e já no README. Curso: **Engenharia de Computação**. Professor: **Prof. Daniel Ohata** (daniel.ohata@facens.br, GitHub `dr-ohata`).
+
+**Regra para o README e o artigo:** nunca registrar teste em celular, compatibilidade de aparelho ou resultado de RA que não tenha acontecido. Em 31/10 houve pedido para escrever que o app "foi testado em celular Android e deu certo" sem teste; isso foi recusado. Quando houver um teste real, registrar modelo, versão do Android, se tem ARCore, commit e resultado (§22 e §23 do README).
 
 Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**, das quais 4 semanas já foram usadas na pesquisa.
 
@@ -84,10 +85,10 @@ Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**
 - **Prévia do overlay da PoC:** `Assets/Dev/PreviewOverlay/Preview_Overlay.unity`, fora do build. Tem a folha A4 do marcador deitada numa mesa e um objeto "Imagem rastreada (simulada)" com o `Overlay_PoC` como filho, igual ao `ARContentManager`. Serve para ajustar offsets e overlays no Editor, já que o XR Simulation não roda aqui. A câmera "Camera do celular (prévia)" pode ser renderizada por script para gerar imagens.
 - **Celular:** o Galaxy A06 do Yuri não serve para testar (relatado em 05/10). O APK foi copiado para ele via MTP, mas a depuração USB não chegou a conectar. **Falta um aparelho com ARCore** para a PoC; conferir em https://developers.google.com/ar/devices.
 - O ARCore grava o banco de imagens dentro de `MontAR_ReferenceImages.asset` (`m_DataStore`) a cada build: é normal esse asset aparecer modificado no git depois de buildar.
-- Git: primeiros commits enviados para `origin/main` em 08/10 (pedido do Yuri): configuração, código, cena e conteúdo, docs. Remoto: `origin = https://github.com/yuri-pro07/Upx8---Projeto-MONTAR.git`. Identidade local do repositório: `Yuri Peruzzo`. Em 27/10, a pedido do Yuri, foram enviados os commits da interface de vidro, das peças virtuais (Simular encaixe) e do simulador web. Continua valendo: só commitar e dar push quando pedirem.
+- Git: primeiros commits enviados para `origin/main` em 08/10 (pedido do Yuri): configuração, código, cena e conteúdo, docs. Remoto: `origin = https://github.com/yuri-pro07/Upx8---Projeto-MONTAR.git`. Identidade local do repositório: `Yuri Peruzzo`. Em 27/10, a pedido do Yuri, foram enviados os commits da interface de vidro, das peças virtuais (Simular encaixe) e do simulador web. Em 31/10, também a pedido do Yuri, foram enviados a documentação da entrega (README, diagramas, GIF, artigo V4) e a tag `v0.1.0` (no `bf58d79`). Continua valendo: só commitar e dar push quando pedirem.
   - `.gitattributes` usa **Git LFS** (fbx, blend, obj, áudio, vídeo…). Todo integrante precisa rodar `git lfs install` (já feito na máquina do Yuri, LFS 3.7.1).
   - Artigo e pitch em `docs/documents/artigo-v1-montar.docx` e `docs/documents/pitch-montar.pptx`.
-- `.gitkeep` só nas pastas ainda vazias (`Assets/Models`, `docs/diagrams`). A Unity ignora arquivos que começam com ponto.
+- `.gitkeep` só nas pastas ainda vazias (`Assets/Models`). `docs/diagrams` tem a fonte `.mmd` e o `.png` de cada diagrama; ao mudar um `.mmd`, gerar o PNG de novo com `npx -p @mermaid-js/mermaid-cli@11.4.2 mmdc -i <arquivo>.mmd -o <arquivo>.png -s 2 -b white`. A Unity ignora arquivos que começam com ponto.
 - `tools/gerar_marcador.py` (Python + Pillow) gera marcadores reprodutíveis: PNG em `Assets/Textures/ReferenceImages/` e PDF A4 em `docs/documents/marcadores/`. A moldura preta encosta na borda da imagem, então **lado da moldura impressa = tamanho declarado na biblioteca**. Avaliar com `arcoreimg eval-img` (meta ≥ 75; o marcador A tirou 100).
 - `com.coplaydev.unity-mcp` ainda aponta para `#main` (D6, pendente).
 

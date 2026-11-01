@@ -10,7 +10,7 @@
 ![Unity](https://img.shields.io/badge/Unity-6000.6.4f1-black)
 ![Testes](https://img.shields.io/badge/testes-75%20EditMode%20%2B%201%20PlayMode-brightgreen)
 
-> **Estado atual (31/10/2026):** o app funciona por completo **no Editor da Unity**: apresentação, seleção de peças, montagem guiada em RA ou em 3D, peças virtuais com "Simular encaixe", validação por checklist, conclusão, histórico e registro em CSV. Em 31/10 o repositório foi clonado do GitHub numa pasta nova e passou em todos os testes automatizados (75 EditMode e 1 PlayMode de ponta a ponta). O APK Android é gerado sem erros. **O app ainda não foi testado em celular**: a parte de RA (câmera, marcador e overlay sobre a bancada) está implementada, mas não tem resultado medido. A validação do componente pela câmera, prevista no artigo V4, ainda não foi implementada.
+> **Estado atual (31/10/2026):** o app funciona por completo **no Editor da Unity**: apresentação, seleção de peças, montagem guiada em RA ou em 3D, peças virtuais com "Simular encaixe", validação por checklist, conclusão, histórico e registro em CSV. Em 31/10 o repositório foi clonado do GitHub numa pasta nova e passou em todos os testes automatizados (75 EditMode e 1 PlayMode de ponta a ponta). O APK Android é gerado sem erros. **Em 31/10 o app rodou num celular** (Samsung Galaxy A54 5G, Android 16), no modo demonstração 3D: a montagem de 9 etapas chegou ao fim com a validação por checklist bloqueando o avanço, e a conclusão, o histórico e o CSV funcionaram (seções 23 e 25). **A RA com a câmera ainda não foi testada no celular**: a parte de RA (câmera, marcador e overlay sobre a bancada) está implementada, mas não tem resultado medido. A validação do componente pela câmera, prevista no artigo V4, ainda não foi implementada.
 
 ---
 
@@ -84,13 +84,13 @@ Desenvolver e avaliar uma solução integrada de Realidade Aumentada com valida�
 | Objetivo técnico | Situação em 31/10/2026 |
 |---|---|
 | Configurar o projeto Unity com AR Foundation e ARCore para Android | ✅ Concluído (05/10) |
-| Reconhecer o marcador do tapete e ancorar nele a instrução 3D | 🚧 Implementado, falta testar no celular |
+| Reconhecer o marcador do tapete e ancorar nele a instrução 3D | 🚧 Implementado, falta testar a RA no celular (o app já rodou no Galaxy A54 5G, no modo 3D) |
 | Implementar o fluxo sequencial de etapas, com avanço bloqueado até a validação | ✅ Implementado e coberto por testes |
 | Manter o roteiro e o catálogo de peças como dados editáveis, sem alterar código | ✅ Concluído |
 | Permitir a demonstração sem o kit (peças virtuais) e sem ARCore (bancada 3D) | ✅ Implementado e testado no Editor |
 | Registrar métricas (tempos por etapa, validações, intervenções, FPS) e exportá-las em CSV | ✅ Implementado e testado no Editor |
 | Validar o componente pela câmera, com um marcador por peça (RF05 do artigo V4) | ⬜ Planejado |
-| Executar os testes técnicos no celular: detecção, posicionamento, estabilidade, FPS e modo avião | ⬜ Planejado |
+| Executar os testes técnicos no celular: detecção, posicionamento, estabilidade, FPS e modo avião | 🚧 Primeiro teste em 31/10 (Galaxy A54 5G, fluxo completo no modo 3D); detecção, posicionamento, estabilidade, FPS e modo avião ainda não medidos |
 | Documentar instalação, execução, testes e limitações | ✅ Este README |
 
 ### 4.3 Questões de pesquisa e hipóteses (artigo V4)
@@ -151,7 +151,7 @@ O detalhamento está no artigo V4, em [`docs/documents/artigo-v4-montar.docx`](d
 
 **Legenda:** ✅ Implementado · 🚧 Em desenvolvimento · ⬜ Planejado · ❌ Cancelado
 
-**Critério usado:** ✅ quer dizer implementado e verificado no Editor por teste automatizado (seção 22). 🚧 quer dizer que o código existe, mas a funcionalidade depende da câmera ou do ARCore e só pode ser confirmada no celular. RF15 já funciona no modo 3D (o teste PlayMode simula o encaixe em todas as etapas); falta a versão presa ao marcador na RA. **Nenhuma funcionalidade foi testada em celular até 31/10/2026.**
+**Critério usado:** ✅ quer dizer implementado e verificado no Editor por teste automatizado (seção 22). 🚧 quer dizer que o código existe, mas a funcionalidade depende da câmera ou do ARCore e só pode ser confirmada no celular. RF15 já funciona no modo 3D (o teste PlayMode simula o encaixe em todas as etapas); falta a versão presa ao marcador na RA. **No celular:** em 31/10/2026 o app rodou num Samsung Galaxy A54 5G (Android 16), no modo demonstração 3D, e RF01, RF04, RF05, RF09, RF10, RF11, RF12 e RF13 funcionaram no aparelho; o app também informou o CSV gravado (RF07). Ao escolher a RA, apareceu a explicação da câmera (RF14), mas a sessão rodou no 3D. RF02, RF03 e a RA com a câmera não foram testados no celular, e a versão instalada era anterior ao RF15 e ao RF16 (seção 23).
 
 ---
 
@@ -161,7 +161,7 @@ Os critérios vêm do artigo V4 e são metas provisórias, a confirmar nos teste
 
 | ID | Categoria | Requisito | Critério de verificação | Situação |
 |---|---|---|---|---|
-| RNF01 | Compatibilidade | Smartphone Android comum com ARCore, sem óculos nem sensores extras | Execução no aparelho do experimento, com modelo e versão do Android registrados | ⬜ |
+| RNF01 | Compatibilidade | Smartphone Android comum com ARCore, sem óculos nem sensores extras | Execução no aparelho do experimento, com modelo e versão do Android registrados | 🚧 (rodou no Galaxy A54 5G, Android 16, só no modo 3D; aparelho do experimento a definir) |
 | RNF02 | Desempenho | Detecção rápida do marcador | Mediana de até 2 s entre o marcador entrar no campo de visão e a detecção | ⬜ |
 | RNF03 | Desempenho | Taxa de quadros adequada durante toda a montagem | Média ≥ 30 FPS na sessão, sem trecho de 5 s abaixo de 20 FPS | ⬜ |
 | RNF04 | Estabilidade | Conteúdo alinhado ao encaixe ao mover o celular e com o marcador parcialmente coberto | Desvio ≤ 5 mm; realinha em até 2 s; rastreia com até 1/3 do marcador coberto | ⬜ |
@@ -204,12 +204,13 @@ Não usamos Blender: os overlays e a placa genérica são formas simples geradas
 
 | Equipamento | Fabricante e modelo | Sistema | Características relevantes | Finalidade |
 |---|---|---|---|---|
-| Computador de desenvolvimento (Yuri) | AMD Ryzen 7 9800X3D, 32 GB RAM, NVIDIA GeForce RTX 5070 Ti | Windows 11 Pro (10.0.26200) | Unity 6000.6.4f1 com Android Build Support | Desenvolvimento, build do APK e todos os testes feitos até agora |
+| Computador de desenvolvimento (Yuri) | AMD Ryzen 7 9800X3D, 32 GB RAM, NVIDIA GeForce RTX 5070 Ti | Windows 11 Pro (10.0.26200) | Unity 6000.6.4f1 com Android Build Support | Desenvolvimento, build do APK e testes no Editor |
+| Celular do primeiro teste | Samsung Galaxy A54 5G (SM-A546E) | Android 16, One UI 8.5 | Está na [lista de aparelhos com ARCore](https://developers.google.com/ar/devices) do Google (com Depth API) | Teste do app no modo 3D em 31/10/2026 (seção 23) |
 | Marcador A impresso | Folha A4, impressão em tamanho real | — | Moldura de 15 cm, nota 100 no `arcoreimg` | Referência da RA (ainda não usado com celular) |
 
 Equipamentos previstos que **ainda não foram usados**:
 
-- **Smartphone Android com ARCore:** não definido. Até 31/10/2026 a equipe não teve um aparelho com ARCore disponível para os testes (seção 29, problema 6).
+- **Smartphone do experimento:** ainda não definido. O Galaxy A54 5G tem ARCore, mas até 31/10/2026 só rodou o app no modo 3D; a RA com o marcador impresso ainda não foi testada nele (seção 29, problema 6).
 - **Kit de montagem:** placa-mãe, CPU, cooler, RAM, SSD, placa de vídeo e fonte do laboratório da Facens, ainda não definidos. A demonstração de usabilidade usa as peças virtuais do app.
 - **Suporte articulado para o celular:** previsto no artigo V4, para deixar as mãos livres no experimento.
 
@@ -369,7 +370,7 @@ Upx8---Projeto-MONTAR/
 │   ├── diagrams/             diagramas (.mmd de origem e .png)
 │   ├── documents/            artigos V1 e V4, pitch, roteiro de montagem
 │   │   └── marcadores/       PDF do marcador para impressão
-│   ├── images/               capturas das telas e GIF do fluxo
+│   ├── images/               capturas das telas, GIF do fluxo e capturas do celular (celular/)
 │   └── simulador/            simulador web da montagem (gerado)
 │
 ├── tools/                    scripts Python (marcadores, texturas, ícones, simulador web)
@@ -520,7 +521,7 @@ Também dá para gerar o APK em linha de comando, sem abrir o Editor:
 "C:\Program Files\Unity\Hub\Editor\6000.6.4f1\Editor\Unity.exe" -batchmode -quit -projectPath . -executeMethod MontAR.EditorTools.BatchTasks.BuildAndroid -logFile build.log
 ```
 
-O APK foi gerado com sucesso em 05/10/2026 (prova de conceito, 45 MB) e em 27/10/2026 (app completo, 47,9 MB), mas **ainda não foi instalado em nenhum celular**.
+O APK foi gerado com sucesso em 05/10/2026 (prova de conceito, 45 MB) e em 27/10/2026 (app completo, 47,9 MB). Em 31/10/2026 um APK da versão de 23/10 (interface clara, antes das peças virtuais e da interface de vidro) foi instalado e usado num Samsung Galaxy A54 5G (seção 23). O APK de 27/10 ainda não tem teste em celular.
 
 ### Rodar os testes automatizados
 
@@ -603,7 +604,7 @@ Conclusão (resumo da sessão) → Histórico de montagens → Nova montagem
 
 ## 21. Interface
 
-Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtuais, feitas pelo teste automatizado de ponta a ponta (interface de vidro, 27/10/2026). Não são capturas do celular nem da RA, que ainda não foi testada.
+Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtuais, feitas pelo teste automatizado de ponta a ponta (interface de vidro, 27/10/2026). Não são capturas do celular nem da RA. As capturas do celular (Galaxy A54 5G, modo 3D) estão na seção 25.
 
 | Apresentação | Peças | Início |
 |---|---|---|
@@ -647,6 +648,9 @@ Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtua
 | Simulador web (27/10/2026) | Chrome headless, computador e celular emulado, kit padrão (9 etapas) e kit com AM5, 4 pentes, HD, 12V-2x6 e fonte com chave (10 etapas) | Percorre todas as etapas com a regra de validação | Aprovado nos modos "na tela" e "na sua frente" (câmera simulada) | ✅ |
 | Clone limpo + testes EditMode (31/10/2026) | `git clone` do GitHub numa pasta nova, `git lfs pull` e Unity 6000.6.4f1 com `-runTests -testPlatform EditMode` | Projeto importa sem erro de compilação e todos os testes passam | Importação e testes em 2 min 18 s; **75 de 75 aprovados** | ✅ |
 | Fluxo completo no clone limpo (31/10/2026) | Teste PlayMode `AppFlowSmokeTests`: apresentação, peças (troca de CPU, RAM de 1 a 4 pentes, SSD, GPU, fonte com chave), código inválido e válido, 9 etapas com **Simular encaixe** e uma validação reprovada, conclusão e histórico | Chega ao fim; o CSV e o `history.json` são gravados com a sessão | **1 de 1 aprovado** em 22,8 s; 19 capturas geradas | ✅ |
+| Fluxo completo no celular (31/10/2026) | APK 0.1.0 da versão de 23/10 num Samsung Galaxy A54 5G com Android 16: apresentação, seleção de peças (CPU AMD AM5, 2 pentes de RAM, SSD M.2 e placa de vídeo, 9 etapas), código `M03`, escolha da Câmera (RA) com a explicação da permissão, montagem no modo demonstração 3D com o checklist, conclusão e histórico | O app roda no aparelho; a etapa só avança com o checklist completo; o resumo, o histórico e o CSV são gravados | 9 etapas validadas em 0:52, com 2 validações reprovadas (etapas 1 e 8) e 0 intervenções. Com 2 de 3 itens marcados, a etapa 1 mostrou "Etapa não validada" e o item que faltou. O app informou o CSV `sessions/M03_20261031T214831.csv`, e o histórico registrou a montagem como "demonstração 3D". Capturas na seção 25 | ✅ |
+
+O teste no Galaxy A54 5G foi funcional: as etapas foram confirmadas em poucos segundos, sem montagem física, então os tempos não medem a montagem. A sessão rodou no modo 3D, e as capturas não mostram a imagem da câmera nem o marcador; o CSV não foi copiado do aparelho para conferência.
 
 ### 22.2 Testes planejados em celular (artigo V4)
 
@@ -654,14 +658,14 @@ Serão feitos no smartphone e com o kit definitivos, registrando modelo, versão
 
 | Teste | Procedimento | Resultado esperado | Resultado obtido | Status |
 |---|---|---|---|---|
-| Inicialização | Abrir o app, aceitar a câmera e iniciar a RA | App abre, pede a permissão e mostra a câmera | — | ⬜ |
+| Inicialização | Abrir o app, aceitar a câmera e iniciar a RA | App abre, pede a permissão e mostra a câmera | Galaxy A54 5G (31/10): o app abre e, ao escolher a RA, mostra a explicação da câmera; a sessão rodou no 3D e a imagem da câmera não foi registrada | 🚧 |
 | Detecção do marcador | Apontar para o marcador A em luz de laboratório | Mediana de até 2 s até `reference_detected` (RNF02) | — | ⬜ |
 | Posicionamento | Peça virtual sobre gabarito impresso, 10 reposicionamentos por etapa | Desvio ≤ 5 mm (RNF04) | — | ⬜ |
 | Estabilidade | Mover o celular e cobrir 1/3 do marcador | Realinha em até 2 s (RNF04) | — | ⬜ |
 | Taxa de quadros | FPS do CSV numa sessão completa | Média ≥ 30 FPS, sem 5 s abaixo de 20 (RNF03) | — | ⬜ |
 | Modo avião | Sessão completa sem internet | Sessão completa e CSV gravado (RNF05) | — | ⬜ |
 | Retomada | Fechar e reabrir o app no meio da montagem | Retoma na etapa salva | — | ⬜ |
-| Exportação CSV | Concluir uma sessão e copiar com `adb pull` | CSV completo, sem dados pessoais (RNF06) | — | ⬜ |
+| Exportação CSV | Concluir uma sessão e copiar com `adb pull` | CSV completo, sem dados pessoais (RNF06) | Galaxy A54 5G (31/10): o app informou o CSV gravado; falta copiar e conferir o arquivo | 🚧 |
 | Piloto de interação | Participantes fora da amostra | No máximo um pedido de esclarecimento por participante (RNF07) | — | ⬜ |
 
 ---
@@ -671,13 +675,13 @@ Serão feitos no smartphone e com o kit definitivos, registrando modelo, versão
 | Dispositivo | Sistema | Versão | Resultado |
 |---|---|---|---|
 | PC de desenvolvimento (Editor Unity 6000.6.4f1) | Windows 11 Pro | 10.0.26200 | Fluxo completo aprovado no modo 3D (testes de 07/10 e 31/10). A RA não roda no Editor desta máquina (seção 29, problema 1) |
-| Celular Android | — | — | **Nenhum celular testado até 31/10/2026** |
+| Samsung Galaxy A54 5G (SM-A546E) | Android (One UI 8.5) | 16 | Teste em 31/10/2026 com o APK 0.1.0 da versão de 23/10. Fluxo completo aprovado no **modo demonstração 3D**: apresentação, seleção de peças, início, explicação da câmera, 9 etapas com checklist, conclusão e histórico (seções 22.1 e 25). O aparelho está na lista de aparelhos com ARCore do Google, mas a **RA com a câmera e o marcador não foi testada** |
 
 ---
 
 ## 24. Limitações Conhecidas
 
-- **Sem teste em celular:** a RA (detecção do marcador, overlay sobre a bancada, permissão da câmera, desfoque da interface sobre a imagem da câmera) não foi executada em nenhum aparelho. Nenhum valor de tempo de detecção, FPS ou estabilidade foi medido.
+- **RA sem teste em celular:** o app já rodou num Galaxy A54 5G, mas só no modo 3D. A RA (detecção do marcador, overlay sobre a bancada, imagem da câmera) não foi executada em nenhum aparelho, e nenhum valor de tempo de detecção, FPS ou estabilidade foi medido. A versão testada era a de 23/10: as peças virtuais e a interface de vidro (27/10) também não rodaram em celular.
 - **Dependência de marcador:** o ARCore não reconhece objetos 3D no Android, então a RA precisa do marcador impresso em tamanho real (15 cm).
 - **Placa genérica:** os encaixes são posicionados para uma placa ATX genérica, com posições aproximadas, até o kit do laboratório ser definido.
 - **Validação por autoconfirmação:** o checklist depende do julgamento do próprio usuário e pode aprovar uma etapa com falha. A validação do componente pela câmera (RF17) ainda não existe, e nem ela vai conferir a posição exata da peça.
@@ -692,7 +696,28 @@ Serão feitos no smartphone e com o kit definitivos, registrando modelo, versão
 
 ## 25. Evidências de Funcionamento
 
-Todas as evidências até agora são do **Editor**, no modo demonstração 3D. Ainda não há evidência da RA no celular.
+### No celular (Samsung Galaxy A54 5G, 31/10/2026)
+
+Capturas de tela do aparelho, com o APK 0.1.0 da versão de 23/10 (interface clara), no modo demonstração 3D. Ainda não há evidência da RA com a câmera no celular.
+
+| Android 16 no A54 | Apresentação | Antes de começar | Peças |
+|---|---|---|---|
+| <img src="docs/images/celular/a54-android.jpg" alt="Informações do software: One UI 8.5, Android 16" width="170"> | <img src="docs/images/celular/a54-apresentacao.jpg" alt="Apresentação no celular" width="170"> | <img src="docs/images/celular/a54-antes-de-comecar.jpg" alt="Antes de começar" width="170"> | <img src="docs/images/celular/a54-pecas.jpg" alt="Seleção de peças no celular" width="170"> |
+
+| Início (Câmera RA) | Explicação da câmera | Etapa 1 no 3D | Checklist (2 de 3) |
+|---|---|---|---|
+| <img src="docs/images/celular/a54-inicio.jpg" alt="Início com código M03" width="170"> | <img src="docs/images/celular/a54-permissao-camera.jpg" alt="Explicação da permissão da câmera" width="170"> | <img src="docs/images/celular/a54-etapa-1-3d.jpg" alt="Etapa 1 na bancada 3D" width="170"> | <img src="docs/images/celular/a54-checklist.jpg" alt="Checklist com 2 de 3 itens" width="170"> |
+
+| Etapa não validada | Conclusão | Histórico |
+|---|---|---|
+| <img src="docs/images/celular/a54-etapa-nao-validada.jpg" alt="Etapa não validada" width="170"> | <img src="docs/images/celular/a54-conclusao.jpg" alt="Montagem concluída" width="170"> | <img src="docs/images/celular/a54-historico.jpg" alt="Histórico de montagens" width="170"> |
+
+- **Aparelho:** a tela "Informações do software" mostra One UI 8.5 e Android 16; o código do modelo, SM-A546E (Galaxy A54 5G), aparece no status do SE para Android, e a versão de banda de base começa com A546E.
+- **Validação sequencial:** com 2 de 3 itens marcados na etapa 1, o app mostrou "Etapa não validada" com o item que faltou e não liberou a etapa 2.
+- **Conclusão e histórico:** "Montagem de Teste", participante `M03`, 9 etapas validadas em 0:52, 2 validações reprovadas (etapas 1 e 8) e 0 intervenções. O histórico registrou 31/10/2026 18:49, no modo demonstração 3D.
+- **Registro:** o app informou o CSV `sessions/M03_20261031T214831.csv`.
+
+### No Editor
 
 - **GIF do fluxo completo** (seção 17): [`docs/images/fluxo-montagem-3d.gif`](docs/images/fluxo-montagem-3d.gif), montado com as 19 capturas geradas pelo teste PlayMode no clone limpo de 31/10/2026.
 - **Capturas das telas** (seção 21) em `docs/images/`.
@@ -733,7 +758,8 @@ Situação em 31/10/2026.
 | Artigo V4: requisitos, arquitetura e plano de testes | Equipe | até 24/10 | ✅ |
 | Peças virtuais, "Simular encaixe" e interface de vidro | Yuri | 27/10 | ✅ |
 | Documentação técnica do repositório (este README) | Equipe | 31/10 | ✅ |
-| Prova de conceito no celular: rastreamento e sobreposição | Yuri | depende de um aparelho com ARCore | 🚧 |
+| Primeiro teste no celular (Galaxy A54 5G, modo 3D) | Equipe | 31/10 | ✅ |
+| Prova de conceito no celular: rastreamento e sobreposição | Yuri | próximo passo (o A54 tem ARCore) | 🚧 |
 | Validação do componente pela câmera e liberação do pesquisador (RF17 e RF18) | Yuri | até 09/11 | ⬜ |
 | Manual técnico e tutorial em vídeo (condições de controle) | Pedro e Enzo | até 09/11 | ⬜ |
 | Protocolo experimental e instrumentos (checklist de falhas, SUS) | Enzo | até 09/11 | 🚧 (definido no artigo V4) |
@@ -759,7 +785,7 @@ docs: atualiza README, CHANGELOG, CLAUDE.md e capturas
 - Até agora o desenvolvimento ficou na branch `main`, sem branches de funcionalidade. A `main` sempre compila e passa nos testes.
 - Commits separados por assunto (configuração, funcionalidade, documentação), para registrar a evolução do projeto (`git log --oneline`).
 - **Tags** marcam os marcos do [CHANGELOG](CHANGELOG.md): `v0.1.0` (estrutura inicial e configuração da RA). As próximas são `v0.2.0` (prova de conceito no celular), `v0.3.0` (fluxo com validação no celular) e `v1.0.0` (protótipo congelado, 09/11).
-- PNG, PDF, GIF e fontes passam pelo Git LFS (`.gitattributes`).
+- PNG, JPG, PDF, GIF e fontes passam pelo Git LFS (`.gitattributes`).
 - Builds (`.apk`, `.aab`), keystores, `.env` e as pastas geradas pela Unity (`Library`, `Logs`, `UserSettings`, `Builds`) ficam fora do repositório (`.gitignore`). O repositório não tem senhas, tokens nem chaves.
 
 ---
@@ -796,11 +822,11 @@ docs: atualiza README, CHANGELOG, CLAUDE.md e capturas
 **Causa:** abrir uma cena pelo `EditorSceneManager` descarrega os assets sem uso, e a referência guardada antes virava nula.
 **Solução:** o construtor carrega o catálogo, o roteiro e o prefab pelo caminho, depois de abrir a cena.
 
-### Problema 6: nenhum celular com ARCore para testar
+### Problema 6: sem celular com ARCore para os primeiros testes
 
 **Problema:** a prova de conceito da RA não pôde ser executada em celular.
 **Causa:** o único aparelho disponível em 05/10 (Samsung Galaxy A06) não conectou pela depuração USB, e a equipe não teve outro aparelho com ARCore até 31/10.
-**Solução (parcial):** o fluxo inteiro passou a ser testado no Editor, no modo 3D, com testes automatizados. O APK fica pronto para instalar por cabo ou copiando o arquivo. O teste no celular continua pendente e é o próximo passo do cronograma.
+**Solução (parcial):** o fluxo inteiro passou a ser testado no Editor, no modo 3D, com testes automatizados, e o APK fica pronto para instalar por cabo ou copiando o arquivo. Em 31/10 o app rodou num Samsung Galaxy A54 5G, que tem ARCore, e o fluxo completo funcionou no modo 3D (seção 23). Falta testar a RA com o marcador impresso, que é o próximo passo do cronograma.
 
 ### Problema 7: sem o kit, a demonstração não mostrava a montagem
 
@@ -836,7 +862,7 @@ docs: atualiza README, CHANGELOG, CLAUDE.md e capturas
 | AR Foundation e ARCore | Software | Gratuitos |
 | Python, Pillow, three.js, Mermaid | Software | Gratuitos (código aberto) |
 | Computador de desenvolvimento | Hardware | Equipamento da equipe |
-| Smartphone Android com ARCore | Hardware | A obter (equipe ou instituição) |
+| Smartphone Android com ARCore | Hardware | Galaxy A54 5G usado no primeiro teste (31/10); aparelho do experimento a definir |
 | Suporte articulado para o celular | Hardware | Baixo custo, a obter |
 | Kit de componentes para montagem | Hardware | Laboratório da Facens (kit ainda não definido) |
 | Impressão do tapete e do marcador | Material | Baixo custo |
@@ -873,10 +899,10 @@ Projeto acadêmico desenvolvido para fins educacionais na disciplina UPX: Realid
 - [x] Estrutura de pastas documentada
 - [x] Scripts principais descritos
 - [x] Procedimento de instalação testado (clone limpo, 31/10/2026)
-- [x] Procedimento de execução testado no Editor (falta no celular)
-- [x] Screenshots reais adicionados (do Editor)
+- [x] Procedimento de execução testado no Editor e no celular (Galaxy A54 5G, modo 3D; RA pendente)
+- [x] Screenshots reais adicionados (Editor e celular)
 - [x] Testes registrados
-- [x] Dispositivos testados informados (nenhum celular até agora)
+- [x] Dispositivos testados informados (PC e Samsung Galaxy A54 5G)
 - [x] Limitações conhecidas documentadas
-- [x] Evidência de funcionamento adicionada (Editor)
+- [x] Evidência de funcionamento adicionada (Editor e celular, modo 3D)
 - [x] Commits representam a evolução do projeto

@@ -378,8 +378,7 @@ Upx8---Projeto-MONTAR/
 ├── .gitignore
 ├── CHANGELOG.md
 ├── CLAUDE.md                 contexto do projeto para o assistente de código
-├── README.md
-└── README-PREENCHIMENTO.md   guia de preenchimento do repositório-modelo
+└── README.md
 ```
 
 ### Pastas principais

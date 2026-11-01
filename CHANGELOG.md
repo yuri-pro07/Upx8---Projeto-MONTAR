@@ -72,6 +72,9 @@ Prova de conceito em andamento. Ainda não testada em celular.
 - `ImageTrackingController` não quebra mais quando o ARCore entrega uma imagem sem referência na biblioteca.
 - `StepFlow`: a fase da etapa já sai certa no `step_started`. Antes, uma etapa sem marcador (ou no modo 3D) passava para "Guiando" depois do evento, e a interface ficava com o botão Validar travado.
 
+### Removido
+- `README-PREENCHIMENTO.md`, o guia de preenchimento copiado do repositório-modelo. Com o README completo, ele não era mais necessário.
+
 ## [0.1.0] - 2026-10-05
 
 Tag `v0.1.0` no commit `bf58d79` (configuração do projeto Unity com AR Foundation e ARCore).

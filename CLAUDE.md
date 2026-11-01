@@ -280,8 +280,7 @@ A decomposição do tempo (identificação × execução física × confirmaçã
 ├── tools/          ← gerar_marcador.py, gerar_texturas_previa.py, gerar_icones_ui.py (adição nossa)
 ├── .gitignore  .gitattributes
 ├── CHANGELOG.md
-├── README.md                    ← as 33 seções do modelo, preenchidas com dados REAIS do MontAR
-└── README-PREENCHIMENTO.md      ← guia do professor (copiar do modelo)
+└── README.md                    ← as 33 seções do modelo, preenchidas com dados REAIS do MontAR
 ```
 
 O `.gitignore` atual (template oficial Unity) já é mais completo que o do modelo. Basta acrescentar `.vscode/`, `.idea/`, `.env`, `*.keystore`, `*.jks`, `.DS_Store` e `Thumbs.db`.
@@ -298,7 +297,7 @@ O `.gitignore` atual (template oficial Unity) já é mais completo que o do mode
 ## 12. Regras para o Claude neste projeto
 
 1. **Responder em português.**
-2. **Nunca inventar** resultados, versões, compatibilidade de dispositivo ou métricas, seja no README, no CHANGELOG ou no artigo. Registrar só o que foi realmente testado (regra do `README-PREENCHIMENTO.md` e do artigo).
+2. **Nunca inventar** resultados, versões, compatibilidade de dispositivo ou métricas, seja no README, no CHANGELOG ou no artigo. Registrar só o que foi realmente testado (regra do repositório-modelo `dr-ohata/upx-modelo` e do artigo).
 3. **Não editar à mão** o YAML de `.unity`, `.prefab` ou `.asset`. Mudanças de cena e prefab vão pelo Editor (via MCP, §13) ou ficam como instruções para a equipe.
 4. Depois de criar ou alterar scripts, **verificar o console da Unity** (erros de compilação) antes de declarar pronto.
 5. Ao concluir uma funcionalidade, atualizar a tabela RF (§8 aqui e §6 do README) e, quando fechar um marco, o CHANGELOG.
@@ -365,7 +364,7 @@ Foi assim que o app foi montado e testado em 07/10. A Unity trava o projeto, ent
 - [x] Revisar o que vai no 1º commit (08/10).
 - [x] Mover o artigo e o pitch para `docs/documents/`.
 - [x] Criar as pastas do modelo (`Materials`, `Models`, `Prefabs`, `Scripts`, `Textures`) e `docs/{diagrams,documents,images}`.
-- [x] Copiar `README-PREENCHIMENTO.md` do modelo. Criar `CHANGELOG.md` (`0.1.0`).
+- [x] Copiar `README-PREENCHIMENTO.md` do modelo (removido em 31/10, a pedido do Yuri, depois de o README ficar completo). Criar `CHANGELOG.md` (`0.1.0`).
 - [x] Criar o `README.md` com as 33 seções do modelo e preencher já o que o artigo e o pitch respondem. Pendentes no README: curso, professor e RAs (marcados como _a preencher_ / _a confirmar_).
 - [x] Ajustar o `.gitignore` (§10). `git lfs install`: feito na máquina do Yuri; falta Enzo e Pedro.
 - [x] Via MCP: remover `TutorialInfo/` e `Readme.asset`, renomear Company/Product no Player Settings e confirmar os `.meta` das pastas novas.

@@ -213,8 +213,8 @@ namespace MontAR
         }
 
         /// <summary>
-        /// Antes de usar a RA, explica para que serve a câmera e abre o pedido do Android ("Durante o uso
-        /// do app", "Só desta vez", "Não permitir"). Sem permissão, segue na demonstração 3D.
+        /// Antes de usar a RA, explica para que serve a câmera e abre o pedido do sistema.
+        /// Sem permissão, segue na demonstração 3D.
         /// </summary>
         private void WithCameraFor(GuidanceMode mode, System.Action then)
         {
@@ -231,8 +231,7 @@ namespace MontAR
             dialog.Show(
                 "Permitir o uso da câmera?",
                 "A RA usa a câmera para achar o marcador A do tapete e mostrar a peça fantasma sobre a placa. "
-                + "Nada é gravado nem enviado.\n\nNa próxima tela o Android pergunta: <b>Durante o uso do app</b>, "
-                + "<b>Só desta vez</b> ou <b>Não permitir</b>.",
+                + "Nada é gravado nem enviado.\n\n" + CameraPermission.SystemPromptHint,
                 "Continuar",
                 () => CameraPermission.Request(result =>
                 {
@@ -259,7 +258,7 @@ namespace MontAR
         private void ShowCameraDenied(CameraPermissionResult result)
         {
             string message = result == CameraPermissionResult.DeniedPermanently
-                ? "Câmera bloqueada. Para usar a RA, libere em Configurações › Apps › MontAR › Permissões. Seguindo na demonstração 3D."
+                ? $"Câmera bloqueada. Para usar a RA, libere em {CameraPermission.SettingsHint}. Seguindo na demonstração 3D."
                 : "Sem a câmera, a montagem segue na demonstração 3D. Dá para tentar a RA de novo no botão Câmera.";
             if (current == assemblyScreen)
                 assemblyScreen.ShowNotice(message, 4f);

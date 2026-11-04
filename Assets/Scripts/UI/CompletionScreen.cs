@@ -67,7 +67,13 @@ namespace MontAR
 
             fileLabel.text = string.IsNullOrEmpty(csvPath)
                 ? "Métricas não gravadas nesta sessão."
-                : $"Métricas salvas em sessions/{Path.GetFileName(csvPath)} (copiar com adb pull).";
+                : $"Métricas salvas em sessions/{Path.GetFileName(csvPath)} ({CsvCopyHint}).";
         }
+
+#if UNITY_IOS
+        private const string CsvCopyHint = "copiar no Xcode: Devices and Simulators › MontAR › Download Container";
+#else
+        private const string CsvCopyHint = "copiar com adb pull";
+#endif
     }
 }

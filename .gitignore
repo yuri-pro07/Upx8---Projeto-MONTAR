@@ -122,6 +122,14 @@ Thumbs.db
 *.keystore
 *.jks
 
+# Assinatura e pacotes da Apple (iOS)
+*.p12
+*.cer
+*.pem
+*.mobileprovision
+*.provisionprofile
+*.ipa
+
 # Python (scripts em tools/)
 __pycache__/
 

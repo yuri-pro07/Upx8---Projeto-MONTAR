@@ -8,7 +8,7 @@
 ![Plataforma](https://img.shields.io/badge/plataforma-Android-green)
 ![RA](https://img.shields.io/badge/RA-AR%20Foundation%20%2B%20ARCore-blue)
 ![Unity](https://img.shields.io/badge/Unity-6000.6.4f1-black)
-![Testes](https://img.shields.io/badge/testes-75%20EditMode%20%2B%201%20PlayMode-brightgreen)
+![Testes](https://img.shields.io/badge/testes-82%20EditMode%20%2B%202%20PlayMode-brightgreen)
 
 > **Estado atual (31/10/2026):** o app funciona por completo **no Editor da Unity**: apresentação, seleção de peças, montagem guiada em RA ou em 3D, peças virtuais com "Simular encaixe", validação por checklist, conclusão, histórico e registro em CSV. Em 31/10 o repositório foi clonado do GitHub numa pasta nova e passou em todos os testes automatizados (75 EditMode e 1 PlayMode de ponta a ponta). O APK Android é gerado sem erros. **Em 31/10 o app rodou num celular** (Samsung Galaxy A54 5G, Android 16), no modo demonstração 3D: a montagem de 9 etapas chegou ao fim com a validação por checklist bloqueando o avanço, e a conclusão, o histórico e o CSV funcionaram (seções 23 e 25). **A RA com a câmera ainda não foi testada no celular**: a parte de RA (câmera, marcador e overlay sobre a bancada) está implementada, mas não tem resultado medido. A validação do componente pela câmera, prevista no artigo V4, ainda não foi implementada.
 
@@ -148,6 +148,7 @@ O detalhamento está no artigo V4, em [`docs/documents/artigo-v4-montar.docx`](d
 | RF16 | Interface em vidro | Cartões de vidro fosco com o fundo desfocado e fonte Plus Jakarta Sans | ✅ |
 | RF17 | Validar o componente pela câmera | Um marcador por componente: o app confere se a peça mostrada é a da etapa e alerta se for outra (RF05 do artigo V4) | ⬜ |
 | RF18 | Liberação pelo pesquisador | Liberar a etapa com senha após 20 s sem validação, registrando o motivo (RF10 do artigo V4) | ⬜ |
+| RF19 | Pular etapa (só para testes) | Botão **Pular etapa**, com confirmação, na RA e no 3D: avança sem validar e deixa a etapa marcada como pulada no resumo, no histórico e no CSV. Será desligado no congelamento de 09/11, porque no experimento vale o RF05 | ✅ |
 
 **Legenda:** ✅ Implementado · 🚧 Em desenvolvimento · ⬜ Planejado · ❌ Cancelado
 
@@ -182,9 +183,11 @@ As versões foram conferidas em `ProjectSettings/ProjectVersion.txt`, `Packages/
 | Unity | 6000.6.4f1 | Motor 3D, cena de RA e lógica das etapas |
 | C# | o da Unity 6000.6 | Scripts da aplicação (namespace `MontAR`) |
 | Android (Player Settings) | API mínima 29, IL2CPP, ARM64 | Plataforma do APK (`br.facens.yupen.montar`, versão 0.1.0) |
+| iOS (Player Settings) | iOS mínimo 15.0, Metal | Projeto do Xcode (`br.facens.yupen.montar`). Preparado, ainda sem teste em iPhone |
 | AR Foundation | 6.6.2 | Camada de RA: sessão, câmera e rastreamento de imagens |
 | Google ARCore XR Plugin | 6.6.2 | Provedor de RA no Android |
-| XR Plugin Management | 4.7.0 | Ativa o ARCore no Android |
+| Apple ARKit XR Plugin | 6.6.2 | Provedor de RA no iOS (preparado, ainda sem teste) |
+| XR Plugin Management | 4.7.0 | Ativa o ARCore no Android e o ARKit no iOS |
 | XR Core Utils | 2.6.0 | `XROrigin` (dependência do AR Foundation) |
 | Universal Render Pipeline | 17.6.0 | Renderização (perfil Mobile) e passe de desfoque da interface de vidro |
 | Input System | 1.20.0 | Toque, arrastar e pinça |
@@ -328,7 +331,7 @@ session_id, participant_code, app_version, device_model, step_index, step_id, ev
 | Grupo | Eventos |
 |---|---|
 | Sessão | `session_started`, `session_completed` |
-| Etapa | `step_started`, `step_completed` |
+| Etapa | `step_started`, `step_completed`, `step_skipped` |
 | Rastreamento | `reference_detected`, `tracking_lost` |
 | Validação | `validation_started`, `validation_passed`, `validation_failed`, `validation_cancelled` |
 | Observador | `observer_intervention` |
@@ -441,6 +444,7 @@ Pacotes declarados em `Packages/manifest.json`. A Unity baixa todos sozinha ao a
 ```text
 com.unity.xr.arfoundation            6.6.2
 com.unity.xr.arcore                  6.6.2
+com.unity.xr.arkit                   6.6.2
 com.unity.render-pipelines.universal 17.6.0
 com.unity.inputsystem                1.20.0
 com.unity.ugui                       2.6.0
@@ -521,7 +525,30 @@ Também dá para gerar o APK em linha de comando, sem abrir o Editor:
 "C:\Program Files\Unity\Hub\Editor\6000.6.4f1\Editor\Unity.exe" -batchmode -quit -projectPath . -executeMethod MontAR.EditorTools.BatchTasks.BuildAndroid -logFile build.log
 ```
 
-O APK foi gerado com sucesso em 05/10/2026 (prova de conceito, 45 MB) e em 27/10/2026 (app completo, 47,9 MB). Em 31/10/2026 um APK da versão de 23/10 (interface clara, antes das peças virtuais e da interface de vidro) foi instalado e usado num Samsung Galaxy A54 5G (seção 23). O APK de 27/10 ainda não tem teste em celular.
+O APK foi gerado com sucesso em 05/10/2026 (prova de conceito, 45 MB) e em 27/10/2026 (app completo, 47,9 MB). Em 31/10/2026 um APK da versão de 23/10 (interface clara, antes das peças virtuais e da interface de vidro) foi instalado e usado num Samsung Galaxy A54 5G (seção 23). O APK de 27/10 não teve teste em celular. O APK atual, de 04/11/2026 (48,0 MB, com o botão Pular etapa), também não foi testado em celular até agora.
+
+### No iPhone (Mac com Xcode)
+
+> **Ainda sem teste.** O projeto foi preparado para iOS em 04/11/2026, mas o projeto do Xcode nunca foi gerado e o app nunca rodou em iPhone. Este procedimento ainda não foi executado.
+
+É preciso um Mac com Xcode, um iPhone com iOS 15 ou mais novo, o cabo e uma conta Apple (a gratuita serve).
+
+**1. Gerar o projeto do Xcode** (pasta `Builds/iOS`), por um dos dois caminhos:
+
+- **Na Unity do Mac:** instale a Unity 6000.6.4f1 com o módulo **iOS Build Support**, instale o [Git LFS](https://git-lfs.com) e rode `git lfs install` **antes de clonar**, clone o repositório (`git clone` e `git lfs pull`), abra o projeto e use o menu **MontAR › iOS › Gerar projeto do Xcode**.
+- **No Windows, sem instalar a Unity no Mac:** instale o módulo **iOS Build Support** pelo Unity Hub, gere o projeto com o comando abaixo e copie a pasta `Builds/iOS` inteira para o Mac. Se o Xcode reclamar de `Permission denied` num script, rode `chmod +x *.sh` dentro da pasta, no Terminal.
+
+```bash
+"C:\Program Files\Unity\Hub\Editor\6000.6.4f1\Editor\Unity.exe" -batchmode -quit -buildTarget iOS -projectPath . -executeMethod MontAR.EditorTools.BatchTasks.BuildIos -logFile build-ios.log
+```
+
+**2. Assinar.** Abra `Unity-iPhone.xcodeproj`. No alvo **Unity-iPhone**, aba **Signing & Capabilities**, marque **Automatically manage signing** e escolha sua conta em **Team** (em Xcode › Settings › Accounts dá para adicioná-la). Se o Xcode recusar o identificador `br.facens.yupen.montar`, acrescente algo no fim, como `.yuri`.
+
+**3. Preparar o iPhone.** Conecte o cabo e toque em **Confiar**. Do iOS 16 em diante, ative **Ajustes › Privacidade e Segurança › Modo de Desenvolvedor** (o iPhone reinicia).
+
+**4. Rodar.** Escolha o iPhone no topo do Xcode e clique em ▶. Na primeira vez, o iPhone bloqueia o app: libere em **Ajustes › Geral › VPN e Gerenciamento de Dispositivo** e rode de novo.
+
+Com conta gratuita, o app para de abrir depois de 7 dias e precisa ser instalado de novo pelo Xcode. O CSV da sessão sai pelo Xcode, em **Window › Devices and Simulators › MontAR › Download Container**.
 
 ### Rodar os testes automatizados
 
@@ -649,6 +676,9 @@ Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtua
 | Clone limpo + testes EditMode (31/10/2026) | `git clone` do GitHub numa pasta nova, `git lfs pull` e Unity 6000.6.4f1 com `-runTests -testPlatform EditMode` | Projeto importa sem erro de compilação e todos os testes passam | Importação e testes em 2 min 18 s; **75 de 75 aprovados** | ✅ |
 | Fluxo completo no clone limpo (31/10/2026) | Teste PlayMode `AppFlowSmokeTests`: apresentação, peças (troca de CPU, RAM de 1 a 4 pentes, SSD, GPU, fonte com chave), código inválido e válido, 9 etapas com **Simular encaixe** e uma validação reprovada, conclusão e histórico | Chega ao fim; o CSV e o `history.json` são gravados com a sessão | **1 de 1 aprovado** em 22,8 s; 19 capturas geradas | ✅ |
 | Fluxo completo no celular (31/10/2026) | APK 0.1.0 da versão de 23/10 num Samsung Galaxy A54 5G com Android 16: apresentação, seleção de peças (CPU AMD AM5, 2 pentes de RAM, SSD M.2 e placa de vídeo, 9 etapas), código `M03`, escolha da Câmera (RA) com a explicação da permissão, montagem no modo demonstração 3D com o checklist, conclusão e histórico | O app roda no aparelho; a etapa só avança com o checklist completo; o resumo, o histórico e o CSV são gravados | 9 etapas validadas em 0:52, com 2 validações reprovadas (etapas 1 e 8) e 0 intervenções. Com 2 de 3 itens marcados, a etapa 1 mostrou "Etapa não validada" e o item que faltou. O app informou o CSV `sessions/M03_20261031T214831.csv`, e o histórico registrou a montagem como "demonstração 3D". Capturas na seção 25 | ✅ |
+| Pular etapa e testes automatizados (04/11/2026) | `-runTests` EditMode e PlayMode, com um teste novo na cena real, no modo 3D: desistir de pular, pular com confirmação, validar uma etapa e pular as outras até o fim | A etapa pulada avança sem validar, não conta como validada e fica marcada na conclusão, no histórico e no CSV | **82 de 82** EditMode e **2 de 2** PlayMode aprovados; no CSV, 8 `step_skipped` e 1 `step_completed`. Sem teste em celular | ✅ |
+| Build Android (04/11/2026) | `BatchTasks.BuildAndroid` em linha de comando | APK sem erros | APK de 48,0 MB, 0 erros, 2 min 26 s | ✅ |
+| Preparação para iOS (04/11/2026) | Pacote ARKit 6.6.2 e `BatchTasks.ConfigureIos`; compilação à parte, com o símbolo `UNITY_IOS`, dos trechos de iOS de `CameraPermission` e `CompletionScreen`; testes e APK de novo | O código de iOS compila, e os testes e o build do Android continuam passando | Compilou sem erros; **82 de 82** EditMode, **2 de 2** PlayMode, APK de 48,0 MB com 0 erros. **O build de iOS não foi executado** (falta o módulo nesta máquina) | 🚧 |
 
 O teste no Galaxy A54 5G foi funcional: as etapas foram confirmadas em poucos segundos, sem montagem física, então os tempos não medem a montagem. A sessão rodou no modo 3D, e as capturas não mostram a imagem da câmera nem o marcador; o CSV não foi copiado do aparelho para conferência.
 
@@ -688,7 +718,8 @@ Serão feitos no smartphone e com o kit definitivos, registrando modelo, versão
 - **Mãos ocupadas:** a montagem exige as duas mãos. No experimento o celular ficará num suporte articulado; fora dele, o usuário alterna entre segurar o aparelho e montar.
 - **Tempo maior:** a validação de cada etapa pode aumentar o tempo total da montagem (hipótese H2).
 - **Montagem em bancada:** o roteiro não inclui o gabinete.
-- **Sessões fora da medição:** no modo 3D a etapa não espera o marcador, e com peças virtuais não há instalação real. Essas sessões não servem para medir latência de rastreamento nem falhas de instalação.
+- **Sessões fora da medição:** no modo 3D a etapa não espera o marcador, e com peças virtuais não há instalação real. Sessões com etapa pulada (`step_skipped`) também ficam de fora. Essas sessões não servem para medir latência de rastreamento nem falhas de instalação.
+- **iOS sem teste:** o projeto está preparado, mas o build de iOS nunca rodou e o app nunca abriu em iPhone. O marcador, a permissão da câmera e o desfoque da interface no Metal não foram conferidos.
 - **Simulador web:** o giroscópio real e o WebXR não foram testados em aparelho.
 - **XR Simulation bloqueado:** no PC de desenvolvimento, o Smart App Control impede simular a RA no Editor.
 
@@ -849,7 +880,7 @@ docs: atualiza README, CHANGELOG, CLAUDE.md e capturas
 - validação visual automática da posição de cada componente;
 - roteiros para outros modelos de placa-mãe e para a montagem dentro do gabinete;
 - painel para o professor acompanhar vários alunos na mesma aula;
-- suporte a iOS (ARKit).
+- testar no iPhone o suporte a iOS (ARKit), já preparado no projeto (seção 16).
 
 ---
 

@@ -36,13 +36,13 @@ Disciplina **UPX — Realidade Aumentada**, Centro Universitário Facens (Soroca
 
 ## 3. Equipe Yupen
 
-| Integrante | Papel | E-mail (RA) |
+| Integrante | Papel | RA |
 |---|---|---|
-| Enzo Zorzetto | Pesquisa e experimento: estado da arte, protocolo experimental, análise de dados | 234974@facens.br* |
-| Yuri Peruzzo | **Desenvolvimento AR**: rastreamento, sobreposição 3D, fluxo de validação de etapas | 248732@facens.br* |
-| Pedro Ricci Gomes Nascimento | Produto e conteúdo: requisitos, interface, roteiro de montagem, documentação | 234923@facens.br* |
+| Enzo Zorzetto | Pesquisa e experimento: estado da arte, protocolo experimental, análise de dados | 234974* |
+| Yuri Peruzzo | **Desenvolvimento AR**: rastreamento, sobreposição 3D, fluxo de validação de etapas | 248732* |
+| Pedro Ricci Gomes Nascimento | Produto e conteúdo: requisitos, interface, roteiro de montagem, documentação | 234923* |
 
-\* RAs confirmados pelo Yuri em 31/10/2026 e já no README. Curso: **Engenharia de Computação**. Professor: **Prof. Daniel Ohata** (daniel.ohata@facens.br, GitHub `dr-ohata`).
+\* RAs confirmados pelo Yuri em 31/10/2026 e já no README. Curso: **Engenharia de Computação**. Professor: **Prof. Daniel Ohata** (GitHub `dr-ohata`).
 
 **Regra para o README e o artigo:** registrar teste em celular, compatibilidade de aparelho ou resultado de RA só com evidência (capturas, CSV, vídeo) e só o que ela mostra. Para cada teste, registrar modelo, versão do Android, se tem ARCore, versão do app e resultado (§22, §23 e §25 do README). Primeiro teste real: 31/10/2026, Samsung Galaxy A54 5G (SM-A546E), Android 16 / One UI 8.5, APK da versão de 23/10, só no modo 3D; capturas em `docs/images/celular/`.
 
@@ -71,7 +71,7 @@ Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**
   - objeto `MontAR` com `ImageTrackingController`, `ARContentManager` (sem `previewStep`), `PocDiagnosticsHud` (desligado; toque longo de 2 s na versão da tela de apresentação liga/desliga), `SessionMetricsLogger`, `StepFlowController` (roteiro `Roteiro_bancada_v0`) e `AppController` (catálogo `Catalogo_pecas_v0`);
   - instância do prefab `Assets/Prefabs/UI/MontAR_UI.prefab` (5 telas + aviso + diálogo);
   - `Demonstração 3D` em y = −100: bancada virtual (mesa, tapete, placa genérica, marcador A virtual) e a câmera da demonstração. A bancada fica desativada fora do modo 3D. Nos menus, essa câmera só limpa o fundo.
-- **Tudo isso é gerado por código** (Editor, menu **MontAR › App › Reconstruir interface e cena**, ou `BatchTasks.BuildContent`). Reconstruir **apaga ajustes manuais** no prefab da UI e na bancada virtual. O catálogo de peças só é criado se não existir.
+- **Tudo isso é gerado por código** (Editor, menu **MontAR › App › Reconstruir interface e cena**, ou `BatchTasks.BuildContent`; para mudança só na UI, `BatchTasks.BuildUi`, que não gera IDs internos novos nos overlays e deixa o diff limpo). Reconstruir **apaga ajustes manuais** no prefab da UI e na bancada virtual. O catálogo de peças só é criado se não existir.
 - Conteúdo da montagem: `Assets/Dev/PreviewOverlay/spec_montagem.json` é a fonte. O `MontagemPreviewBuilder` (menu **MontAR › Prévia › Reconstruir cena de montagem**) gera a placa genérica (`Prefabs/Bancada`), os overlays (`Prefabs/Overlays`), as etapas (`Data/Steps/Bancada`), o roteiro (`Data/Roteiro_bancada_v0.asset`) e a cena de prévia `Preview_Montagem.unity`. As texturas da bancada vêm de `tools/gerar_texturas_previa.py` (→ `Textures/Bancada`); os ícones da UI, de `tools/gerar_icones_ui.py` (→ `Textures/UI`).
 - `docs/documents/roteiro-bancada-v0.md` é exportado das etapas (menu **MontAR › App › Exportar roteiro**). É a base do manual e do vídeo. Não editar à mão.
 - **Peças virtuais e "Simular encaixe"** (27/10, pedido para a demonstração de usabilidade sem o kit). Escolha "Kit de verdade" × "Peças virtuais" na tela de início (`StartScreen`, salvo em `PlayerPrefs` `montar.pecas_virtuais`, padrão ligado). Com peças virtuais: na RA, o `ARContentManager` cria uma `VirtualAssembly` presa ao marcador A com a placa genérica (offset do tapete) e as peças já encaixadas; na bancada 3D, a `VirtualAssembly` fica no marcador virtual. O botão **Simular encaixe** (`StepFlowController.SimulateFit`) anima a peça (elementos com `OverlayPart.Role == Piece`, isto é, verdes no spec; a placa fantasma da etapa 1 não conta) e esconde a peça fantasma. Validar sem simular também encaixa. O checklist continua obrigatório e a `StepFlow` não mudou. CSV: `session_started` ganha `;pecas=virtuais` (**separar essas sessões na análise**). Testado só no Editor.
@@ -79,13 +79,14 @@ Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**
 - **Simulador web para avaliadores** (27/10): `docs/simulador/index.html`, página única em three.js com a mesma bancada, os mesmos overlays e o mesmo roteiro do app, com validação por checklist e peças que ficam instaladas. Gerado por `python tools/gerar_simulador_web.py`, que embute o `spec_montagem.json`, o catálogo lido do `DefaultParts` do `AppBuilder` e as texturas de `Textures/Bancada`; o modelo da página é `tools/simulador_web/simulador.html` (nunca editar o `index.html` à mão). **Rodar de novo depois de mudar o spec, o catálogo ou as texturas.** Modos: na tela (órbita), na sua frente (câmera + giroscópio, sem rastreamento) e WebXR (RA com hit-test e dom-overlay; óculos com painel na cena). Câmera e WebXR exigem HTTPS (GitHub Pages da pasta `docs/`, ainda não ativado). Não grava CSV: fica fora do experimento. Testado só no Chrome headless; giroscópio real e WebXR não foram testados em aparelho.
 - Template limpo: `TutorialInfo/`, `Readme.asset` e `SampleScene.unity` removidos. `PC_*` mantidos (perfil do Standalone). `SampleSceneProfile` mantido porque os dois RP Assets o referenciam como volume profile.
 - `activeInputHandler: 1`, ou seja, **somente o novo Input System** (nada de `UnityEngine.Input`). O IMGUI (`OnGUI`) do painel de diagnóstico funciona mesmo assim.
-- Build Android funciona: `Builds/MontAR-0.1.0-poc.apk` (45 MB, 05/10, só a PoC) e `Builds/MontAR-0.1.0-dev.apk` (47,9 MB, 27/10, app completo com interface de vidro e peças virtuais, gerado por `BatchTasks.BuildAndroid`). Os dois ficam fora do git. Nenhum dos dois tem teste em celular registrado. O de 27/10 foi entregue ao Yuri para mandar a quem vai testar. O APK que rodou no A54 em 31/10 é da versão de 23/10 (interface clara, sem peças virtuais nem vidro); esse arquivo não está em `Builds/`.
+- Build Android funciona: `Builds/MontAR-0.1.0-poc.apk` (45 MB, 05/10, só a PoC) e `Builds/MontAR-0.1.0-dev.apk` (48,0 MB, 04/11, app completo com interface de vidro, peças virtuais e Pular etapa, gerado por `BatchTasks.BuildAndroid`). Os dois ficam fora do git. Nenhum dos dois tem teste em celular registrado. O de 27/10 (sobrescrito pelo de 04/11) foi entregue ao Yuri para mandar a quem vai testar. O APK que rodou no A54 em 31/10 é da versão de 23/10 (interface clara, sem peças virtuais nem vidro); esse arquivo não está em `Builds/`.
 - ⚠️ **Smart App Control (Windows 11) na máquina do Yuri** bloqueou a DLL nativa do XR Simulation (`DllNotFoundException: XRSimulationSubsystem` no Play) e as DLLs do `Library/BurstCache` (só avisos) em 05/10. **Não desligar** (é irreversível no Windows 11). Em 07/10, nos testes PlayMode em batchmode, o XR Simulation carregou (`ARSession: Ready`); falta conferir no Editor com interface. Testar RA no celular. Registrado no README §29.
 - **Sem celular:** o próprio app tem o modo **demonstração 3D** (bancada virtual, mesmo overlay e mesmos offsets da RA). Prévias de Editor: `Preview_Montagem.unity` (todas as etapas, renderiza imagens com `MontagemPreviewBuilder.RenderShots`) e `Preview_Overlay.unity`, ambas em `Assets/Dev/PreviewOverlay/`, fora do build.
 - **Prévia do overlay da PoC:** `Assets/Dev/PreviewOverlay/Preview_Overlay.unity`, fora do build. Tem a folha A4 do marcador deitada numa mesa e um objeto "Imagem rastreada (simulada)" com o `Overlay_PoC` como filho, igual ao `ARContentManager`. Serve para ajustar offsets e overlays no Editor, já que o XR Simulation não roda aqui. A câmera "Camera do celular (prévia)" pode ser renderizada por script para gerar imagens.
 - **Celular:** o Galaxy A06 do Yuri não serve para testar (relatado em 05/10). O APK foi copiado para ele via MTP, mas a depuração USB não chegou a conectar. Em 31/10 o app rodou num **Samsung Galaxy A54 5G** (SM-A546E, Android 16, One UI 8.5), que está na lista do ARCore (com Depth API): fluxo completo no modo 3D, 9 etapas em 0:52, 2 validações reprovadas, CSV `sessions/M03_20261031T214831.csv` (não copiado do aparelho). **Falta testar a RA** (marcador, overlay, convenção do +Z, FPS) nesse ou em outro aparelho da lista https://developers.google.com/ar/devices.
+- **iOS (preparado em 04/11, nunca rodou):** `BatchTasks.ConfigureIos` grava o identificador, o texto da câmera, a assinatura automática, o `ARKitLoader` e os símbolos `UNITY_XR_ARKIT_LOADER_ENABLED` e `APP_UI_EDITOR_ONLY` (em linha de comando, os pacotes só os adicionam com os scripts já compilados). `BatchTasks.BuildIos` ou o menu **MontAR › iOS › Gerar projeto do Xcode** geram `Builds/iOS`. Sem `xcrun` (Windows), o pacote do ARKit põe o marcador num catálogo `ARReferenceImages` que o Xcode compila. O módulo iOS Build Support **não está instalado na máquina do Yuri** (o pedido de administrador do Hub expirou em 04/11), então o build de iOS nunca rodou: só os trechos `#if UNITY_IOS` de `CameraPermission` e `CompletionScreen` foram compilados à parte. No primeiro build, conferir o catálogo do marcador, o `Info.plist` (câmera, `arkit`) e, no iPhone, a permissão, o rastreamento e o desfoque no Metal. Passo a passo no §16 do README.
 - O ARCore grava o banco de imagens dentro de `MontAR_ReferenceImages.asset` (`m_DataStore`) a cada build: é normal esse asset aparecer modificado no git depois de buildar.
-- Git: primeiros commits enviados para `origin/main` em 08/10 (pedido do Yuri): configuração, código, cena e conteúdo, docs. Remoto: `origin = https://github.com/yuri-pro07/Upx8---Projeto-MONTAR.git`. Identidade local do repositório: `Yuri Peruzzo`. Em 27/10, a pedido do Yuri, foram enviados os commits da interface de vidro, das peças virtuais (Simular encaixe) e do simulador web. Em 31/10, também a pedido do Yuri, foram enviados a documentação da entrega (README, diagramas, GIF, artigo V4) e a tag `v0.1.0` (no `bf58d79`). Na noite de 31/10, também a pedido do Yuri, foram enviados a remoção do `README-PREENCHIMENTO.md` e o registro do teste no Galaxy A54 5G. Continua valendo: só commitar e dar push quando pedirem.
+- Git: primeiros commits enviados para `origin/main` em 08/10 (pedido do Yuri): configuração, código, cena e conteúdo, docs. Remoto: `origin = https://github.com/yuri-pro07/Upx8---Projeto-MONTAR.git`. Identidade local do repositório: `Yuri Peruzzo`. Em 27/10, a pedido do Yuri, foram enviados os commits da interface de vidro, das peças virtuais (Simular encaixe) e do simulador web. Em 31/10, também a pedido do Yuri, foram enviados a documentação da entrega (README, diagramas, GIF, artigo V4) e a tag `v0.1.0` (no `bf58d79`). Na noite de 31/10, também a pedido do Yuri, foram enviados a remoção do `README-PREENCHIMENTO.md` e o registro do teste no Galaxy A54 5G. Em 04/11, também a pedido do Yuri, foram enviados o Pular etapa e a preparação para iOS, com o e-mail noreply do GitHub nos commits. Continua valendo: só commitar e dar push quando pedirem. **O repositório é público:** antes de cada push, conferir o diff e não enviar dados pessoais, senhas, chaves nem certificados.
   - `.gitattributes` usa **Git LFS** (fbx, blend, obj, áudio, vídeo…). Todo integrante precisa rodar `git lfs install` (já feito na máquina do Yuri, LFS 3.7.1).
   - Artigo e pitch em `docs/documents/artigo-v1-montar.docx` e `docs/documents/pitch-montar.pptx`.
 - `.gitkeep` só nas pastas ainda vazias (`Assets/Models`). `docs/diagrams` tem a fonte `.mmd` e o `.png` de cada diagrama; ao mudar um `.mmd`, gerar o PNG de novo com `npx -p @mermaid-js/mermaid-cli@11.4.2 mmdc -i <arquivo>.mmd -o <arquivo>.png -s 2 -b white`. A Unity ignora arquivos que começam com ponto.
@@ -101,6 +102,7 @@ Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**
 | Input System | 1.20.0 | Toque/UI (`InputSystemUIInputModule`) |
 | AR Foundation | **6.6.2** (recomendada para o 6000.6) | Camada de RA |
 | Google ARCore XR Plugin | **6.6.2** | Provedor RA Android |
+| Apple ARKit XR Plugin | **6.6.2** | Provedor RA iOS (preparado, sem teste) |
 | XR Plugin Management | 4.7.0 (dependência) | Ativar ARCore |
 | XR Core Utils | 2.6.0 (dependência) | `XROrigin` |
 | uGUI + TextMeshPro | 2.6.0 (TMP vem dentro do uGUI no Unity 6) | Interface |
@@ -108,7 +110,7 @@ Esforço planejado (slide 11): 3 pessoas × 16 semanas × 6 h/semana = **288 h**
 | Blender | 4.x | Modelos 3D dos componentes |
 | Vuforia | *alternativa em avaliação* (ver D1) | Model Targets, se o rastreamento por imagem não bastar |
 
-Plataforma-alvo: **Android com ARCore**, smartphone comum, sem tripé e sem óculos. Registrar no README apenas as versões **efetivamente instaladas** (conferir `Packages/packages-lock.json`).
+Plataforma-alvo: **Android com ARCore**, smartphone comum, sem tripé e sem óculos. iOS com ARKit está preparado (§5), sem teste. Registrar no README apenas as versões **efetivamente instaladas** (conferir `Packages/packages-lock.json`).
 
 ### Checklist de configuração da Unity (feito em 05/10 na máquina do Yuri, salvo onde indicado)
 
@@ -210,6 +212,7 @@ Assets da PoC (continuam no projeto, fora do roteiro):
 | RF14 | Pedido da permissão da câmera explicado antes da RA (sem permissão, segue no 3D) | 🚧 a explicação apareceu no A54 (31/10) e a sessão seguiu no 3D; falta registrar o pedido do Android e a RA |
 | RF15 | Peças virtuais: placa 3D no marcador e botão "Simular encaixe" (peça fica montada) | 🚧 testado no Editor (3D), falta a RA no celular |
 | RF16 | Interface em vidro (desfoque do fundo, fundo aurora, fonte Plus Jakarta Sans) | 🚧 testado no Editor, falta conferir no celular |
+| RF19 | Pular etapa, só para testes sem todas as peças (CSV: `step_skipped`) | 🚧 testado no Editor (3D), falta conferir no celular. **Desligar antes de 09/11** (`StepFlowController.SkipStepsEnabled`) |
 
 **Legenda:** ✅ implementado · 🚧 em desenvolvimento · ⬜ planejado · ❌ cancelado. Usar a mesma legenda do README. Critério para ✅: funcionando **no celular**.
 
@@ -240,7 +243,7 @@ Eventos implementados:
 | Grupo | Eventos |
 |---|---|
 | Sessão | `session_started`, `session_completed` |
-| Etapa | `step_started`, `step_completed` |
+| Etapa | `step_started`, `step_completed`, `step_skipped` (só em testes; sessão com esse evento fica fora da análise) |
 | Rastreamento | `reference_detected`, `tracking_lost` (de **qualquer** referência; o nome vai em `detail`) |
 | Validação | `validation_started`, `validation_passed`, `validation_failed`, `validation_cancelled` |
 | Observador | `observer_intervention` |
@@ -393,6 +396,7 @@ Foi assim que o app foi montado e testado em 07/10. A Unity trava o projeto, ent
 - [ ] Decidir D9 (kit fixo no experimento).
 - [ ] Testes técnicos: estabilidade do rastreamento, FPS e latência, registrados no README §22 e §23.
 - [ ] **Paralelo (Pedro/Enzo):** manual técnico e tutorial em vídeo com o **mesmo roteiro**, checklist de observação de falhas por categoria, protocolo experimental e formulário SUS.
+- [ ] **Antes de congelar:** `StepFlowController.SkipStepsEnabled = false`, para o botão Pular etapa não aparecer no experimento.
 - [ ] Piloto com 1–2 pessoas fora da amostra. Ajustes. Tag `v1.0.0` + APK em Release. **Congelar.**
 
 ### Fase 3: experimento (10/11 – 01/12)

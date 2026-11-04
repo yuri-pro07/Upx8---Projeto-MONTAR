@@ -157,6 +157,28 @@ namespace MontAR.Tests
         }
 
         [Test]
+        public void Summary_SkippedStep_HasTimeButDoesNotCountAsCompleted()
+        {
+            double now = 0;
+            var summary = new SessionSummary(() => now);
+            StepFlow flow = CreateFlow(new FakeStep("cpu", "tapete"), new FakeStep("ram", ""));
+            flow.EventRaised += summary.Record;
+
+            flow.Start();
+            now = 7;
+            flow.SkipCurrentStep();
+            now = 10;
+            flow.BeginValidation();
+            flow.SubmitValidation(true);
+
+            Assert.AreEqual(1, summary.CompletedSteps, "só a etapa validada conta");
+            Assert.IsTrue(summary.Steps[0].Skipped);
+            Assert.AreEqual(7, summary.Steps[0].Seconds, 1e-9);
+            Assert.IsFalse(summary.Steps[1].Skipped);
+            Assert.IsTrue(summary.IsFinished);
+        }
+
+        [Test]
         public void Summary_OnResume_StartsAtSavedStep()
         {
             var summary = new SessionSummary(() => 0);

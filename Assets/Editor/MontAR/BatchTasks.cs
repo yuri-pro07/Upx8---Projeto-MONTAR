@@ -24,6 +24,15 @@ namespace MontAR.EditorTools
             Debug.Log("[MontAR] Roteiro exportado: " + RoteiroExporter.Export());
         }
 
+        /// <summary>
+        /// Reconstrói só a interface e a cena. Use quando a mudança é na UI: o BuildContent também gera os
+        /// overlays de novo, com IDs internos novos em todos os prefabs, e enche o diff sem mudar o conteúdo.
+        /// </summary>
+        public static void BuildUi()
+        {
+            Debug.Log("[MontAR] " + AppBuilder.RebuildApp());
+        }
+
         /// <summary>Recria o catálogo de peças com os valores padrão do AppBuilder (sobrescreve ajustes no Inspector).</summary>
         public static void RebuildCatalog()
         {

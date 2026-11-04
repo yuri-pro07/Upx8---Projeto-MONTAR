@@ -37,7 +37,7 @@ namespace MontAR
         /// <summary>Índice da etapa atual; -1 antes de iniciar.</summary>
         public int CurrentIndex { get; private set; }
 
-        /// <summary>Quantas etapas já foram aprovadas. É o ponto de retomada da sessão.</summary>
+        /// <summary>Quantas etapas já foram aprovadas ou puladas. É o ponto de retomada da sessão.</summary>
         public int CompletedCount { get; private set; }
 
         public StepPhase Phase { get; private set; }
@@ -170,17 +170,24 @@ namespace MontAR
 
             CompletedCount = CurrentIndex + 1;
             Raise(FlowEventType.StepCompleted, string.Empty);
+            AdvanceOrFinish();
+            return true;
+        }
 
-            if (CurrentIndex + 1 < steps.Count)
-            {
-                BeginStep(CurrentIndex + 1);
-            }
-            else
-            {
-                IsFinished = true;
-                Raise(FlowEventType.SessionCompleted, -1, string.Empty, string.Empty);
-            }
+        /// <summary>
+        /// Pula a etapa atual sem validar (teste sem todas as peças). Funciona também antes de achar o
+        /// marcador. Emite só step_skipped, nunca validation_passed nem step_completed, para o CSV
+        /// não misturar etapa pulada com etapa feita. Com a validação aberta, é preciso fechá-la antes.
+        /// </summary>
+        public bool SkipCurrentStep(string detail = "")
+        {
+            if (!IsRunning || Phase == StepPhase.Validating)
+                return false;
 
+            Phase = StepPhase.Completed;
+            CompletedCount = CurrentIndex + 1;
+            Raise(FlowEventType.StepSkipped, detail);
+            AdvanceOrFinish();
             return true;
         }
 
@@ -192,6 +199,18 @@ namespace MontAR
 
             Raise(FlowEventType.ObserverIntervention, detail);
             return true;
+        }
+
+        private void AdvanceOrFinish()
+        {
+            if (CurrentIndex + 1 < steps.Count)
+            {
+                BeginStep(CurrentIndex + 1);
+                return;
+            }
+
+            IsFinished = true;
+            Raise(FlowEventType.SessionCompleted, -1, string.Empty, string.Empty);
         }
 
         private void BeginStep(int index)

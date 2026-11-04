@@ -822,6 +822,10 @@ namespace MontAR.EditorTools
             Button validate = MakeButton(actionsRow, "Botão Validar", "Validar etapa", ButtonStyle.Primary, out TextMeshProUGUI validateLabel, 128f, 38f);
             Layout(validate.gameObject, preferredHeight: 128f, minHeight: 128f, flexibleWidth: 1f, preferredWidth: 0f);
 
+            // "Pular etapa": para testar sem todas as peças. A tela esconde quando não se aplica.
+            Button skipStep = MakeButton(sheet, "Botão Pular etapa", "Pular etapa", ButtonStyle.Ghost, out _, 88f, 34f);
+            Layout(skipStep.gameObject, preferredHeight: 88f, minHeight: 88f);
+
             // Painel da validação (Valida).
             RectTransform validation = BottomBand(Node("Painel da validação", safe), 24f, 24f, 24f);
             Glass(validation.gameObject, 52f, true);
@@ -858,7 +862,7 @@ namespace MontAR.EditorTools
                 ("stepSheet", sheet.gameObject), ("sheetDrag", sheetDrag), ("collapseButton", collapse), ("collapseLabel", collapseLabel), ("titleLabel", title),
                 ("detailsGroup", details.gameObject), ("instructionLabel", instruction), ("alertBox", alert.gameObject), ("alertLabel", alertLabel),
                 ("errorBox", errorBox.gameObject), ("errorLabel", errorLabel),
-                ("validateButton", validate), ("validateLabel", validateLabel),
+                ("validateButton", validate), ("validateLabel", validateLabel), ("skipButton", skipStep),
                 ("simulateButton", simulate), ("simulateLabel", simulateLabel), ("simulateIcon", simulateIcon),
                 ("fitSprite", LoadSprite("icone_encaixe")), ("fittedSprite", LoadSprite("ui_check")),
                 ("validationSheet", validation.gameObject), ("validationHint", validationHint), ("checklistContainer", checklist),

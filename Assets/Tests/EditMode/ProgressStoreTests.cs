@@ -33,6 +33,23 @@ namespace MontAR.Tests
         }
 
         [Test]
+        public void SkippedSteps_RoundTrip_AndOldFilesLoadWithoutThem()
+        {
+            var progress = new SessionProgress { sessionId = "P07_X", participantCode = "P07", completedSteps = 3 };
+            progress.skippedSteps.Add(1);
+            store.Save(progress);
+
+            Assert.IsTrue(store.TryLoad(out SessionProgress loaded));
+            CollectionAssert.AreEqual(new[] { 1 }, loaded.skippedSteps);
+            Assert.AreEqual(1, loaded.SkippedCount);
+
+            // Arquivo salvo por uma versão anterior do app, sem o campo.
+            File.WriteAllText(store.FilePath, "{\"sessionId\":\"P07_X\",\"participantCode\":\"P07\",\"completedSteps\":3}");
+            Assert.IsTrue(store.TryLoad(out SessionProgress old));
+            Assert.AreEqual(0, old.SkippedCount);
+        }
+
+        [Test]
         public void SaveAndLoad_RoundTrips()
         {
             store.Save(new SessionProgress

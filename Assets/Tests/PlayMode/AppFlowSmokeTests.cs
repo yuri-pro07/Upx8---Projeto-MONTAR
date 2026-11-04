@@ -61,11 +61,24 @@ namespace MontAR.Tests
                 File.Delete(createdCsv);
         }
 
+        /// <summary>Tira a cena do app entre um teste e outro: sem ela, o AR Foundation para, e erros do XR Simulation não caem no próximo teste.</summary>
+        [UnityTearDown]
+        public IEnumerator UnloadAppScene()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Scene appScene = SceneManager.GetSceneByName("MontAR");
+            if (!appScene.isLoaded)
+                yield break;
+            SceneManager.SetActiveScene(SceneManager.CreateScene("Cena vazia do teste"));
+            yield return SceneManager.UnloadSceneAsync(appScene);
+        }
+
         [UnityTest]
         [Timeout(240000)]
         public IEnumerator DemoSession_FromWelcomeToCompletion()
         {
             // No Editor o XR Simulation pode falhar ao iniciar (Smart App Control): isso não é falha do app.
+            // Precisa ficar no corpo do teste: o Test Framework zera essa opção depois do [SetUp].
             LogAssert.ignoreFailingMessages = true;
             Directory.CreateDirectory(ScreensFolder);
 
@@ -257,7 +270,111 @@ namespace MontAR.Tests
             yield return Capture("16_historico");
         }
 
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator SkipStep_AdvancesWithoutValidation_AndIsMarkedEverywhere()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Directory.CreateDirectory(ScreensFolder);
+
+            SceneManager.LoadScene("MontAR");
+            yield return null;
+            yield return null;
+
+            app = Object.FindAnyObjectByType<AppController>();
+            flow = Object.FindAnyObjectByType<StepFlowController>();
+            for (float waited = 0f; !app.IsArChecked && waited < 12f; waited += Time.unscaledDeltaTime)
+                yield return null;
+
+            for (int i = 0; i < 10 && !(app.CurrentScreen is PartsScreen); i++)
+            {
+                Click("Botão Próximo");
+                yield return null;
+            }
+            yield return null;
+            Click("Botão Continuar");
+            yield return null;
+            Find<TMP_InputField>("Campo do código").text = "T02";
+            Click("Modo 3D");
+            Click("Botão Iniciar");
+            yield return null;
+            Assert.IsInstanceOf<AssemblyScreen>(app.CurrentScreen);
+            if (flow.Mode != GuidanceMode.Demo3D)
+            {
+                Click("Modo 3D");
+                yield return null;
+            }
+            int total = flow.ActiveSteps.Count;
+            yield return new WaitForSecondsRealtime(0.4f);
+            yield return Capture("17_pular_botao");
+
+            // "Ficar" não pula.
+            Click("Botão Pular etapa");
+            yield return null;
+            ConfirmDialog dialog = Object.FindAnyObjectByType<ConfirmDialog>();
+            Assert.IsNotNull(dialog, "o botão pede confirmação");
+            yield return Capture("18_pular_confirmacao");
+            dialog.Dismiss();
+            yield return null;
+            Assert.AreEqual(0, flow.Flow.CurrentIndex, "desistir fica na mesma etapa");
+
+            // Pular a primeira, validar a segunda e pular o resto, até a última.
+            yield return SkipCurrentStep();
+            Assert.AreEqual(1, flow.Flow.CurrentIndex);
+            Assert.AreEqual(1, flow.Flow.CompletedCount);
+
+            Click("Botão Validar");
+            yield return null;
+            Assert.IsFalse(flow.CanSkipStep, "com a validação aberta não dá para pular");
+            Assert.IsFalse(Find<RectTransform>("Painel da validação").GetComponentsInChildren<Button>(false).Any(b => b.name == "Botão Pular etapa"));
+            SetFirstItems(int.MaxValue);
+            Click("Botão Confirmar");
+            yield return null;
+            Assert.AreEqual(2, flow.Flow.CurrentIndex);
+
+            for (int guard = 0; guard < 20 && flow.Flow.IsRunning; guard++)
+                yield return SkipCurrentStep();
+            Assert.IsTrue(flow.Flow.IsFinished, "pular a última etapa termina a sessão");
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            // Conclusão: não diz que validou tudo.
+            Assert.IsInstanceOf<CompletionScreen>(app.CurrentScreen);
+            yield return Capture("19_pular_conclusao");
+            int skipped = total - 1;
+            string subtitle = app.CurrentScreen.GetComponentsInChildren<TMP_Text>(false).First(t => t.text.Contains("participante") || t.text.Contains("Participante")).text;
+            StringAssert.Contains($"1 de {total} etapas validadas e {skipped} puladas", subtitle);
+
+            // CSV: etapa pulada é step_skipped, nunca step_completed.
+            createdCsv = flow.MetricsFilePath;
+            string csv = File.ReadAllText(createdCsv);
+            Assert.AreEqual(skipped, csv.Split('\n').Count(line => line.Contains(",step_skipped,")));
+            Assert.AreEqual(1, csv.Split('\n').Count(line => line.Contains(",step_completed,")));
+            Assert.AreEqual(1, csv.Split('\n').Count(line => line.Contains(",validation_passed,")));
+            StringAssert.Contains("session_completed", csv);
+
+            // Histórico.
+            Click("Botão Histórico");
+            yield return null;
+            var saved = app.History.Load();
+            Assert.AreEqual(1, saved[0].completedSteps);
+            Assert.AreEqual(skipped, saved[0].skippedSteps);
+            Assert.IsTrue(saved[0].steps[0].skipped);
+            Assert.IsFalse(saved[0].steps[1].skipped);
+            yield return Capture("20_pular_historico");
+        }
+
         // ------------------------------------------------------------ utilitários
+
+        /// <summary>Toca em "Pular etapa" e confirma no diálogo.</summary>
+        private IEnumerator SkipCurrentStep()
+        {
+            Click("Botão Pular etapa");
+            yield return null;
+            ConfirmDialog dialog = Object.FindAnyObjectByType<ConfirmDialog>();
+            Assert.IsNotNull(dialog, "o botão pede confirmação");
+            dialog.GetComponentsInChildren<Button>(false).First(b => b.name == "Botão principal").onClick.Invoke();
+            yield return null;
+        }
 
         private T Find<T>(string objectName) where T : Component
         {

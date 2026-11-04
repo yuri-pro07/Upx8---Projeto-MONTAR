@@ -61,6 +61,63 @@ namespace MontAR.Tests
         }
 
         [Test]
+        public void Skip_WhileLocating_AdvancesWithoutValidation()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", "tapete"), new FakeStep("ram", "tapete"));
+            flow.Start();
+            Assert.AreEqual(StepPhase.Locating, flow.Phase, "o marcador ainda não foi achado");
+            events.Clear();
+
+            Assert.IsTrue(flow.SkipCurrentStep());
+
+            CollectionAssert.AreEqual(new[] { FlowEventType.StepSkipped, FlowEventType.StepStarted }, Types());
+            Assert.AreEqual("step_skipped", events[0].Type.ToCsvName());
+            Assert.AreEqual(0, events[0].StepIndex);
+            Assert.AreEqual("cpu", events[0].StepId);
+            Assert.AreEqual(1, flow.CurrentIndex);
+            Assert.AreEqual(1, flow.CompletedCount, "a retomada continua depois da etapa pulada");
+            Assert.AreEqual(StepPhase.Locating, flow.Phase, "a etapa seguinte volta a esperar o marcador");
+        }
+
+        [Test]
+        public void Skip_WhileValidating_IsRefused()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", ""), new FakeStep("ram", ""));
+            flow.Start();
+            Assert.IsTrue(flow.BeginValidation());
+            events.Clear();
+
+            Assert.IsFalse(flow.SkipCurrentStep());
+
+            Assert.IsEmpty(events);
+            Assert.AreEqual(0, flow.CurrentIndex);
+            Assert.AreEqual(StepPhase.Validating, flow.Phase);
+        }
+
+        [Test]
+        public void Skip_LastStep_FinishesSession_WithoutCompletingIt()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", ""));
+            flow.Start();
+            events.Clear();
+
+            Assert.IsTrue(flow.SkipCurrentStep());
+
+            CollectionAssert.AreEqual(new[] { FlowEventType.StepSkipped, FlowEventType.SessionCompleted }, Types());
+            Assert.IsTrue(flow.IsFinished);
+            Assert.IsFalse(flow.SkipCurrentStep(), "sem sessão em andamento não há o que pular");
+        }
+
+        [Test]
+        public void Skip_BeforeStart_IsRefused()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", ""));
+
+            Assert.IsFalse(flow.SkipCurrentStep());
+            Assert.IsFalse(flow.HasStarted);
+        }
+
+        [Test]
         public void Start_Twice_Throws()
         {
             StepFlow flow = CreateFlow(new FakeStep("a", ""));

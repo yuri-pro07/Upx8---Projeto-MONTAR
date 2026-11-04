@@ -84,6 +84,7 @@ namespace MontAR
             startScreen.Back += () => ShowParts();
             startScreen.StartRequested += OnStartRequested;
             assemblyScreen.ExitRequested += ConfirmExit;
+            assemblyScreen.SkipRequested += ConfirmSkip;
             assemblyScreen.ModeRequested += SetMode;
             completionScreen.NewSessionRequested += () =>
             {
@@ -300,6 +301,16 @@ namespace MontAR
                 "Ficar");
         }
 
+        private void ConfirmSkip()
+        {
+            dialog.Show(
+                "Pular esta etapa?",
+                "Use só em testes, quando faltar a peça. A etapa não é validada e fica marcada como pulada no resumo, no histórico e no CSV.",
+                "Pular",
+                () => flowController.SkipCurrentStep(),
+                "Ficar");
+        }
+
         private void OnBackPressed()
         {
             if (dialog.IsOpen)
@@ -363,7 +374,7 @@ namespace MontAR
             yield return new WaitForSecondsRealtime(completionDelaySeconds);
             SessionProgress progress = flowController.Progress;
             completionScreen.Bind(summary, flowController.ActiveSteps, progress != null ? progress.participantCode : "",
-                flowController.MetricsFilePath, progress != null ? progress.label : "");
+                flowController.MetricsFilePath, progress != null ? progress.label : "", progress != null ? progress.SkippedCount : 0);
             ShowScreen(completionScreen);
         }
 

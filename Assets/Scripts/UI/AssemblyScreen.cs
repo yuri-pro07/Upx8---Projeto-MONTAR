@@ -63,6 +63,8 @@ namespace MontAR
         [SerializeField] private TMP_Text errorLabel;
         [SerializeField] private Button validateButton;
         [SerializeField] private TMP_Text validateLabel;
+        [Tooltip("Pula a etapa sem validar, para testar sem todas as peças (StepFlowController.SkipStepsEnabled).")]
+        [SerializeField] private Button skipButton;
 
         [Header("Peças virtuais")]
         [Tooltip("Mostra a peça descendo até o lugar e a deixa montada (só com peças virtuais).")]
@@ -99,6 +101,7 @@ namespace MontAR
         private string validationError;
 
         public event Action ExitRequested;
+        public event Action SkipRequested;
         public event Action<GuidanceMode> ModeRequested;
 
         /// <summary>A validação está aberta (o botão voltar do Android fecha ela antes de sair).</summary>
@@ -124,6 +127,8 @@ namespace MontAR
                     controller.RequestValidation();
                 Refresh();
             });
+            if (skipButton != null)
+                skipButton.onClick.AddListener(() => SkipRequested?.Invoke());
             if (simulateButton != null)
             {
                 simulateButton.onClick.AddListener(() =>
@@ -202,6 +207,12 @@ namespace MontAR
                     if (flow != null && flowEvent.StepIndex + 1 < flow.StepCount)
                         toast.Show($"Etapa {flowEvent.StepIndex + 1} concluída!", 1.8f);
                     break;
+                case FlowEventType.StepSkipped:
+                    validationError = null;
+                    StepFlow skippedFlow = controller != null ? controller.Flow : null;
+                    if (skippedFlow != null && flowEvent.StepIndex + 1 < skippedFlow.StepCount)
+                        toast.Show($"Etapa {flowEvent.StepIndex + 1} pulada", 1.8f);
+                    break;
             }
 
             if (IsVisible)
@@ -251,6 +262,8 @@ namespace MontAR
             bool simulate = simulateButton != null && controller.SimulatedParts && controller.CurrentStepHasPiece;
             validateButton.interactable = flow.Phase == StepPhase.Guiding;
             validateLabel.text = locating ? (simulate ? "Validar etapa" : "Aponte para o marcador A") : hasError ? "Validar de novo" : "Validar etapa";
+            if (skipButton != null)
+                skipButton.gameObject.SetActive(controller.CanSkipStep);
             if (simulateButton != null)
             {
                 simulateButton.gameObject.SetActive(simulate);

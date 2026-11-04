@@ -134,6 +134,28 @@ namespace MontAR.Tests
         }
 
         [Test]
+        public void CreateEntry_MarksSkippedSteps_AndKeepsThemAfterReload()
+        {
+            var summary = new SessionSummary(() => 0);
+            summary.Record(new FlowEvent(FlowEventType.SessionStarted, -1, "", ""));
+            summary.Record(new FlowEvent(FlowEventType.StepStarted, 0, "cpu", ""));
+            summary.Record(new FlowEvent(FlowEventType.StepSkipped, 0, "cpu", ""));
+            summary.Record(new FlowEvent(FlowEventType.StepStarted, 1, "ram", ""));
+            summary.Record(new FlowEvent(FlowEventType.StepCompleted, 1, "ram", ""));
+            summary.Record(new FlowEvent(FlowEventType.SessionCompleted, -1, "", ""));
+            var progress = new SessionProgress { sessionId = "P01_X", participantCode = "P01" };
+            progress.skippedSteps.Add(0);
+
+            store.Add(AssemblyHistoryStore.CreateEntry(progress, summary, null, GuidanceMode.AugmentedReality, ""));
+            HistoryEntry entry = store.Load()[0];
+
+            Assert.AreEqual(1, entry.completedSteps, "a etapa pulada não conta como validada");
+            Assert.AreEqual(1, entry.skippedSteps);
+            Assert.IsTrue(entry.steps[0].skipped);
+            Assert.IsFalse(entry.steps[1].skipped);
+        }
+
+        [Test]
         public void DisplayName_WithoutLabel()
         {
             Assert.AreEqual("Montagem sem nome", Entry("A").DisplayName);

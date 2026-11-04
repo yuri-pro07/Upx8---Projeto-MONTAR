@@ -18,8 +18,13 @@ namespace MontAR
 
         public string procedureId;
 
-        /// <summary>Etapas já aprovadas; é o índice da próxima etapa a executar.</summary>
+        /// <summary>Etapas já aprovadas ou puladas; é o índice da próxima etapa a executar.</summary>
         public int completedSteps;
+
+        /// <summary>Índices das etapas puladas sem validar (teste sem todas as peças).</summary>
+        public List<int> skippedSteps = new List<int>();
+
+        public int SkippedCount => skippedSteps != null ? skippedSteps.Count : 0;
 
         public bool finished;
 

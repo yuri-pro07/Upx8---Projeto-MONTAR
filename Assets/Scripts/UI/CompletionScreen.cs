@@ -33,13 +33,16 @@ namespace MontAR
             historyButton.onClick.AddListener(() => HistoryRequested?.Invoke());
         }
 
-        public void Bind(SessionSummary summary, IReadOnlyList<AssemblyStep> steps, string participantCode, string csvPath, string label = "")
+        public void Bind(SessionSummary summary, IReadOnlyList<AssemblyStep> steps, string participantCode, string csvPath, string label = "", int skippedSteps = 0)
         {
             bool resumed = summary.StartedAtStep > 0;
             string who = string.IsNullOrEmpty(label) ? $"Participante {participantCode}" : $"<b>{label}</b> (participante {participantCode})";
+            string result = skippedSteps > 0
+                ? $"{steps.Count - skippedSteps} de {steps.Count} etapas validadas e {skippedSteps} {(skippedSteps == 1 ? "pulada" : "puladas")}"
+                : $"as {steps.Count} etapas foram validadas";
             subtitleLabel.text = resumed
-                ? $"{who}: as {steps.Count} etapas foram validadas (sessão retomada na etapa {summary.StartedAtStep + 1})."
-                : $"{who}: as {steps.Count} etapas foram validadas.";
+                ? $"{who}: {result} (sessão retomada na etapa {summary.StartedAtStep + 1})."
+                : $"{who}: {result}.";
 
             timeValue.text = SessionSummary.FormatDuration(summary.ElapsedSeconds);
             stepsValue.text = summary.CompletedSteps.ToString();
@@ -56,6 +59,8 @@ namespace MontAR
                     .Append("  <color=#71717A>").Append(SessionSummary.FormatDuration(timing.Seconds));
                 if (timing.FailedValidations > 0)
                     text.Append(timing.FailedValidations == 1 ? " · 1 reprovação" : $" · {timing.FailedValidations} reprovações");
+                if (timing.Skipped)
+                    text.Append(" · pulada");
                 text.Append("</color>");
             }
             stepTimesList.text = text.ToString();

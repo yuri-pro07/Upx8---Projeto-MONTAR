@@ -19,6 +19,9 @@ namespace MontAR
         public double Seconds { get; internal set; } = -1;
 
         public int FailedValidations { get; internal set; }
+
+        /// <summary>A etapa foi pulada sem validar.</summary>
+        public bool Skipped { get; internal set; }
     }
 
     /// <summary>
@@ -99,6 +102,14 @@ namespace MontAR
                     CompletedSteps++;
                     if (currentStep != null)
                         currentStep.Seconds = now - stepStartedAt;
+                    break;
+
+                case FlowEventType.StepSkipped:
+                    if (currentStep != null)
+                    {
+                        currentStep.Seconds = now - stepStartedAt;
+                        currentStep.Skipped = true;
+                    }
                     break;
 
                 case FlowEventType.ObserverIntervention:

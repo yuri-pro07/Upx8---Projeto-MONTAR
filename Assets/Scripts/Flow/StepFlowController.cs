@@ -13,6 +13,12 @@ namespace MontAR
     /// </summary>
     public class StepFlowController : MonoBehaviour
     {
+        /// <summary>
+        /// Liga o botão "Pular etapa", usado para testar sem todas as peças.
+        /// Desligar antes do congelamento do protótipo (09/11): no experimento, a etapa só avança validada.
+        /// </summary>
+        public const bool SkipStepsEnabled = true;
+
         [SerializeField] private AssemblyProcedure procedure;
         [SerializeField] private ImageTrackingController imageTracking;
         [SerializeField] private ARContentManager contentManager;
@@ -72,6 +78,9 @@ namespace MontAR
         /// <summary>Dá para simular o encaixe agora: peças virtuais, etapa em Guia, com peça e ainda não encaixada.</summary>
         public bool CanSimulateFit => simulatedParts && flow != null && flow.IsRunning && flow.Phase == StepPhase.Guiding
             && !fittedSteps.Contains(flow.CurrentIndex) && CurrentStepHasPiece;
+
+        /// <summary>Dá para pular a etapa agora: na RA e no 3D, com ou sem o marcador, fora da validação.</summary>
+        public bool CanSkipStep => SkipStepsEnabled && flow != null && flow.IsRunning && flow.Phase != StepPhase.Validating;
 
         private void Awake()
         {
@@ -198,6 +207,9 @@ namespace MontAR
 
         public bool CancelValidation() => flow != null && flow.CancelValidation();
 
+        /// <summary>Botão "Pular etapa": avança sem validar e deixa a etapa marcada como pulada.</summary>
+        public bool SkipCurrentStep() => CanSkipStep && flow.SkipCurrentStep();
+
         /// <summary>Botão discreto do observador (alimenta a taxa de conclusão sem intervenção).</summary>
         public bool RegisterObserverIntervention(string detail = "") =>
             flow != null && flow.RegisterObserverIntervention(detail);
@@ -238,14 +250,17 @@ namespace MontAR
                 imageTracking.ReferenceLost += OnReferenceLost;
             }
 
-            // Peças virtuais: as etapas já validadas (retomada) começam com a peça encaixada.
+            // Peças virtuais: as etapas já validadas (retomada) começam com a peça encaixada; as puladas, não.
             ClearFitted();
             if (contentManager != null)
                 contentManager.SetSimulated(simulatedParts);
             if (simulatedParts)
             {
                 for (int i = 0; i < fromIndex; i++)
-                    Fit(i, false);
+                {
+                    if (progress.skippedSteps == null || !progress.skippedSteps.Contains(i))
+                        Fit(i, false);
+                }
             }
 
             progressStore.Save(progress);
@@ -326,6 +341,14 @@ namespace MontAR
                     // Validou sem simular: a peça entra na placa virtual do mesmo jeito.
                     if (simulatedParts)
                         Fit(flowEvent.StepIndex, true);
+                    break;
+
+                case FlowEventType.StepSkipped:
+                    progress.completedSteps = flow.CompletedCount;
+                    if (progress.skippedSteps == null)
+                        progress.skippedSteps = new List<int>();
+                    progress.skippedSteps.Add(flowEvent.StepIndex);
+                    progressStore.Save(progress);
                     break;
 
                 case FlowEventType.SessionCompleted:

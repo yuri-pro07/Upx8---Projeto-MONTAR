@@ -30,6 +30,7 @@ namespace MontAR
         [SerializeField] private AssemblyScreen assemblyScreen;
         [SerializeField] private CompletionScreen completionScreen;
         [SerializeField] private HistoryScreen historyScreen;
+        [SerializeField] private StudyScreen studyScreen;
         [SerializeField] private ConfirmDialog dialog;
         [SerializeField] private Toast toast;
 
@@ -44,6 +45,12 @@ namespace MontAR
         [Tooltip("Espera antes da tela de conclusão, para o aviso da última etapa aparecer.")]
         [SerializeField] private float completionDelaySeconds = 0.9f;
 
+        [Header("Estudo do PC")]
+        [SerializeField] private StudyStage studyStage;
+
+        private const string AssemblyCameraExplanation = "A RA usa a câmera para achar o marcador A do tapete e mostrar a peça fantasma sobre a placa. Nada é gravado nem enviado.";
+        private const string StudyCameraExplanation = "O Estudo do PC usa a câmera para achar a mesa e colocar o computador em 3D sobre ela. Nada é gravado nem enviado.";
+
         private PartSelection selection;
         private SessionSummary summary;
         private AssemblyHistoryStore historyStore;
@@ -51,6 +58,7 @@ namespace MontAR
         private UiScreen historyReturn;
         private string lastHistorySessionId;
         private bool askingCamera;
+        private bool studyPrefersCamera = true;
         private GuidanceMode preferredMode = GuidanceMode.AugmentedReality;
         private bool arAvailable;
         private bool arChecked;
@@ -67,7 +75,7 @@ namespace MontAR
         /// <summary>Histórico de montagens deste aparelho.</summary>
         public AssemblyHistoryStore History => historyStore;
 
-        private UiScreen[] Screens => new UiScreen[] { welcomeScreen, partsScreen, startScreen, assemblyScreen, completionScreen, historyScreen };
+        private UiScreen[] Screens => new UiScreen[] { welcomeScreen, partsScreen, startScreen, assemblyScreen, completionScreen, historyScreen, studyScreen };
 
         private void Awake()
         {
@@ -81,6 +89,10 @@ namespace MontAR
             partsScreen.Continued += () => ShowStart();
             partsScreen.Back += () => ShowScreen(welcomeScreen);
             partsScreen.HistoryRequested += () => ShowHistory(partsScreen);
+            partsScreen.StudyRequested += OpenStudy;
+            studyScreen.Bind(studyStage);
+            studyScreen.ExitRequested += CloseStudy;
+            studyScreen.ModeRequested += SetStudyCamera;
             startScreen.Back += () => ShowParts();
             startScreen.StartRequested += OnStartRequested;
             assemblyScreen.ExitRequested += ConfirmExit;
@@ -216,7 +228,7 @@ namespace MontAR
         /// Antes de usar a RA, explica para que serve a câmera e abre o pedido do sistema.
         /// Sem permissão, segue na demonstração 3D.
         /// </summary>
-        private void WithCameraFor(GuidanceMode mode, System.Action then)
+        private void WithCameraFor(GuidanceMode mode, System.Action then, string explanation = AssemblyCameraExplanation)
         {
             if (mode != GuidanceMode.AugmentedReality || !arAvailable || CameraPermission.IsGranted)
             {
@@ -230,8 +242,7 @@ namespace MontAR
             askingCamera = true;
             dialog.Show(
                 "Permitir o uso da câmera?",
-                "A RA usa a câmera para achar o marcador A do tapete e mostrar a peça fantasma sobre a placa. "
-                + "Nada é gravado nem enviado.\n\n" + CameraPermission.SystemPromptHint,
+                explanation + "\n\n" + CameraPermission.SystemPromptHint,
                 "Continuar",
                 () => CameraPermission.Request(result =>
                 {
@@ -328,6 +339,8 @@ namespace MontAR
                 ShowScreen(welcomeScreen);
             else if (current == startScreen)
                 ShowParts();
+            else if (current == studyScreen)
+                studyScreen.HandleBack();
             else if (current == assemblyScreen)
             {
                 if (assemblyScreen.IsValidating)
@@ -335,6 +348,48 @@ namespace MontAR
                 else
                     ConfirmExit();
             }
+        }
+
+        // ------------------------------------------------------------ estudo do PC
+
+        private void OpenStudy()
+        {
+            bool wantCamera = arAvailable && studyPrefersCamera;
+            WithCameraFor(wantCamera ? GuidanceMode.AugmentedReality : GuidanceMode.Demo3D,
+                () => BeginStudy(wantCamera && CameraPermission.IsGranted), StudyCameraExplanation);
+        }
+
+        private void BeginStudy(bool useCamera)
+        {
+            EnableArSession(useCamera);
+            studyScreen.SetArAvailable(arAvailable);
+            ShowScreen(studyScreen);
+            studyScreen.Begin(useCamera);
+            ApplyView();
+        }
+
+        private void CloseStudy()
+        {
+            studyScreen.End();
+            ShowParts();
+        }
+
+        private void SetStudyCamera(bool useCamera)
+        {
+            studyPrefersCamera = useCamera;
+            if (useCamera && !CameraPermission.IsGranted)
+            {
+                WithCameraFor(GuidanceMode.AugmentedReality, () => ApplyStudyCamera(CameraPermission.IsGranted), StudyCameraExplanation);
+                return;
+            }
+            ApplyStudyCamera(useCamera);
+        }
+
+        private void ApplyStudyCamera(bool useCamera)
+        {
+            EnableArSession(useCamera);
+            studyScreen.SetCameraMode(useCamera);
+            ApplyView();
         }
 
         // ------------------------------------------------------------ montagem
@@ -409,14 +464,14 @@ namespace MontAR
         }
 
         /// <summary>
-        /// Câmera da RA só na montagem em modo RA. Na demonstração 3D, a câmera da bancada virtual.
-        /// Nos menus, a câmera da bancada só limpa o fundo (bancada escondida).
+        /// Câmera da RA só na montagem em modo RA e no estudo com câmera. Na demonstração 3D, a câmera da
+        /// bancada virtual. Nos menus, a câmera da bancada só limpa o fundo (bancada escondida).
         /// </summary>
         private void ApplyView()
         {
             bool assembling = current == assemblyScreen;
             bool demo = assembling && flowController.Mode == GuidanceMode.Demo3D;
-            bool ar = assembling && !demo;
+            bool ar = (assembling && !demo) || (current == studyScreen && studyScreen.UsesCamera);
 
             if (arCamera != null)
                 arCamera.enabled = ar;
@@ -468,6 +523,7 @@ namespace MontAR
             Debug.Log($"[MontAR] RA {(arAvailable ? "disponível" : "indisponível")} (ARSession: {state}).");
             startScreen.SetArAvailable(arAvailable);
             assemblyScreen.SetArAvailable(arAvailable);
+            studyScreen.SetArAvailable(arAvailable);
 
             if (!arAvailable && flowController.Mode == GuidanceMode.AugmentedReality && flowController.HasSession)
                 SetMode(GuidanceMode.Demo3D);

@@ -19,6 +19,8 @@ namespace MontAR
         [SerializeField] private Button backButton;
         [Tooltip("Abre o histórico de montagens do aparelho. Opcional.")]
         [SerializeField] private Button historyButton;
+        [Tooltip("Aba que abre o Estudo do PC.")]
+        [SerializeField] private Button studyButton;
         [SerializeField] private ScrollRect scrollRect;
 
         private readonly List<PartRowView> rows = new List<PartRowView>();
@@ -28,9 +30,12 @@ namespace MontAR
         public event Action Continued;
         public event Action Back;
         public event Action HistoryRequested;
+        public event Action StudyRequested;
 
         private void Awake()
         {
+            if (studyButton != null)
+                studyButton.onClick.AddListener(() => StudyRequested?.Invoke());
             continueButton.onClick.AddListener(() => Continued?.Invoke());
             backButton.onClick.AddListener(() => Back?.Invoke());
             if (historyButton != null)

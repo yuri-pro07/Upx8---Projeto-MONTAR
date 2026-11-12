@@ -6,6 +6,7 @@ using MontAR.Dev;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -33,6 +34,9 @@ namespace MontAR.EditorTools
         public const string TmpSettingsPath = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
         public const string UiRootName = "MontAR UI";
         public const string StageRootName = "Demonstração 3D";
+        public const string StudyRootName = "Estudo do PC";
+        public const string StudyContentPath = "Assets/Data/Estudo/estudo_pc.json";
+        private const string StudyMaterialsFolder = "Assets/Materials/Estudo";
         private const float StageDepth = -100f;
 
         // ------------------------------------------------------------ menus
@@ -367,10 +371,11 @@ namespace MontAR.EditorTools
             AssemblyScreen assembly = BuildAssembly(screens);
             CompletionScreen completion = BuildCompletion(screens);
             HistoryScreen history = BuildHistory(screens);
+            StudyScreen study = BuildStudy(screens);
             BuildToast(root.transform);
             ConfirmDialog dialog = BuildDialog(root.transform);
 
-            foreach (UiScreen screen in new UiScreen[] { welcome, parts, start, assembly, completion, history })
+            foreach (UiScreen screen in new UiScreen[] { welcome, parts, start, assembly, completion, history, study })
                 screen.gameObject.SetActive(false);
             dialog.gameObject.SetActive(false);
 
@@ -537,8 +542,15 @@ namespace MontAR.EditorTools
         {
             RectTransform content = ScreenRoot(parent, "Tela 2 - Peças", out PartsScreen screen);
             VLayout(content.gameObject, null, 0f);
-            Header(content, "Escolha as peças", "Use ‹ › para trocar o modelo (ex.: Intel ou AMD). O roteiro se ajusta ao que você marcar.", out Button back,
+            RectTransform header = Header(content, "Escolha as peças", "Use ‹ › para trocar o modelo (ex.: Intel ou AMD). O roteiro se ajusta ao que você marcar.", out Button back,
                 "Histórico ›", out Button history);
+
+            // Abas: "Montar" é esta tela; "Estudar PC" abre o estudo em RA.
+            RectTransform tabs = Segmented(header, "Abas", "Aba Montar", "Montar", "Aba Estudar PC", "Estudar PC",
+                out Button mountTab, out TextMeshProUGUI mountLabel, out Button studyTab, out _, 104f, 34f);
+            tabs.SetSiblingIndex(1);
+            ((Image)mountTab.targetGraphic).color = UiTheme.Primary;
+            mountLabel.color = UiTheme.TextOnPrimary;
 
             RectTransform list = Scroll(content, "Lista de peças", Pad(32, 32, 8, 40), 20f, out ScrollRect scroll);
             PartRowView row = BuildPartRow(list);
@@ -548,8 +560,184 @@ namespace MontAR.EditorTools
             Button next = MakeButton(footer, "Botão Continuar", "Continuar", ButtonStyle.Primary, out _, 132f);
 
             Bind(screen, ("listContainer", list), ("rowTemplate", row), ("summaryLabel", summary), ("continueButton", next),
-                ("backButton", back), ("historyButton", history), ("scrollRect", scroll));
+                ("backButton", back), ("historyButton", history), ("studyButton", studyTab), ("scrollRect", scroll));
             return screen;
+        }
+
+        private static StudyScreen BuildStudy(Transform parent)
+        {
+            RectTransform root = Stretch(Node("Tela 7 - Estudo do PC", parent));
+            root.gameObject.AddComponent<CanvasGroup>();
+            var screen = root.gameObject.AddComponent<StudyScreen>();
+
+            RectTransform surface = Stretch(Node("Superfície do estudo", root));
+            Img(surface.gameObject, new Color(0f, 0f, 0f, 0f));
+            var input = surface.gameObject.AddComponent<StudyInput>();
+
+            // Pinos numerados: acompanham as peças na tela, atrás dos cartões.
+            RectTransform pinsLayer = Stretch(Node("Pinos das peças", root));
+            RectTransform pinRect = Node("Pino", pinsLayer);
+            pinRect.anchorMin = pinRect.anchorMax = new Vector2(0.5f, 0.5f);
+            pinRect.sizeDelta = new Vector2(84f, 84f);
+            RectTransform pinHalo = Stretch(Node("Halo", pinRect), -22f, -22f, -22f, -22f);
+            Img(pinHalo.gameObject, new Color(UiTheme.Primary.r, UiTheme.Primary.g, UiTheme.Primary.b, 0.5f), Halo).raycastTarget = false;
+            Image pinDisc = Img(pinRect.gameObject, UiTheme.GlassTintDeep, Circle);
+            Decorate(pinRect, 42f, UiTheme.Primary, null, true);
+            var pinButton = pinRect.gameObject.AddComponent<Button>();
+            pinButton.targetGraphic = pinDisc;
+            TextMeshProUGUI pinNumber = Label(pinRect, "Número", "1", 36f, UiTheme.TextOnDark, FontStyles.Bold, TextAlignmentOptions.Center);
+            Stretch(pinNumber.rectTransform);
+            var pin = pinRect.gameObject.AddComponent<StudyPinView>();
+            Bind(pin, ("button", pinButton), ("numberLabel", pinNumber), ("halo", pinHalo));
+
+            RectTransform safe = Stretch(Node("Área segura", root));
+            safe.gameObject.AddComponent<SafeAreaFitter>();
+
+            // Topo: título, situação e a troca Câmera/3D; embaixo, a dica do momento.
+            RectTransform topArea = TopBand(Node("Topo do estudo", safe), 24f, 300f, 24f, 24f);
+            VLayout(topArea.gameObject, null, 14f);
+            FitHeight(topArea.gameObject);
+
+            RectTransform top = Node("Topo", topArea);
+            Glass(top.gameObject, 44f, true);
+            HLayout(top.gameObject, Pad(26, 26, 22, 22), 20f, TextAnchor.MiddleLeft);
+            Layout(top.gameObject, preferredHeight: 136f, minHeight: 136f);
+            Button exit = IconButton(top, "Botão Sair", "×", null, new Color(1f, 1f, 1f, 0.1f), UiTheme.TextOnDark, 88f, 54f, out _);
+            RectTransform titles = Node("Textos", top);
+            VLayout(titles.gameObject, null, 0f, TextAnchor.MiddleLeft);
+            Layout(titles.gameObject, flexibleWidth: 1f);
+            Title(titles, "Título", "Estudo do PC", 42f).textWrappingMode = TextWrappingModes.NoWrap;
+            TextMeshProUGUI status = Label(titles, "Situação", "Procurando a mesa", 26f, UiTheme.TextOnDarkMuted);
+            status.textWrappingMode = TextWrappingModes.NoWrap;
+            status.overflowMode = TextOverflowModes.Ellipsis;
+
+            RectTransform modes = Node("Modo", top);
+            Fill(modes.gameObject, new Color(0f, 0f, 0f, 0.28f), 40f, UiTheme.GlassBorder);
+            HLayout(modes.gameObject, Pad(6), 6f, TextAnchor.MiddleCenter);
+            Layout(modes.gameObject, preferredHeight: 84f, preferredWidth: 300f, minWidth: 300f);
+            Button ar = MakeButton(modes, "Modo RA", "Câmera", ButtonStyle.Segment, out TextMeshProUGUI arLabel, 72f, 26f);
+            Layout(ar.gameObject, preferredHeight: 72f, flexibleWidth: 1f, preferredWidth: 0f);
+            Button demo = MakeButton(modes, "Modo 3D", "3D", ButtonStyle.Segment, out TextMeshProUGUI demoLabel, 72f, 26f);
+            Layout(demo.gameObject, preferredHeight: 72f, flexibleWidth: 1f, preferredWidth: 0f);
+
+            RectTransform hint = Node("Dica", topArea);
+            Image hintBackground = Card(hint.gameObject, UiTheme.StatusLocating, 30f);
+            hintBackground.raycastTarget = false;
+            HLayout(hint.gameObject, Pad(28, 28, 16, 16), 0f, TextAnchor.MiddleCenter);
+            Layout(hint.gameObject, minHeight: 76f);
+            TextMeshProUGUI hintLabel = Label(hint, "Texto", "Aponte para a mesa", 28f, UiTheme.TextOnDark, FontStyles.Bold, TextAlignmentOptions.Center);
+            Layout(hintLabel.gameObject, flexibleWidth: 1f);
+
+            // Visão geral: a lista das peças, na ordem da montagem, e as ferramentas.
+            RectTransform overview = BottomBand(Node("Painel das peças", safe), 24f, 24f, 24f);
+            Glass(overview.gameObject, 52f, true);
+            VLayout(overview.gameObject, Pad(30, 30, 30, 30), 16f);
+            FitHeight(overview.gameObject);
+            Label(overview, "Legenda", "Peças, na ordem da montagem", 28f, UiTheme.TextOnDarkMuted);
+            RectTransform chips = HorizontalScroll(overview, "Lista de peças", 100f, 14f);
+            Button chip = MakeButton(chips, "Chip", "1  Peça", ButtonStyle.Secondary, out _, 100f, 32f);
+            Layout(chip.gameObject, preferredHeight: 100f, minHeight: 100f, preferredWidth: 220f);
+            RectTransform tools = Node("Ferramentas", overview);
+            HLayout(tools.gameObject, null, 16f, TextAnchor.MiddleCenter);
+            Layout(tools.gameObject, preferredHeight: 108f);
+            Button explode = IconTextButton(tools, "Botão Separar", "Separar peças", LoadSprite("icone_cubo"), ButtonStyle.Primary, out TextMeshProUGUI explodeLabel, out _, 108f, 34f);
+            Layout(explode.gameObject, preferredHeight: 108f, minHeight: 108f, flexibleWidth: 1f, preferredWidth: 0f);
+            Button reposition = MakeButton(tools, "Botão Recolocar", "Recolocar", ButtonStyle.Secondary, out _, 108f, 34f);
+            Layout(reposition.gameObject, preferredHeight: 108f, minHeight: 108f, preferredWidth: 300f);
+
+            // Peça aberta: o que faz, como encaixa, a ordem e os detalhes. A altura vem da tela.
+            RectTransform sheet = Node("Painel da peça", safe);
+            sheet.anchorMin = new Vector2(0f, 0f);
+            sheet.anchorMax = new Vector2(1f, 0f);
+            sheet.pivot = new Vector2(0.5f, 0f);
+            sheet.offsetMin = new Vector2(24f, 24f);
+            sheet.offsetMax = new Vector2(-24f, 24f);
+            Glass(sheet.gameObject, 52f, true);
+            VLayout(sheet.gameObject, Pad(40, 40, 32, 32), 18f);
+
+            RectTransform head = Node("Cabeçalho", sheet);
+            HLayout(head.gameObject, null, 24f, TextAnchor.MiddleLeft);
+            Layout(head.gameObject, preferredHeight: 112f, minHeight: 112f);
+            RectTransform number = Node("Número", head);
+            Img(number.gameObject, UiTheme.Primary, Circle).raycastTarget = false;
+            Layout(number.gameObject, preferredHeight: 92f, preferredWidth: 92f, minHeight: 92f, minWidth: 92f);
+            TextMeshProUGUI numberLabel = Label(number, "Texto", "1", 42f, UiTheme.TextOnPrimary, FontStyles.Bold, TextAlignmentOptions.Center);
+            Stretch(numberLabel.rectTransform);
+            RectTransform partTitles = Node("Textos", head);
+            VLayout(partTitles.gameObject, null, 0f, TextAnchor.MiddleLeft);
+            Layout(partTitles.gameObject, flexibleWidth: 1f);
+            TextMeshProUGUI partName = Title(partTitles, "Nome", "Peça", 46f);
+            partName.textWrappingMode = TextWrappingModes.NoWrap;
+            partName.overflowMode = TextOverflowModes.Ellipsis;
+            TextMeshProUGUI partOrder = Label(partTitles, "Ordem", "Etapa 1 de 9", 28f, UiTheme.TextAccent, FontStyles.Bold);
+            Button close = IconButton(head, "Botão Fechar", "×", null, new Color(1f, 1f, 1f, 0.1f), UiTheme.TextOnDark, 84f, 52f, out _);
+
+            RectTransform body = Scroll(sheet, "Texto da peça", Pad(0, 12, 4, 12), 16f, out ScrollRect sheetScroll);
+            TextMeshProUGUI tagline = Label(body, "Resumo", "Resumo", 36f, UiTheme.TextPrimary, FontStyles.Bold);
+            Label(body, "Título o que faz", "O que faz", 28f, UiTheme.TextAccent, FontStyles.Bold);
+            TextMeshProUGUI what = Label(body, "O que faz", "", 33f, UiTheme.TextSecondary);
+            what.lineSpacing = 8f;
+            Label(body, "Título como encaixa", "Como encaixa", 28f, UiTheme.TextAccent, FontStyles.Bold);
+            TextMeshProUGUI how = Label(body, "Como encaixa", "", 33f, UiTheme.TextSecondary);
+            how.lineSpacing = 8f;
+            RectTransform details = Node("Detalhes", body);
+            VLayout(details.gameObject, Pad(0, 0, 16, 0), 0f);
+            TextMeshProUGUI detailsLabel = Label(details, "Texto", "", 32f, UiTheme.TextSecondary);
+            detailsLabel.lineSpacing = 8f;
+            details.gameObject.SetActive(false);
+
+            RectTransform actions = Node("Ações", sheet);
+            HLayout(actions.gameObject, null, 14f, TextAnchor.MiddleCenter);
+            Layout(actions.gameObject, preferredHeight: 112f, minHeight: 112f);
+            Button previous = IconButton(actions, "Peça anterior", "‹", null, new Color(1f, 1f, 1f, 0.1f), UiTheme.TextOnDark, 104f, 60f, out _);
+            Button more = MakeButton(actions, "Botão Mais detalhes", "Mais detalhes", ButtonStyle.Secondary, out TextMeshProUGUI moreLabel, 112f, 32f);
+            Layout(more.gameObject, preferredHeight: 112f, minHeight: 112f, flexibleWidth: 1f, preferredWidth: 0f);
+            Button fit = MakeButton(actions, "Botão Ver encaixe", "Ver encaixe", ButtonStyle.Primary, out _, 112f, 32f);
+            Layout(fit.gameObject, preferredHeight: 112f, minHeight: 112f, flexibleWidth: 1f, preferredWidth: 0f);
+            Button next = IconButton(actions, "Próxima peça", "›", null, new Color(1f, 1f, 1f, 0.1f), UiTheme.TextOnDark, 104f, 60f, out _);
+
+            Bind(screen,
+                ("contentAsset", AssetDatabase.LoadAssetAtPath<TextAsset>(StudyContentPath)), ("surface", input),
+                ("exitButton", exit), ("statusLabel", status), ("topArea", topArea),
+                ("modeArButton", ar), ("modeArBackground", ar.targetGraphic), ("modeArLabel", arLabel),
+                ("modeDemoButton", demo), ("modeDemoBackground", demo.targetGraphic), ("modeDemoLabel", demoLabel),
+                ("hintChip", hint.gameObject), ("hintBackground", hintBackground), ("hintLabel", hintLabel),
+                ("pinsLayer", pinsLayer), ("pinTemplate", pin),
+                ("overviewCard", overview), ("chipsContainer", chips), ("chipTemplate", chip),
+                ("explodeButton", explode), ("explodeLabel", explodeLabel), ("repositionButton", reposition),
+                ("partSheet", sheet), ("partNumberLabel", numberLabel), ("partNameLabel", partName), ("partOrderLabel", partOrder),
+                ("taglineLabel", tagline), ("whatLabel", what), ("howLabel", how), ("detailsGroup", details.gameObject), ("detailsLabel", detailsLabel),
+                ("sheetScroll", sheetScroll), ("closeButton", close), ("detailsButton", more), ("detailsButtonLabel", moreLabel), ("fitButton", fit),
+                ("previousButton", previous), ("nextButton", next));
+            return screen;
+        }
+
+        /// <summary>Lista que rola na horizontal. Devolve o Content, com HorizontalLayoutGroup.</summary>
+        private static RectTransform HorizontalScroll(Transform parent, string name, float height, float spacing)
+        {
+            RectTransform root = Node(name, parent);
+            Layout(root.gameObject, preferredHeight: height, minHeight: height);
+            var scrollRect = root.gameObject.AddComponent<ScrollRect>();
+            scrollRect.vertical = false;
+            scrollRect.movementType = ScrollRect.MovementType.Elastic;
+
+            RectTransform viewport = Stretch(Node("Viewport", root));
+            viewport.gameObject.AddComponent<RectMask2D>();
+            Img(viewport.gameObject, new Color(1f, 1f, 1f, 0f)).raycastTarget = true;
+
+            RectTransform content = Node("Conteúdo", viewport);
+            content.anchorMin = new Vector2(0f, 0f);
+            content.anchorMax = new Vector2(0f, 1f);
+            content.pivot = new Vector2(0f, 0.5f);
+            content.offsetMin = Vector2.zero;
+            content.offsetMax = Vector2.zero;
+            HLayout(content.gameObject, null, spacing, TextAnchor.MiddleLeft);
+            var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            scrollRect.viewport = viewport;
+            scrollRect.content = content;
+            return content;
         }
 
         private static PartRowView BuildPartRow(Transform parent)
@@ -1060,7 +1248,7 @@ namespace MontAR.EditorTools
 
             foreach (GameObject rootObject in scene.GetRootGameObjects())
             {
-                if (rootObject.name == UiRootName || rootObject.name == StageRootName)
+                if (rootObject.name == UiRootName || rootObject.name == StageRootName || rootObject.name == StudyRootName)
                     Object.DestroyImmediate(rootObject);
             }
 
@@ -1106,6 +1294,8 @@ namespace MontAR.EditorTools
             arSession.enabled = false;
             EditorUtility.SetDirty(arSession);
 
+            StudyStage studyStage = BuildStudyStage(arCamera, stage.StageCamera);
+
             Bind(flow, ("procedure", procedure), ("imageTracking", tracking), ("contentManager", content), ("demoStage", stage), ("metricsLogger", logger));
             Bind(ui.GetComponentInChildren<DemoOrbitInput>(true), ("stage", stage));
             Bind(ui.GetComponentInChildren<AssemblyScreen>(true), ("demoStage", stage));
@@ -1117,6 +1307,7 @@ namespace MontAR.EditorTools
                 ("assemblyScreen", ui.GetComponentInChildren<AssemblyScreen>(true)),
                 ("completionScreen", ui.GetComponentInChildren<CompletionScreen>(true)),
                 ("historyScreen", ui.GetComponentInChildren<HistoryScreen>(true)),
+                ("studyScreen", ui.GetComponentInChildren<StudyScreen>(true)), ("studyStage", studyStage),
                 ("dialog", ui.GetComponentInChildren<ConfirmDialog>(true)),
                 ("toast", ui.transform.Find("Aviso").GetComponent<Toast>()),
                 ("diagnosticsHud", hud),
@@ -1211,6 +1402,59 @@ namespace MontAR.EditorTools
                 ("assembly", assembly));
             bench.SetActive(false);
             return stage;
+        }
+
+        /// <summary>Palco do Estudo do PC. A detecção de planos fica desligada: só o estudo a usa, e a montagem não muda.</summary>
+        private static StudyStage BuildStudyStage(Camera arCamera, Camera stageCamera)
+        {
+            XROrigin origin = Object.FindAnyObjectByType<XROrigin>();
+            if (origin == null)
+                throw new InvalidOperationException("XR Origin não encontrado na cena.");
+
+            ARPlaneManager planes = GetOrAdd<ARPlaneManager>(origin.gameObject);
+            planes.requestedDetectionMode = UnityEngine.XR.ARSubsystems.PlaneDetectionMode.Horizontal;
+            planes.enabled = false;
+            ARRaycastManager raycasts = GetOrAdd<ARRaycastManager>(origin.gameObject);
+            raycasts.enabled = false;
+            EditorUtility.SetDirty(origin.gameObject);
+
+            Light mainLight = Array.Find(Object.FindObjectsByType<Light>(FindObjectsSortMode.None), l => l.type == LightType.Directional);
+            var boardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(MontagemPreviewBuilder.BoardPrefabPath);
+
+            var root = new GameObject(StudyRootName);
+            var stage = root.AddComponent<StudyStage>();
+            Bind(stage, ("arCamera", arCamera), ("stageCamera", stageCamera), ("mainLight", mainLight), ("planeManager", planes), ("raycastManager", raycasts),
+                ("opaqueMaterial", StudyOpaqueMaterial()), ("transparentMaterial", StudyTransparentMaterial()), ("boardPrefab", boardPrefab));
+            return stage;
+        }
+
+        /// <summary>Lit com emissão ligada: sem um material assim no build, a variante do shader é removida e o RGB não acende.</summary>
+        private static Material StudyOpaqueMaterial()
+        {
+            string path = StudyMaterialsFolder + "/Estudo_Peca.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material != null)
+                return material;
+
+            EnsureFolder(StudyMaterialsFolder);
+            material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            material.EnableKeyword("_EMISSION");
+            material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            material.SetColor("_EmissionColor", Color.black);
+            AssetDatabase.CreateAsset(material, path);
+            return material;
+        }
+
+        private static Material StudyTransparentMaterial()
+        {
+            string path = StudyMaterialsFolder + "/Estudo_Transparente.mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material != null)
+                return material;
+
+            EnsureFolder(StudyMaterialsFolder);
+            AssetDatabase.CopyAsset("Assets/Materials/Overlay_Fantasma.mat", path);
+            return AssetDatabase.LoadAssetAtPath<Material>(path);
         }
 
         /// <summary>Material de base das peças virtuais encaixadas (a cor de cada peça muda em tempo de execução).</summary>

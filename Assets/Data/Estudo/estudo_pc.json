@@ -1,0 +1,162 @@
+{
+  "parts": [
+    {
+      "id": "placa_mae",
+      "name": "Placa-mãe",
+      "shortName": "Placa-mãe",
+      "sequence": 1,
+      "orderLabel": "Etapa 1 de 9 da montagem",
+      "tagline": "A central que liga todas as peças",
+      "whatItDoes": "É a placa principal do computador. Leva energia e dados entre o processador, a memória, o armazenamento, a placa de vídeo e as portas USB, de som e de rede.",
+      "howItFits": "No MontAR ela fica deitada no tapete, com o painel traseiro para a esquerda. Num gabinete, a placa é presa com parafusos sobre os espaçadores, sem encostar no metal.",
+      "details": [
+        { "title": "Formato ATX", "text": "Este modelo é ATX, com 305 x 244 mm. Existem formatos menores, como micro-ATX e mini-ITX, que cabem em gabinetes menores, mas têm menos slots." },
+        { "title": "Soquete", "text": "O soquete define qual processador serve na placa: LGA1700 para Intel de 12ª a 14ª geração e AM5 para AMD Ryzen 7000 em diante." },
+        { "title": "VRM", "text": "Os blocos em volta do soquete regulam a energia entregue ao processador. Eles esquentam bastante, por isso costumam ter dissipadores." },
+        { "title": "Cuidado", "text": "Antes de pegar a placa, descarregue a estática tocando numa parte metálica aterrada. Nunca monte sobre superfície metálica: pode causar curto." }
+      ]
+    },
+    {
+      "id": "cpu",
+      "name": "Processador (CPU)",
+      "shortName": "CPU",
+      "sequence": 2,
+      "orderLabel": "Etapa 2 de 9 da montagem",
+      "tagline": "O cérebro que executa os programas",
+      "whatItDoes": "Executa as instruções dos programas e faz os cálculos do computador. Tudo o que você abre passa por ele.",
+      "howItFits": "Levante a alavanca e abra a moldura do soquete. Segure a CPU pelas bordas, alinhe o triângulo dourado com a marca do soquete e apoie sem empurrar. Feche a moldura e trave a alavanca.",
+      "details": [
+        { "title": "Núcleos e threads", "text": "Cada núcleo trabalha numa tarefa. Threads são as linhas de trabalho que o processador consegue tocar ao mesmo tempo. Mais núcleos ajudam quando há muito para fazer em paralelo." },
+        { "title": "Frequência", "text": "Medida em GHz, indica quantos ciclos o processador faz por segundo. Só dá para comparar GHz entre modelos parecidos: a arquitetura também pesa muito." },
+        { "title": "Onde ficam os pinos", "text": "Na LGA1700 e na AM5, os pinos ficam no soquete da placa, e a CPU tem contatos planos. Por isso nunca encoste no soquete: um pino torto pode inutilizar a placa." },
+        { "title": "Pasta térmica", "text": "A tampa metálica da CPU passa o calor para o cooler. A pasta preenche as microfolgas entre os dois. Pouca quantidade basta: mais ou menos um grão de ervilha." }
+      ]
+    },
+    {
+      "id": "cooler",
+      "name": "Cooler do processador",
+      "shortName": "Cooler",
+      "sequence": 3,
+      "orderLabel": "Etapa 3 de 9 da montagem",
+      "tagline": "Tira o calor da CPU",
+      "whatItDoes": "Retira o calor do processador. O calor sobe pelos tubos de cobre, passa para as aletas de alumínio, e o ventilador leva o ar quente embora.",
+      "howItFits": "Confira a pasta térmica. Apoie o cooler sobre a CPU, com os 4 pontos de fixação alinhados aos furos em volta do soquete, e prenda em X, em diagonal. Depois ligue o cabo no conector CPU_FAN.",
+      "details": [
+        { "title": "Heat pipes", "text": "Os tubos de cobre têm um líquido dentro. Ele evapora perto da CPU, sobe, condensa nas aletas e volta. Mais tubos costumam dissipar mais calor." },
+        { "title": "Cabo de 4 pinos (PWM)", "text": "O quarto fio deixa a placa controlar a velocidade do ventilador. Em pouco uso ele gira devagar e faz menos barulho." },
+        { "title": "Por que prender em X", "text": "Apertar em diagonal distribui a pressão por igual. Assim o cooler fica plano sobre a CPU, sem espaço sobrando de um lado." },
+        { "title": "Erro comum", "text": "Sem o cabo no CPU_FAN, ou com ele em outro conector, a placa acusa erro ou o processador esquenta demais." }
+      ]
+    },
+    {
+      "id": "ram",
+      "name": "Memória RAM",
+      "shortName": "RAM",
+      "sequence": 4,
+      "orderLabel": "Etapa 4 de 9 da montagem",
+      "tagline": "A mesa de trabalho do processador",
+      "whatItDoes": "Guarda o que está em uso agora, como programas abertos e arquivos em edição. É muito rápida, mas apaga tudo quando o computador desliga.",
+      "howItFits": "Abra as travas dos slots A2 e B2, o 2º e o 4º a partir da CPU. Segure o pente pelas pontas, alinhe o chanfro com a chave do slot e empurre na vertical até as travas fecharem.",
+      "details": [
+        { "title": "Dual channel", "text": "Com dois pentes iguais em slots alternados, o processador acessa os dois ao mesmo tempo. Por isso o roteiro usa A2 e B2." },
+        { "title": "DDR5 e MT/s", "text": "DDR5 é a geração da memória. MT/s indica quantas transferências ela faz por segundo: quanto maior, mais dados passam. A DDR4 não encaixa em slot DDR5." },
+        { "title": "Por que só entra num sentido", "text": "O chanfro nos contatos fica fora do centro. Se ele não bater com a chave do slot, gire o pente 180 graus e tente de novo. Nunca force." },
+        { "title": "Cuidado", "text": "Não encoste nos contatos dourados nem nos chips: a estática da mão pode queimar a memória." }
+      ]
+    },
+    {
+      "id": "ssd",
+      "name": "SSD M.2",
+      "shortName": "SSD M.2",
+      "sequence": 5,
+      "orderLabel": "Etapa 5 de 9 da montagem",
+      "tagline": "Onde seus arquivos ficam guardados",
+      "whatItDoes": "Guarda o sistema, os programas e os arquivos, mesmo com o computador desligado. O M.2 encaixa direto na placa-mãe, sem cabos.",
+      "howItFits": "Tire o parafuso do suporte. Encaixe o SSD inclinado no conector M.2, com o chanfro dos contatos alinhado à chave. Abaixe a outra ponta até o suporte e prenda com o parafuso.",
+      "details": [
+        { "title": "O que é 2280", "text": "É o tamanho: 22 mm de largura por 80 mm de comprimento. O suporte da placa precisa estar na posição certa para esse tamanho." },
+        { "title": "NVMe e SATA", "text": "O NVMe usa as linhas PCIe e é bem mais rápido. Um SSD SATA chega a cerca de 550 MB/s; um NVMe PCIe 4.0 pode passar de 7.000 MB/s." },
+        { "title": "SSD e HD", "text": "O SSD guarda dados em chips, sem partes móveis, e é muito mais rápido. O HD usa discos giratórios e costuma custar menos por gigabyte." },
+        { "title": "Erro comum", "text": "SSD sem parafuso fica levantado e pode soltar. Aperte só até firmar: força demais entorta a placa do SSD." }
+      ]
+    },
+    {
+      "id": "fonte",
+      "name": "Fonte de alimentação",
+      "shortName": "Fonte",
+      "sequence": 6,
+      "orderLabel": "Ligada nas etapas 6 e 7 de 9",
+      "tagline": "Entrega energia para tudo",
+      "whatItDoes": "Converte a corrente alternada da tomada nas tensões contínuas que as peças usam: 12 V, 5 V e 3,3 V.",
+      "howItFits": "Na bancada ela fica ao lado da placa, ligada pelos cabos. Num gabinete, é presa na parte de baixo com quatro parafusos. Só ligue na tomada depois da verificação final.",
+      "details": [
+        { "title": "Potência", "text": "É medida em watts. Some o consumo da CPU e da placa de vídeo e deixe uma folga: a fonte não deve trabalhar sempre no limite." },
+        { "title": "Selo 80 Plus", "text": "Indica a eficiência, ou seja, quanta energia vira trabalho em vez de calor. Bronze, Gold e Platinum são níveis cada vez mais eficientes." },
+        { "title": "Tensão da tomada", "text": "Fontes bivolt se ajustam sozinhas. Se a sua tiver chave 110/220 V, confira a posição antes de ligar: errada, ela pode queimar." },
+        { "title": "Cuidado", "text": "Nunca abra uma fonte. Os componentes internos guardam energia e podem dar choque mesmo fora da tomada." }
+      ]
+    },
+    {
+      "id": "cabos",
+      "name": "Cabos de energia",
+      "shortName": "Cabos",
+      "sequence": 7,
+      "orderLabel": "Etapas 6 e 7 de 9 da montagem",
+      "tagline": "Levam a energia da fonte às peças",
+      "whatItDoes": "Ligam a fonte à placa-mãe, ao processador e à placa de vídeo. Cada um tem um formato próprio, justamente para evitar ligações erradas.",
+      "howItFits": "Primeiro o cabo de 24 pinos, na borda direita da placa, até ouvir o clique. Depois o EPS 12V no canto superior esquerdo, perto do painel traseiro, até a trava prender.",
+      "details": [
+        { "title": "24 pinos (ATX)", "text": "É o maior cabo e alimenta a placa-mãe. Cabo meio encaixado é a causa mais comum de PC que não liga: empurre até a trava prender." },
+        { "title": "EPS 4+4", "text": "Vem marcado como CPU e alimenta o processador. Se vier dividido, junte as duas metades antes de encaixar." },
+        { "title": "PCIe 6+2", "text": "Vem marcado como PCI-E ou VGA e alimenta a placa de vídeo. Parece o EPS, mas a pinagem é outra: forçar o cabo errado pode danificar a placa ou a fonte." },
+        { "title": "Trava", "text": "Todo conector tem uma lingueta de um lado. Se não entrar fácil, confira o lado antes de empurrar mais." }
+      ]
+    },
+    {
+      "id": "gpu",
+      "name": "Placa de vídeo (GPU)",
+      "shortName": "Placa de vídeo",
+      "sequence": 8,
+      "orderLabel": "Etapa 8 de 9 da montagem",
+      "tagline": "Desenha as imagens na tela",
+      "whatItDoes": "Gera as imagens enviadas ao monitor. Tem processador e memória próprios, feitos para fazer muitos cálculos em paralelo, como em jogos, vídeo e inteligência artificial.",
+      "howItFits": "Use o slot PCIe x16 de cima, o mais perto da CPU. Abra a trava na ponta do slot, alinhe os contatos e empurre por igual até a trava fechar. Depois ligue o cabo PCIe 6+2.",
+      "details": [
+        { "title": "VRAM", "text": "É a memória da placa de vídeo, onde ficam texturas e quadros prontos. Faltar VRAM costuma causar travadas em jogos pesados." },
+        { "title": "Por que o slot de cima", "text": "Na placa-mãe deste modelo, os dois slots têm o mesmo tamanho, mas o de baixo é x4. O de cima, x16, tem quatro vezes mais linhas de dados." },
+        { "title": "Energia", "text": "O slot PCIe entrega até 75 W. O restante vem pelos cabos da fonte, por isso placas potentes têm conectores de energia próprios." },
+        { "title": "Monitor", "text": "Com placa de vídeo instalada, ligue o monitor nas saídas dela, e não nas portas da placa-mãe." }
+      ]
+    },
+    {
+      "id": "ventoinhas",
+      "name": "Ventoinhas do gabinete",
+      "shortName": "Ventoinhas",
+      "sequence": 9,
+      "orderLabel": "Fora do roteiro de bancada",
+      "tagline": "Renovam o ar dentro do PC",
+      "whatItDoes": "Criam o caminho do ar: as da frente puxam o ar frio para dentro, e a de trás empurra o ar quente para fora.",
+      "howItFits": "São presas com quatro parafusos no gabinete, e o cabo vai num conector SYS_FAN ou CHA_FAN da placa-mãe. A setinha na lateral da ventoinha mostra o sentido do ar.",
+      "details": [
+        { "title": "Fluxo de ar", "text": "O ar quente sobe, então o caminho comum é entrar pela frente e sair por trás e por cima." },
+        { "title": "Tamanho", "text": "Os tamanhos mais comuns são 120 mm e 140 mm. Ventoinhas maiores movem o mesmo ar girando mais devagar, com menos barulho." },
+        { "title": "RGB", "text": "A luz é só estética e costuma ter cabo próprio, separado do cabo que faz a ventoinha girar." }
+      ]
+    },
+    {
+      "id": "gabinete",
+      "name": "Gabinete",
+      "shortName": "Gabinete",
+      "sequence": 10,
+      "orderLabel": "Fora do roteiro de bancada",
+      "tagline": "A estrutura que protege tudo",
+      "whatItDoes": "Sustenta e protege as peças, organiza os cabos e ajuda a guiar o ar. Também traz o botão de ligar e as portas frontais.",
+      "howItFits": "O roteiro do MontAR é em bancada, sem gabinete. Numa montagem completa, as peças vão para dentro dele e o painel frontal é ligado no conector F_PANEL da placa-mãe.",
+      "details": [
+        { "title": "O que conferir na compra", "text": "O formato da placa-mãe, a altura máxima do cooler e o comprimento máximo da placa de vídeo. As medidas vêm nas especificações do gabinete." },
+        { "title": "Espaçadores", "text": "São os pinos que deixam a placa-mãe afastada do metal. Sem eles, os contatos encostam no gabinete e podem causar curto." },
+        { "title": "F_PANEL", "text": "Os fios do botão de ligar e dos LEDs do gabinete vão nesse conector da placa-mãe. A ordem exata está no manual dela." }
+      ]
+    }
+  ]
+}

@@ -462,6 +462,111 @@ namespace MontAR.Tests
             yield return Capture("24_simular_historico");
         }
 
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator Study_OpensFromTheTab_ZoomsIntoParts_AndDoesNotTouchTheAssembly()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Directory.CreateDirectory(ScreensFolder);
+
+            SceneManager.LoadScene("MontAR");
+            yield return null;
+            yield return null;
+
+            app = Object.FindAnyObjectByType<AppController>();
+            flow = Object.FindAnyObjectByType<StepFlowController>();
+            for (float waited = 0f; !app.IsArChecked && waited < 12f; waited += Time.unscaledDeltaTime)
+                yield return null;
+
+            for (int i = 0; i < 10 && !(app.CurrentScreen is PartsScreen); i++)
+            {
+                Click("Botão Próximo");
+                yield return null;
+            }
+            yield return null;
+            yield return Capture("25_estudo_aba");
+
+            Click("Aba Estudar PC");
+            yield return null;
+            Assert.IsInstanceOf<StudyScreen>(app.CurrentScreen, "a aba abre o estudo");
+            var study = (StudyScreen)app.CurrentScreen;
+            if (study.UsesCamera)
+            {
+                Click("Modo 3D");
+                yield return null;
+            }
+            Assert.IsFalse(study.UsesCamera);
+            Assert.IsTrue(study.Stage.IsPlaced, "no 3D o PC já vai para a mesa virtual");
+            Assert.AreEqual(StudyPcModel.PartIds.Length, study.Stage.Parts.Count);
+
+            // Com a câmera, o PC só vai para a mesa depois de achar uma superfície.
+            study.SetCameraMode(true);
+            yield return null;
+            Assert.IsFalse(study.Stage.IsPlaced, "com a câmera, espera a mesa");
+            Assert.IsFalse(study.Stage.TryPlace(), "sem superfície não coloca");
+            yield return Capture("25b_estudo_procurando");
+            study.SetCameraMode(false);
+            yield return null;
+            Assert.IsTrue(study.Stage.IsPlaced);
+
+            // Espera as peças chegarem na ordem da montagem.
+            yield return new WaitForSecondsRealtime(3f);
+            Assert.IsFalse(study.Stage.IsAnimating, "a entrada termina");
+            Assert.AreEqual(1f, study.Stage.Parts.First(p => p.Id == "cpu").Visibility, 0.01f);
+            yield return Capture("26_estudo_geral", 1.2f);
+
+            Click("Botão Separar");
+            yield return new WaitForSecondsRealtime(1.6f);
+            Assert.IsTrue(study.Stage.IsExploded);
+            yield return Capture("27_estudo_separado", 1.2f);
+            Click("Botão Separar");
+            yield return new WaitForSecondsRealtime(1.2f);
+            Assert.IsFalse(study.Stage.IsExploded);
+
+            // Tocar na lista aproxima a peça e abre o texto; o cooler sai para a CPU aparecer.
+            Transform cpu = study.Stage.Parts.First(p => p.Id == "cpu").Root;
+            float overviewDistance = Vector3.Distance(cpu.position, study.Stage.ViewCamera.transform.position);
+            Click("Chip cpu");
+            yield return new WaitForSecondsRealtime(2.2f);
+            Assert.AreEqual("cpu", study.SelectedPartId);
+            Assert.IsFalse(study.Stage.Parts.First(p => p.Id == "cooler").Root.gameObject.activeSelf, "o cooler sai de cena");
+            float focusDistance = Vector3.Distance(cpu.position + cpu.parent.rotation * (study.Stage.Parts.First(p => p.Id == "cpu").Bounds.center * cpu.parent.localScale.x), study.Stage.ViewCamera.transform.position);
+            Assert.Less(focusDistance, 0.7f, "a peça vem para perto da câmera");
+            yield return Capture("28_estudo_cpu", 1.2f);
+
+            Click("Botão Mais detalhes");
+            yield return new WaitForSecondsRealtime(0.8f);
+            Assert.IsTrue(study.DetailsOpen);
+            yield return Capture("29_estudo_cpu_detalhes", 1.2f);
+            Click("Botão Mais detalhes");
+            yield return null;
+            Assert.IsFalse(study.DetailsOpen);
+
+            // Próxima peça, na ordem da montagem.
+            Click("Próxima peça");
+            yield return new WaitForSecondsRealtime(2f);
+            Assert.AreEqual("cooler", study.SelectedPartId);
+            yield return Capture("30_estudo_cooler", 1.2f);
+            foreach (string id in new[] { "ram", "ssd", "gpu", "fonte" })
+            {
+                study.SelectPart(id);
+                yield return new WaitForSecondsRealtime(2f);
+                yield return Capture("31_estudo_" + id, 1.2f);
+            }
+
+            // Fechar afasta de novo; o botão voltar sai da aba.
+            Click("Botão Fechar");
+            yield return new WaitForSecondsRealtime(1.5f);
+            Assert.IsNull(study.SelectedPartId);
+            Assert.AreEqual(1f, study.Stage.Parts[0].Root.parent.localScale.x, 0.05f, "o PC volta ao tamanho da mesa");
+            Assert.Greater(overviewDistance, 0.7f);
+            study.HandleBack();
+            yield return null;
+            Assert.IsInstanceOf<PartsScreen>(app.CurrentScreen);
+
+            Assert.IsFalse(flow.HasSession, "o estudo não abre sessão de montagem");
+        }
+
         // ------------------------------------------------------------ utilitários
 
         /// <summary>Toca em "Pular etapa" e confirma no diálogo.</summary>
@@ -506,7 +611,7 @@ namespace MontAR.Tests
         /// A UI é renderizada sobre fundo preto e sobre fundo branco: a diferença dá a transparência de cada
         /// pixel, e a UI é composta sobre a bancada sem depender do canal alfa do URP.
         /// </summary>
-        private IEnumerator Capture(string name)
+        private IEnumerator Capture(string name, float settleSeconds = 0f)
         {
             // Espera o fade de entrada da tela terminar.
             yield return new WaitForSecondsRealtime(0.3f);
@@ -535,6 +640,9 @@ namespace MontAR.Tests
             canvas.planeDistance = 1f;
 
             yield return null;
+            // No batchmode a tela é deitada: o que se ajusta ao formato de celular precisa de tempo para assentar.
+            if (settleSeconds > 0f)
+                yield return new WaitForSecondsRealtime(settleSeconds);
             Canvas.ForceUpdateCanvases();
 
             stageCamera.Render();

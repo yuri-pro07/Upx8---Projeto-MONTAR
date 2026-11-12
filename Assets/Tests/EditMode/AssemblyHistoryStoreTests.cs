@@ -156,6 +156,26 @@ namespace MontAR.Tests
         }
 
         [Test]
+        public void CreateEntry_MarksSimulatedSteps_AndKeepsThemAfterReload()
+        {
+            var summary = new SessionSummary(() => 0);
+            summary.Record(new FlowEvent(FlowEventType.SessionStarted, -1, "", ""));
+            summary.Record(new FlowEvent(FlowEventType.StepStarted, 0, "cpu", ""));
+            summary.Record(new FlowEvent(FlowEventType.StepSimulated, 0, "cpu", ""));
+            summary.Record(new FlowEvent(FlowEventType.SessionCompleted, -1, "", ""));
+            var progress = new SessionProgress { sessionId = "P01_X", participantCode = "P01" };
+            progress.simulatedSteps.Add(0);
+
+            store.Add(AssemblyHistoryStore.CreateEntry(progress, summary, null, GuidanceMode.AugmentedReality, ""));
+            HistoryEntry entry = store.Load()[0];
+
+            Assert.AreEqual(0, entry.completedSteps, "a etapa simulada não conta como validada");
+            Assert.AreEqual(1, entry.simulatedSteps);
+            Assert.IsTrue(entry.steps[0].simulated);
+            Assert.IsFalse(entry.steps[0].skipped);
+        }
+
+        [Test]
         public void DisplayName_WithoutLabel()
         {
             Assert.AreEqual("Montagem sem nome", Entry("A").DisplayName);

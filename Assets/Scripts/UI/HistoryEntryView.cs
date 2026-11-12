@@ -35,6 +35,8 @@ namespace MontAR
             stats.Append(entry.failedValidations == 0
                 ? "<color=#16A34A>nenhum erro</color>"
                 : $"<color=#DC2626>{entry.failedValidations} {(entry.failedValidations == 1 ? "erro apontado" : "erros apontados")}</color>");
+            if (entry.simulatedSteps > 0)
+                stats.Append(" · <color=#D97706>").Append(entry.simulatedSteps).Append(entry.simulatedSteps == 1 ? " simulada" : " simuladas").Append("</color>");
             if (entry.skippedSteps > 0)
                 stats.Append(" · <color=#D97706>").Append(entry.skippedSteps).Append(entry.skippedSteps == 1 ? " pulada" : " puladas").Append("</color>");
             if (entry.observerInterventions > 0)
@@ -55,6 +57,8 @@ namespace MontAR
                     steps.Append(step.failedValidations == 1 ? "  <color=#DC2626>· 1 erro</color>" : $"  <color=#DC2626>· {step.failedValidations} erros</color>");
                 if (step.skipped)
                     steps.Append("  <color=#D97706>· pulada</color>");
+                if (step.simulated)
+                    steps.Append("  <color=#D97706>· simulada</color>");
             }
             stepsLabel.text = steps.Length > 0 ? steps.ToString() : "Sem etapas registradas.";
 

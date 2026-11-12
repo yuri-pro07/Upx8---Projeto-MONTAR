@@ -37,7 +37,7 @@ namespace MontAR
         /// <summary>Índice da etapa atual; -1 antes de iniciar.</summary>
         public int CurrentIndex { get; private set; }
 
-        /// <summary>Quantas etapas já foram aprovadas ou puladas. É o ponto de retomada da sessão.</summary>
+        /// <summary>Quantas etapas já foram aprovadas, puladas ou simuladas. É o ponto de retomada da sessão.</summary>
         public int CompletedCount { get; private set; }
 
         public StepPhase Phase { get; private set; }
@@ -179,14 +179,22 @@ namespace MontAR
         /// marcador. Emite só step_skipped, nunca validation_passed nem step_completed, para o CSV
         /// não misturar etapa pulada com etapa feita. Com a validação aberta, é preciso fechá-la antes.
         /// </summary>
-        public bool SkipCurrentStep(string detail = "")
+        public bool SkipCurrentStep(string detail = "") => CloseWithoutValidation(FlowEventType.StepSkipped, detail);
+
+        /// <summary>
+        /// Conclui a etapa atual como simulação (teste sem todas as peças). Para quem usa o app, a etapa
+        /// terminou com sucesso, mas o CSV registra step_simulated: nunca conta como etapa validada.
+        /// </summary>
+        public bool SimulateCurrentStep(string detail = "") => CloseWithoutValidation(FlowEventType.StepSimulated, detail);
+
+        private bool CloseWithoutValidation(FlowEventType type, string detail)
         {
             if (!IsRunning || Phase == StepPhase.Validating)
                 return false;
 
             Phase = StepPhase.Completed;
             CompletedCount = CurrentIndex + 1;
-            Raise(FlowEventType.StepSkipped, detail);
+            Raise(type, detail);
             AdvanceOrFinish();
             return true;
         }

@@ -373,7 +373,8 @@ namespace MontAR
             yield return new WaitForSecondsRealtime(completionDelaySeconds);
             SessionProgress progress = flowController.Progress;
             completionScreen.Bind(summary, flowController.ActiveSteps, progress != null ? progress.participantCode : "",
-                flowController.MetricsFilePath, progress != null ? progress.label : "", progress != null ? progress.SkippedCount : 0);
+                flowController.MetricsFilePath, progress != null ? progress.label : "",
+                progress != null ? progress.SkippedCount : 0, progress != null ? progress.SimulatedCount : 0);
             ShowScreen(completionScreen);
         }
 

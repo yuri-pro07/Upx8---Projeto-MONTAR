@@ -22,6 +22,9 @@ namespace MontAR
 
         /// <summary>A etapa foi pulada sem validar.</summary>
         public bool Skipped { get; internal set; }
+
+        /// <summary>A etapa foi concluída como simulação, sem validar.</summary>
+        public bool Simulated { get; internal set; }
     }
 
     /// <summary>
@@ -109,6 +112,14 @@ namespace MontAR
                     {
                         currentStep.Seconds = now - stepStartedAt;
                         currentStep.Skipped = true;
+                    }
+                    break;
+
+                case FlowEventType.StepSimulated:
+                    if (currentStep != null)
+                    {
+                        currentStep.Seconds = now - stepStartedAt;
+                        currentStep.Simulated = true;
                     }
                     break;
 

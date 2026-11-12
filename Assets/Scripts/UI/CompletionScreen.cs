@@ -33,13 +33,11 @@ namespace MontAR
             historyButton.onClick.AddListener(() => HistoryRequested?.Invoke());
         }
 
-        public void Bind(SessionSummary summary, IReadOnlyList<AssemblyStep> steps, string participantCode, string csvPath, string label = "", int skippedSteps = 0)
+        public void Bind(SessionSummary summary, IReadOnlyList<AssemblyStep> steps, string participantCode, string csvPath, string label = "", int skippedSteps = 0, int simulatedSteps = 0)
         {
             bool resumed = summary.StartedAtStep > 0;
             string who = string.IsNullOrEmpty(label) ? $"Participante {participantCode}" : $"<b>{label}</b> (participante {participantCode})";
-            string result = skippedSteps > 0
-                ? $"{steps.Count - skippedSteps} de {steps.Count} etapas validadas e {skippedSteps} {(skippedSteps == 1 ? "pulada" : "puladas")}"
-                : $"as {steps.Count} etapas foram validadas";
+            string result = DescribeResult(steps.Count, skippedSteps, simulatedSteps);
             subtitleLabel.text = resumed
                 ? $"{who}: {result} (sessão retomada na etapa {summary.StartedAtStep + 1})."
                 : $"{who}: {result}.";
@@ -61,6 +59,8 @@ namespace MontAR
                     text.Append(timing.FailedValidations == 1 ? " · 1 reprovação" : $" · {timing.FailedValidations} reprovações");
                 if (timing.Skipped)
                     text.Append(" · pulada");
+                if (timing.Simulated)
+                    text.Append(" · simulada");
                 text.Append("</color>");
             }
             stepTimesList.text = text.ToString();
@@ -68,6 +68,22 @@ namespace MontAR
             fileLabel.text = string.IsNullOrEmpty(csvPath)
                 ? "Métricas não gravadas nesta sessão."
                 : $"Métricas salvas em sessions/{Path.GetFileName(csvPath)} ({CsvCopyHint}).";
+        }
+
+        /// <summary>O resumo diz quantas etapas foram mesmo validadas: pulada e simulada não contam.</summary>
+        private static string DescribeResult(int total, int skipped, int simulated)
+        {
+            if (skipped == 0 && simulated == 0)
+                return $"as {total} etapas foram validadas";
+
+            string validated = $"{total - skipped - simulated} de {total} etapas validadas";
+            string simulatedText = $"{simulated} {(simulated == 1 ? "simulada" : "simuladas")}";
+            string skippedText = $"{skipped} {(skipped == 1 ? "pulada" : "puladas")}";
+            if (skipped == 0)
+                return $"{validated} e {simulatedText}";
+            if (simulated == 0)
+                return $"{validated} e {skippedText}";
+            return $"{validated}, {simulatedText} e {skippedText}";
         }
 
 #if UNITY_IOS

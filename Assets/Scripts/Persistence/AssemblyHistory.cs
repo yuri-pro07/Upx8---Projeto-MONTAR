@@ -16,6 +16,7 @@ namespace MontAR
         public double seconds;
         public int failedValidations;
         public bool skipped;
+        public bool simulated;
     }
 
     /// <summary>Uma montagem concluída: o que a tela de conclusão mostrou, guardado no aparelho.</summary>
@@ -38,6 +39,9 @@ namespace MontAR
 
         /// <summary>Etapas puladas sem validar (na sessão inteira, mesmo se ela foi retomada).</summary>
         public int skippedSteps;
+
+        /// <summary>Etapas concluídas como simulação (na sessão inteira, mesmo se ela foi retomada).</summary>
+        public int simulatedSteps;
 
         public int failedValidations;
         public int observerInterventions;
@@ -178,6 +182,7 @@ namespace MontAR
                 elapsedSeconds = summary.ElapsedSeconds,
                 completedSteps = summary.CompletedSteps,
                 skippedSteps = progress.SkippedCount,
+                simulatedSteps = progress.SimulatedCount,
                 failedValidations = summary.FailedValidations,
                 observerInterventions = summary.ObserverInterventions,
                 resumed = summary.StartedAtStep > 0,
@@ -192,6 +197,7 @@ namespace MontAR
                     seconds = timing.Seconds,
                     failedValidations = timing.FailedValidations,
                     skipped = timing.Skipped,
+                    simulated = timing.Simulated,
                 });
             }
             return entry;

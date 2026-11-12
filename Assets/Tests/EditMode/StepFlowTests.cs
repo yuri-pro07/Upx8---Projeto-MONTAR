@@ -109,6 +109,49 @@ namespace MontAR.Tests
         }
 
         [Test]
+        public void Simulate_WhileLocating_AdvancesWithoutCountingAsValidated()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", "tapete"), new FakeStep("ram", "tapete"));
+            flow.Start();
+            events.Clear();
+
+            Assert.IsTrue(flow.SimulateCurrentStep());
+
+            CollectionAssert.AreEqual(new[] { FlowEventType.StepSimulated, FlowEventType.StepStarted }, Types());
+            Assert.AreEqual("step_simulated", events[0].Type.ToCsvName());
+            Assert.AreEqual("cpu", events[0].StepId);
+            Assert.AreEqual(1, flow.CurrentIndex);
+            Assert.AreEqual(1, flow.CompletedCount, "a retomada continua depois da etapa simulada");
+        }
+
+        [Test]
+        public void Simulate_WhileValidating_IsRefused()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", ""), new FakeStep("ram", ""));
+            flow.Start();
+            Assert.IsTrue(flow.BeginValidation());
+            events.Clear();
+
+            Assert.IsFalse(flow.SimulateCurrentStep());
+
+            Assert.IsEmpty(events);
+            Assert.AreEqual(StepPhase.Validating, flow.Phase);
+        }
+
+        [Test]
+        public void Simulate_LastStep_FinishesSession_WithoutCompletingIt()
+        {
+            StepFlow flow = CreateFlow(new FakeStep("cpu", ""));
+            flow.Start();
+            events.Clear();
+
+            Assert.IsTrue(flow.SimulateCurrentStep());
+
+            CollectionAssert.AreEqual(new[] { FlowEventType.StepSimulated, FlowEventType.SessionCompleted }, Types());
+            Assert.IsTrue(flow.IsFinished);
+        }
+
+        [Test]
         public void Skip_BeforeStart_IsRefused()
         {
             StepFlow flow = CreateFlow(new FakeStep("cpu", ""));

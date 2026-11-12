@@ -14,10 +14,10 @@ namespace MontAR
     public class StepFlowController : MonoBehaviour
     {
         /// <summary>
-        /// Liga o botão "Pular etapa", usado para testar sem todas as peças.
+        /// Liga os botões "Simular conclusão" e "Pular etapa", usados para testar sem todas as peças.
         /// Desligar antes do congelamento do protótipo (09/11): no experimento, a etapa só avança validada.
         /// </summary>
-        public const bool SkipStepsEnabled = true;
+        public const bool TestShortcutsEnabled = true;
 
         [SerializeField] private AssemblyProcedure procedure;
         [SerializeField] private ImageTrackingController imageTracking;
@@ -79,8 +79,8 @@ namespace MontAR
         public bool CanSimulateFit => simulatedParts && flow != null && flow.IsRunning && flow.Phase == StepPhase.Guiding
             && !fittedSteps.Contains(flow.CurrentIndex) && CurrentStepHasPiece;
 
-        /// <summary>Dá para pular a etapa agora: na RA e no 3D, com ou sem o marcador, fora da validação.</summary>
-        public bool CanSkipStep => SkipStepsEnabled && flow != null && flow.IsRunning && flow.Phase != StepPhase.Validating;
+        /// <summary>Dá para simular ou pular a etapa agora: na RA e no 3D, com ou sem o marcador, fora da validação.</summary>
+        public bool CanUseTestShortcuts => TestShortcutsEnabled && flow != null && flow.IsRunning && flow.Phase != StepPhase.Validating;
 
         private void Awake()
         {
@@ -208,7 +208,10 @@ namespace MontAR
         public bool CancelValidation() => flow != null && flow.CancelValidation();
 
         /// <summary>Botão "Pular etapa": avança sem validar e deixa a etapa marcada como pulada.</summary>
-        public bool SkipCurrentStep() => CanSkipStep && flow.SkipCurrentStep();
+        public bool SkipCurrentStep() => CanUseTestShortcuts && flow.SkipCurrentStep();
+
+        /// <summary>Botão "Simular conclusão": fecha a etapa como sucesso simulado e libera a próxima.</summary>
+        public bool SimulateStepCompletion() => CanUseTestShortcuts && flow.SimulateCurrentStep();
 
         /// <summary>Botão discreto do observador (alimenta a taxa de conclusão sem intervenção).</summary>
         public bool RegisterObserverIntervention(string detail = "") =>
@@ -349,6 +352,16 @@ namespace MontAR
                         progress.skippedSteps = new List<int>();
                     progress.skippedSteps.Add(flowEvent.StepIndex);
                     progressStore.Save(progress);
+                    break;
+
+                case FlowEventType.StepSimulated:
+                    progress.completedSteps = flow.CompletedCount;
+                    if (progress.simulatedSteps == null)
+                        progress.simulatedSteps = new List<int>();
+                    progress.simulatedSteps.Add(flowEvent.StepIndex);
+                    progressStore.Save(progress);
+                    if (simulatedParts)
+                        Fit(flowEvent.StepIndex, true);
                     break;
 
                 case FlowEventType.SessionCompleted:

@@ -15,7 +15,8 @@ namespace MontAR
         ValidationCancelled,
         ObserverIntervention,
         ModeChanged,
-        StepSkipped
+        StepSkipped,
+        StepSimulated
     }
 
     /// <summary>
@@ -63,6 +64,7 @@ namespace MontAR
                 case FlowEventType.ObserverIntervention: return "observer_intervention";
                 case FlowEventType.ModeChanged: return "mode_changed";
                 case FlowEventType.StepSkipped: return "step_skipped";
+                case FlowEventType.StepSimulated: return "step_simulated";
                 default: return type.ToString();
             }
         }

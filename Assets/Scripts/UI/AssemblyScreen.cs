@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
@@ -63,7 +64,14 @@ namespace MontAR
         [SerializeField] private TMP_Text errorLabel;
         [SerializeField] private Button validateButton;
         [SerializeField] private TMP_Text validateLabel;
-        [Tooltip("Pula a etapa sem validar, para testar sem todas as peças (StepFlowController.SkipStepsEnabled).")]
+
+        [Header("Atalhos de teste (StepFlowController.TestShortcutsEnabled)")]
+        [SerializeField] private GameObject testShortcuts;
+        [Tooltip("Mostra a etapa como concluída com sucesso e libera a próxima. Fica marcada como simulada.")]
+        [SerializeField] private Button simulateDoneButton;
+        [Tooltip("Tempo para ver a peça encaixada e o aviso antes da próxima etapa.")]
+        [SerializeField] private float simulateDoneSeconds = 1.2f;
+        [Tooltip("Pula a etapa sem validar, depois de confirmar.")]
         [SerializeField] private Button skipButton;
 
         [Header("Peças virtuais")]
@@ -98,6 +106,7 @@ namespace MontAR
         private StepFlowController controller;
         private bool collapsed;
         private bool arAvailable = true;
+        private bool showingSimulatedDone;
         private string validationError;
 
         public event Action ExitRequested;
@@ -129,6 +138,14 @@ namespace MontAR
             });
             if (skipButton != null)
                 skipButton.onClick.AddListener(() => SkipRequested?.Invoke());
+            if (simulateDoneButton != null)
+            {
+                simulateDoneButton.onClick.AddListener(() =>
+                {
+                    if (controller != null && controller.CanUseTestShortcuts && !showingSimulatedDone)
+                        StartCoroutine(ShowSimulatedDone());
+                });
+            }
             if (simulateButton != null)
             {
                 simulateButton.onClick.AddListener(() =>
@@ -213,6 +230,9 @@ namespace MontAR
                     if (skippedFlow != null && flowEvent.StepIndex + 1 < skippedFlow.StepCount)
                         toast.Show($"Etapa {flowEvent.StepIndex + 1} pulada", 1.8f);
                     break;
+                case FlowEventType.StepSimulated:
+                    validationError = null;
+                    break;
             }
 
             if (IsVisible)
@@ -221,7 +241,27 @@ namespace MontAR
 
         public override void Show()
         {
+            // Sair da tela interrompe a simulação em andamento.
+            showingSimulatedDone = false;
             base.Show();
+            Refresh();
+        }
+
+        /// <summary>
+        /// Mostra a etapa como concluída: a peça entra no lugar (com peças virtuais), o aviso de sucesso
+        /// aparece e, depois de um instante para ver, a próxima etapa é liberada.
+        /// </summary>
+        private IEnumerator ShowSimulatedDone()
+        {
+            showingSimulatedDone = true;
+            controller.SimulateFit();
+            toast.Show($"Etapa {controller.Flow.CurrentIndex + 1} concluída com sucesso (simulação)", simulateDoneSeconds + 1f);
+            Refresh();
+
+            yield return new WaitForSecondsRealtime(simulateDoneSeconds);
+
+            showingSimulatedDone = false;
+            controller.SimulateStepCompletion();
             Refresh();
         }
 
@@ -260,15 +300,19 @@ namespace MontAR
 
             bool locating = flow.Phase == StepPhase.Locating;
             bool simulate = simulateButton != null && controller.SimulatedParts && controller.CurrentStepHasPiece;
-            validateButton.interactable = flow.Phase == StepPhase.Guiding;
+            validateButton.interactable = flow.Phase == StepPhase.Guiding && !showingSimulatedDone;
             validateLabel.text = locating ? (simulate ? "Validar etapa" : "Aponte para o marcador A") : hasError ? "Validar de novo" : "Validar etapa";
-            if (skipButton != null)
-                skipButton.gameObject.SetActive(controller.CanSkipStep);
+            if (testShortcuts != null)
+            {
+                testShortcuts.SetActive(controller.CanUseTestShortcuts);
+                simulateDoneButton.interactable = !showingSimulatedDone;
+                skipButton.interactable = !showingSimulatedDone;
+            }
             if (simulateButton != null)
             {
                 simulateButton.gameObject.SetActive(simulate);
                 bool fitted = controller.IsCurrentStepFitted;
-                simulateButton.interactable = controller.CanSimulateFit;
+                simulateButton.interactable = controller.CanSimulateFit && !showingSimulatedDone;
                 simulateLabel.text = fitted ? "Encaixada" : locating ? "Aponte o marcador" : "Simular encaixe";
                 if (simulateIcon != null)
                     simulateIcon.sprite = fitted ? fittedSprite : fitSprite;
@@ -343,7 +387,11 @@ namespace MontAR
                 return;
 
             bool simulate = controller.SimulatedParts && controller.CurrentStepHasPiece;
-            if (flow.Phase == StepPhase.Locating)
+            if (showingSimulatedDone)
+            {
+                SetStatus(UiTheme.StatusGuiding, fittedSprite, "Etapa concluída com sucesso (simulação)");
+            }
+            else if (flow.Phase == StepPhase.Locating)
             {
                 SetStatus(UiTheme.StatusLocating, locatingSprite, controller.SimulatedParts
                     ? "Aponte a câmera para o marcador A: a placa virtual aparece sobre ele"

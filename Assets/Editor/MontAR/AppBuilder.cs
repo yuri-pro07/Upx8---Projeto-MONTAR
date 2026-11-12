@@ -822,9 +822,14 @@ namespace MontAR.EditorTools
             Button validate = MakeButton(actionsRow, "Botão Validar", "Validar etapa", ButtonStyle.Primary, out TextMeshProUGUI validateLabel, 128f, 38f);
             Layout(validate.gameObject, preferredHeight: 128f, minHeight: 128f, flexibleWidth: 1f, preferredWidth: 0f);
 
-            // "Pular etapa": para testar sem todas as peças. A tela esconde quando não se aplica.
-            Button skipStep = MakeButton(sheet, "Botão Pular etapa", "Pular etapa", ButtonStyle.Ghost, out _, 88f, 34f);
-            Layout(skipStep.gameObject, preferredHeight: 88f, minHeight: 88f);
+            // Atalhos para testar sem todas as peças. A tela esconde a linha quando não se aplicam.
+            RectTransform shortcuts = Node("Atalhos de teste", sheet);
+            HLayout(shortcuts.gameObject, null, 20f, TextAnchor.MiddleCenter);
+            Layout(shortcuts.gameObject, preferredHeight: 88f, minHeight: 88f);
+            Button simulateDone = MakeButton(shortcuts, "Botão Simular conclusão", "Simular conclusão", ButtonStyle.Ghost, out _, 88f, 34f);
+            Layout(simulateDone.gameObject, preferredHeight: 88f, minHeight: 88f, flexibleWidth: 1f, preferredWidth: 0f);
+            Button skipStep = MakeButton(shortcuts, "Botão Pular etapa", "Pular etapa", ButtonStyle.Ghost, out _, 88f, 34f);
+            Layout(skipStep.gameObject, preferredHeight: 88f, minHeight: 88f, flexibleWidth: 1f, preferredWidth: 0f);
 
             // Painel da validação (Valida).
             RectTransform validation = BottomBand(Node("Painel da validação", safe), 24f, 24f, 24f);
@@ -862,7 +867,8 @@ namespace MontAR.EditorTools
                 ("stepSheet", sheet.gameObject), ("sheetDrag", sheetDrag), ("collapseButton", collapse), ("collapseLabel", collapseLabel), ("titleLabel", title),
                 ("detailsGroup", details.gameObject), ("instructionLabel", instruction), ("alertBox", alert.gameObject), ("alertLabel", alertLabel),
                 ("errorBox", errorBox.gameObject), ("errorLabel", errorLabel),
-                ("validateButton", validate), ("validateLabel", validateLabel), ("skipButton", skipStep),
+                ("validateButton", validate), ("validateLabel", validateLabel),
+                ("testShortcuts", shortcuts.gameObject), ("simulateDoneButton", simulateDone), ("skipButton", skipStep),
                 ("simulateButton", simulate), ("simulateLabel", simulateLabel), ("simulateIcon", simulateIcon),
                 ("fitSprite", LoadSprite("icone_encaixe")), ("fittedSprite", LoadSprite("ui_check")),
                 ("validationSheet", validation.gameObject), ("validationHint", validationHint), ("checklistContainer", checklist),

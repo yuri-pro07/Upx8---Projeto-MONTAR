@@ -325,7 +325,7 @@ namespace MontAR.Tests
 
             Click("Botão Validar");
             yield return null;
-            Assert.IsFalse(flow.CanSkipStep, "com a validação aberta não dá para pular");
+            Assert.IsFalse(flow.CanUseTestShortcuts, "com a validação aberta não dá para pular");
             Assert.IsFalse(Find<RectTransform>("Painel da validação").GetComponentsInChildren<Button>(false).Any(b => b.name == "Botão Pular etapa"));
             SetFirstItems(int.MaxValue);
             Click("Botão Confirmar");
@@ -361,6 +361,105 @@ namespace MontAR.Tests
             Assert.IsTrue(saved[0].steps[0].skipped);
             Assert.IsFalse(saved[0].steps[1].skipped);
             yield return Capture("20_pular_historico");
+        }
+
+        [UnityTest]
+        [Timeout(120000)]
+        public IEnumerator SimulateCompletion_ShowsSuccess_ThenAdvances_AndIsMarkedEverywhere()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            Directory.CreateDirectory(ScreensFolder);
+
+            SceneManager.LoadScene("MontAR");
+            yield return null;
+            yield return null;
+
+            app = Object.FindAnyObjectByType<AppController>();
+            flow = Object.FindAnyObjectByType<StepFlowController>();
+            for (float waited = 0f; !app.IsArChecked && waited < 12f; waited += Time.unscaledDeltaTime)
+                yield return null;
+
+            for (int i = 0; i < 10 && !(app.CurrentScreen is PartsScreen); i++)
+            {
+                Click("Botão Próximo");
+                yield return null;
+            }
+            yield return null;
+            Click("Botão Continuar");
+            yield return null;
+            Find<TMP_InputField>("Campo do código").text = "T03";
+            Click("Modo 3D");
+            Click("Peças virtuais");
+            Click("Botão Iniciar");
+            yield return null;
+            Assert.IsInstanceOf<AssemblyScreen>(app.CurrentScreen);
+            if (flow.Mode != GuidanceMode.Demo3D)
+            {
+                Click("Modo 3D");
+                yield return null;
+            }
+            Assert.IsTrue(flow.SimulatedParts);
+            int total = flow.ActiveSteps.Count;
+            yield return new WaitForSecondsRealtime(0.4f);
+            yield return Capture("21_simular_botao");
+
+            // Etapa 1: sem peça, mostra o sucesso e avança sozinha.
+            Click("Botão Simular conclusão");
+            yield return new WaitForSecondsRealtime(2f);
+            Assert.AreEqual(1, flow.Flow.CurrentIndex);
+            Assert.AreEqual(1, flow.Flow.CompletedCount);
+
+            // Etapa 2 (CPU): a peça fica montada e o sucesso aparece antes de a próxima etapa abrir.
+            Assert.IsTrue(flow.CanSimulateFit, "a CPU tem peça para encaixar");
+            Click("Botão Simular conclusão");
+            yield return null;
+            Assert.AreEqual(1, flow.Flow.CurrentIndex, "fica na etapa enquanto mostra o sucesso");
+            Assert.IsTrue(flow.IsCurrentStepFitted, "a peça aparece encaixada");
+            Assert.IsFalse(Find<Button>("Botão Validar").interactable, "não dá para validar enquanto mostra o sucesso");
+            Assert.IsFalse(Find<Button>("Botão Simular conclusão").interactable, "dois toques não pulam duas etapas");
+            yield return Capture("22_simular_sucesso");
+            yield return new WaitForSecondsRealtime(1.5f);
+            Assert.AreEqual(2, flow.Flow.CurrentIndex);
+
+            // Etapa 3 validada de verdade, e as outras simuladas até o fim.
+            Click("Botão Validar");
+            yield return null;
+            SetFirstItems(int.MaxValue);
+            Click("Botão Confirmar");
+            yield return null;
+            Assert.AreEqual(3, flow.Flow.CurrentIndex);
+
+            for (int guard = 0; guard < 20 && flow.Flow.IsRunning; guard++)
+            {
+                Click("Botão Simular conclusão");
+                yield return new WaitForSecondsRealtime(1.4f);
+            }
+            Assert.IsTrue(flow.Flow.IsFinished, "simular a última etapa termina a sessão");
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            // Conclusão: não diz que validou tudo.
+            Assert.IsInstanceOf<CompletionScreen>(app.CurrentScreen);
+            yield return Capture("23_simular_conclusao");
+            int simulated = total - 1;
+            string subtitle = app.CurrentScreen.GetComponentsInChildren<TMP_Text>(false).First(t => t.text.Contains("articipante")).text;
+            StringAssert.Contains($"1 de {total} etapas validadas e {simulated} simuladas", subtitle);
+
+            // CSV: etapa simulada é step_simulated, nunca validation_passed nem step_completed.
+            createdCsv = flow.MetricsFilePath;
+            string csv = File.ReadAllText(createdCsv);
+            Assert.AreEqual(simulated, csv.Split('\n').Count(line => line.Contains(",step_simulated,")));
+            Assert.AreEqual(1, csv.Split('\n').Count(line => line.Contains(",step_completed,")));
+            Assert.AreEqual(1, csv.Split('\n').Count(line => line.Contains(",validation_passed,")));
+
+            // Histórico.
+            Click("Botão Histórico");
+            yield return null;
+            var saved = app.History.Load();
+            Assert.AreEqual(1, saved[0].completedSteps);
+            Assert.AreEqual(simulated, saved[0].simulatedSteps);
+            Assert.IsTrue(saved[0].steps[0].simulated);
+            Assert.IsFalse(saved[0].steps[2].simulated);
+            yield return Capture("24_simular_historico");
         }
 
         // ------------------------------------------------------------ utilitários

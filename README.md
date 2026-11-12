@@ -8,7 +8,7 @@
 ![Plataforma](https://img.shields.io/badge/plataforma-Android-green)
 ![RA](https://img.shields.io/badge/RA-AR%20Foundation%20%2B%20ARCore-blue)
 ![Unity](https://img.shields.io/badge/Unity-6000.6.4f1-black)
-![Testes](https://img.shields.io/badge/testes-82%20EditMode%20%2B%202%20PlayMode-brightgreen)
+![Testes](https://img.shields.io/badge/testes-95%20EditMode%20%2B%204%20PlayMode-brightgreen)
 
 > **Estado atual (31/10/2026):** o app funciona por completo **no Editor da Unity**: apresentação, seleção de peças, montagem guiada em RA ou em 3D, peças virtuais com "Simular encaixe", validação por checklist, conclusão, histórico e registro em CSV. Em 31/10 o repositório foi clonado do GitHub numa pasta nova e passou em todos os testes automatizados (75 EditMode e 1 PlayMode de ponta a ponta). O APK Android é gerado sem erros. **Em 31/10 o app rodou num celular** (Samsung Galaxy A54 5G, Android 16), no modo demonstração 3D: a montagem de 9 etapas chegou ao fim com a validação por checklist bloqueando o avanço, e a conclusão, o histórico e o CSV funcionaram (seções 23 e 25). **A RA com a câmera ainda não foi testada no celular**: a parte de RA (câmera, marcador e overlay sobre a bancada) está implementada, mas não tem resultado medido. A validação do componente pela câmera, prevista no artigo V4, ainda não foi implementada.
 
@@ -149,10 +149,12 @@ O detalhamento está no artigo V4, em [`docs/documents/artigo-v4-montar.docx`](d
 | RF17 | Validar o componente pela câmera | Um marcador por componente: o app confere se a peça mostrada é a da etapa e alerta se for outra (RF05 do artigo V4) | ⬜ |
 | RF18 | Liberação pelo pesquisador | Liberar a etapa com senha após 20 s sem validação, registrando o motivo (RF10 do artigo V4) | ⬜ |
 | RF19 | Pular etapa (só para testes) | Botão **Pular etapa**, com confirmação, na RA e no 3D: avança sem validar e deixa a etapa marcada como pulada no resumo, no histórico e no CSV. Será desligado no congelamento de 09/11, porque no experimento vale o RF05 | ✅ |
+| RF20 | Simular conclusão (só para testes) | Botão **Simular conclusão**, na RA e no 3D: com peças virtuais a peça entra no lugar, aparece o aviso de sucesso e a próxima etapa abre. A etapa fica marcada como simulada no resumo, no histórico e no CSV. Será desligado no congelamento de 09/11, porque no experimento vale o RF05 | ✅ |
+| RF21 | Estudo do PC | Aba **Estudar PC**: coloca um PC aberto em 3D na mesa, sem marcador, ou numa mesa virtual. Tocar numa peça aproxima e mostra o que ela faz, como encaixa, a ordem na montagem e mais detalhes; dá para girar, usar a pinça e separar as peças. Fica fora do fluxo da montagem e não grava CSV | 🚧 |
 
 **Legenda:** ✅ Implementado · 🚧 Em desenvolvimento · ⬜ Planejado · ❌ Cancelado
 
-**Critério usado:** ✅ quer dizer implementado e verificado no Editor por teste automatizado (seção 22). 🚧 quer dizer que o código existe, mas a funcionalidade depende da câmera ou do ARCore e só pode ser confirmada no celular. RF15 já funciona no modo 3D (o teste PlayMode simula o encaixe em todas as etapas); falta a versão presa ao marcador na RA. **No celular:** em 31/10/2026 o app rodou num Samsung Galaxy A54 5G (Android 16), no modo demonstração 3D, e RF01, RF04, RF05, RF09, RF10, RF11, RF12 e RF13 funcionaram no aparelho; o app também informou o CSV gravado (RF07). Ao escolher a RA, apareceu a explicação da câmera (RF14), mas a sessão rodou no 3D. RF02, RF03 e a RA com a câmera não foram testados no celular, e a versão instalada era anterior ao RF15 e ao RF16 (seção 23).
+**Critério usado:** ✅ quer dizer implementado e verificado no Editor por teste automatizado (seção 22). 🚧 quer dizer que o código existe, mas a funcionalidade depende da câmera ou do ARCore e só pode ser confirmada no celular. RF15 já funciona no modo 3D (o teste PlayMode simula o encaixe em todas as etapas); falta a versão presa ao marcador na RA. RF21 funciona no modo 3D (teste PlayMode); a colocação na mesa real depende da câmera e ainda não foi testada. **No celular:** em 31/10/2026 o app rodou num Samsung Galaxy A54 5G (Android 16), no modo demonstração 3D, e RF01, RF04, RF05, RF09, RF10, RF11, RF12 e RF13 funcionaram no aparelho; o app também informou o CSV gravado (RF07). Ao escolher a RA, apareceu a explicação da câmera (RF14), mas a sessão rodou no 3D. RF02, RF03 e a RA com a câmera não foram testados no celular, e a versão instalada era anterior ao RF15 e ao RF16 (seção 23).
 
 ---
 
@@ -331,7 +333,7 @@ session_id, participant_code, app_version, device_model, step_index, step_id, ev
 | Grupo | Eventos |
 |---|---|
 | Sessão | `session_started`, `session_completed` |
-| Etapa | `step_started`, `step_completed`, `step_skipped` |
+| Etapa | `step_started`, `step_completed`, `step_skipped`, `step_simulated` |
 | Rastreamento | `reference_detected`, `tracking_lost` |
 | Validação | `validation_started`, `validation_passed`, `validation_failed`, `validation_cancelled` |
 | Observador | `observer_intervention` |
@@ -525,7 +527,7 @@ Também dá para gerar o APK em linha de comando, sem abrir o Editor:
 "C:\Program Files\Unity\Hub\Editor\6000.6.4f1\Editor\Unity.exe" -batchmode -quit -projectPath . -executeMethod MontAR.EditorTools.BatchTasks.BuildAndroid -logFile build.log
 ```
 
-O APK foi gerado com sucesso em 05/10/2026 (prova de conceito, 45 MB) e em 27/10/2026 (app completo, 47,9 MB). Em 31/10/2026 um APK da versão de 23/10 (interface clara, antes das peças virtuais e da interface de vidro) foi instalado e usado num Samsung Galaxy A54 5G (seção 23). O APK de 27/10 não teve teste em celular. O APK atual, de 04/11/2026 (48,0 MB, com o botão Pular etapa), também não foi testado em celular até agora.
+O APK foi gerado com sucesso em 05/10/2026 (prova de conceito, 45 MB) e em 27/10/2026 (app completo, 47,9 MB). Em 31/10/2026 um APK da versão de 23/10 (interface clara, antes das peças virtuais e da interface de vidro) foi instalado e usado num Samsung Galaxy A54 5G (seção 23). O APK de 27/10 não teve teste em celular. O APK atual, de 04/11/2026 (48,0 MB, com os botões Simular conclusão e Pular etapa), também não foi testado em celular até agora.
 
 ### No iPhone (Mac com Xcode)
 
@@ -650,7 +652,7 @@ Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtua
 | Apresentação | Explicar o app antes de começar | 6 páginas (Aponta, Guia, Validação, Registra), indicador de página, **Pular** | Deslizar ou tocar em **Próximo** |
 | Peças | Definir o kit, que define o roteiro | Uma linha por peça com modelo, detalhes e quantidade; total de etapas no rodapé; atalho **Histórico** | Trocar modelo (‹ ›) e quantidade (− +), **Continuar** |
 | Início | Preparar a sessão | Código do participante, nome opcional, Kit de verdade × Peças virtuais, Câmera (RA) × Demonstração 3D, lista do roteiro | Preencher e tocar em **Iniciar montagem** |
-| Montagem | Guiar a etapa atual | Etapa e progresso, situação da etapa, peça fantasma (RA ou 3D), instrução, alerta, **Simular encaixe**, **Validar etapa**, troca Câmera / 3D, botão do observador | Executar a etapa e tocar em **Validar etapa** |
+| Montagem | Guiar a etapa atual | Etapa e progresso, situação da etapa, peça fantasma (RA ou 3D), instrução, alerta, **Simular encaixe**, **Validar etapa**, **Simular conclusão** e **Pular etapa** (só para testes), troca Câmera / 3D, botão do observador | Executar a etapa e tocar em **Validar etapa** |
 | Validação | Conferir a etapa antes de liberar a próxima | Checklist com 2 ou 3 pontos críticos, **Voltar**, **Confirmar (n/3)** | Marcar os itens e confirmar |
 | Erro da validação | Mostrar o que faltou | Mensagem em vermelho com os itens desmarcados | Corrigir e tocar em **Validar de novo** |
 | Conclusão | Resumir a sessão | Tempo total, etapas validadas, validações reprovadas, intervenções, tempo por etapa, local do CSV | **Ver histórico** ou **Nova montagem** |
@@ -679,6 +681,8 @@ Capturas reais do app **no Editor**, no modo demonstração 3D com peças virtua
 | Pular etapa e testes automatizados (04/11/2026) | `-runTests` EditMode e PlayMode, com um teste novo na cena real, no modo 3D: desistir de pular, pular com confirmação, validar uma etapa e pular as outras até o fim | A etapa pulada avança sem validar, não conta como validada e fica marcada na conclusão, no histórico e no CSV | **82 de 82** EditMode e **2 de 2** PlayMode aprovados; no CSV, 8 `step_skipped` e 1 `step_completed`. Sem teste em celular | ✅ |
 | Build Android (04/11/2026) | `BatchTasks.BuildAndroid` em linha de comando | APK sem erros | APK de 48,0 MB, 0 erros, 2 min 26 s | ✅ |
 | Preparação para iOS (04/11/2026) | Pacote ARKit 6.6.2 e `BatchTasks.ConfigureIos`; compilação à parte, com o símbolo `UNITY_IOS`, dos trechos de iOS de `CameraPermission` e `CompletionScreen`; testes e APK de novo | O código de iOS compila, e os testes e o build do Android continuam passando | Compilou sem erros; **82 de 82** EditMode, **2 de 2** PlayMode, APK de 48,0 MB com 0 erros. **O build de iOS não foi executado** (falta o módulo nesta máquina) | 🚧 |
+| Simular conclusão (04/11/2026) | `-runTests` EditMode e PlayMode, com um teste novo na cena real, no modo 3D com peças virtuais: simular a etapa sem peça e a da CPU, validar uma etapa e simular as outras até o fim; APK de novo | A peça fica encaixada e o sucesso aparece antes da próxima etapa; a etapa simulada não conta como validada e fica marcada na conclusão, no histórico e no CSV | **87 de 87** EditMode e **3 de 3** PlayMode aprovados; no CSV, 8 `step_simulated` e 1 `step_completed`; APK de 48,0 MB, 0 erros. Sem teste em celular | ✅ |
+| Estudo do PC (09/11/2026) | `-runTests` EditMode e PlayMode, com um teste novo na cena real, no modo 3D: abrir pela aba, separar e juntar as peças, aproximar peça por peça, abrir os detalhes, fechar e sair; APK de novo | A peça vem para o centro da tela e o texto certo abre; fechar afasta; a montagem não é afetada | **95 de 95** EditMode e **4 de 4** PlayMode aprovados; APK de 48,4 MB, 0 erros. A detecção da mesa pela câmera não foi testada em celular | ✅ |
 
 O teste no Galaxy A54 5G foi funcional: as etapas foram confirmadas em poucos segundos, sem montagem física, então os tempos não medem a montagem. A sessão rodou no modo 3D, e as capturas não mostram a imagem da câmera nem o marcador; o CSV não foi copiado do aparelho para conferência.
 
@@ -718,7 +722,8 @@ Serão feitos no smartphone e com o kit definitivos, registrando modelo, versão
 - **Mãos ocupadas:** a montagem exige as duas mãos. No experimento o celular ficará num suporte articulado; fora dele, o usuário alterna entre segurar o aparelho e montar.
 - **Tempo maior:** a validação de cada etapa pode aumentar o tempo total da montagem (hipótese H2).
 - **Montagem em bancada:** o roteiro não inclui o gabinete.
-- **Sessões fora da medição:** no modo 3D a etapa não espera o marcador, e com peças virtuais não há instalação real. Sessões com etapa pulada (`step_skipped`) também ficam de fora. Essas sessões não servem para medir latência de rastreamento nem falhas de instalação.
+- **Sessões fora da medição:** no modo 3D a etapa não espera o marcador, e com peças virtuais não há instalação real. Sessões com etapa pulada ou simulada (`step_skipped`, `step_simulated`) também ficam de fora. Essas sessões não servem para medir latência de rastreamento nem falhas de instalação.
+- **Estudo do PC sem teste na câmera:** a detecção da mesa e a colocação do PC usam planos do ARCore/ARKit, que não rodam no Editor. Só o modo 3D foi testado. Mesas muito lisas ou pouca luz dificultam achar o plano.
 - **iOS sem teste:** o projeto está preparado, mas o build de iOS nunca rodou e o app nunca abriu em iPhone. O marcador, a permissão da câmera e o desfoque da interface no Metal não foram conferidos.
 - **Simulador web:** o giroscópio real e o WebXR não foram testados em aparelho.
 - **XR Simulation bloqueado:** no PC de desenvolvimento, o Smart App Control impede simular a RA no Editor.

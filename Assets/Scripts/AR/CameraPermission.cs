@@ -1,4 +1,7 @@
 using System;
+#if UNITY_IOS && !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
 using UnityEngine;
 #if UNITY_ANDROID && !UNITY_EDITOR
 using UnityEngine.Android;
@@ -43,7 +46,7 @@ namespace MontAR
 #if UNITY_ANDROID && !UNITY_EDITOR
                 return Permission.HasUserAuthorizedPermission(Permission.Camera);
 #elif UNITY_IOS && !UNITY_EDITOR
-                return Application.HasUserAuthorization(UserAuthorization.WebCam);
+                return MontAR_CameraAuthorizationStatus() == IosAuthorized;
 #else
                 return true;
 #endif
@@ -80,12 +83,44 @@ namespace MontAR
             callbacks.PermissionRequestDismissed += _ => Answer(CameraPermissionResult.Denied);
             Permission.RequestUserPermission(Permission.Camera, callbacks);
 #elif UNITY_IOS && !UNITY_EDITOR
-            // O iOS só pergunta uma vez: depois de negar, a câmera só volta pelos Ajustes.
-            Application.RequestUserAuthorization(UserAuthorization.WebCam).completed += _ =>
-                done(IsGranted ? CameraPermissionResult.Granted : CameraPermissionResult.DeniedPermanently);
+            // O iOS só pergunta uma vez: depois de negar (ou com a câmera restrita), só volta pelos Ajustes.
+            if (MontAR_CameraAuthorizationStatus() != IosNotDetermined)
+            {
+                done(CameraPermissionResult.DeniedPermanently);
+                return;
+            }
+            pendingIosAnswer = done;
+            MontAR_RequestCameraAccess(IosAnswerCallback);
 #else
             done(CameraPermissionResult.Granted);
 #endif
         }
+
+#if UNITY_IOS && !UNITY_EDITOR
+        // Pedido pelo AVFoundation (Assets/Plugins/iOS/MontARCameraPermission.mm). O pedido da Unity
+        // (Application.RequestUserAuthorization) não abre o diálogo sem WebCamTexture no projeto.
+        private const int IosNotDetermined = 0;
+        private const int IosAuthorized = 3;
+
+        private delegate void IosCameraCallback(int granted);
+
+        // Referência estática para o delegate não ser coletado enquanto o iOS não responde.
+        private static readonly IosCameraCallback IosAnswerCallback = OnIosAnswer;
+        private static Action<CameraPermissionResult> pendingIosAnswer;
+
+        [DllImport("__Internal")]
+        private static extern int MontAR_CameraAuthorizationStatus();
+
+        [DllImport("__Internal")]
+        private static extern void MontAR_RequestCameraAccess(IosCameraCallback callback);
+
+        [AOT.MonoPInvokeCallback(typeof(IosCameraCallback))]
+        private static void OnIosAnswer(int granted)
+        {
+            Action<CameraPermissionResult> done = pendingIosAnswer;
+            pendingIosAnswer = null;
+            done?.Invoke(granted != 0 ? CameraPermissionResult.Granted : CameraPermissionResult.DeniedPermanently);
+        }
+#endif
     }
 }
